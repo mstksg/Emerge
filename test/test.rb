@@ -30,5 +30,9 @@ class TestEo < Test::Unit::TestCase
     assert_equal(4,new_eo.feeler.length)
     
     assert_equal(10,test_eo.energy)
+    
+    assert_equal(1,test_eo.body.hp)
+    new_eo.feeler.poke(test_eo)
+    puts test_eo.body.hp
   end
 end

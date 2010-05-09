@@ -3,7 +3,6 @@ class Eo
   attr_reader :body,:feeler,:energy,:velocity,:age,:brain,:dna
   
   def initialize dna,energy=0
-    
     @dna = dna
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
@@ -15,15 +14,20 @@ class Eo
     @age = 0
   end
   
+  def update
+    @body.recover_hp
+    energy_decay
+  end
+  
   def feeler_triggered momentum
     @brain.process(momentum)
   end
   
   def energy_decay
     ## Placeholder energy decay algorithm
-    
+   @energy *= 0.95 if @hp < @shell
     @energy -= velo_magnitude/efficiency
-  end
+  end 
   
   def velo_magnitude
     Math.sqrt(velocity[0]**2 + velocity[1]**2)
@@ -49,6 +53,10 @@ class Eo
     
   end
   
+  def poked poke_force
+    @body.poked poke_force
+  end
+  
   def mutate new_energy = 0
     new_dna = @dna.mutate
     return Eo.new(new_dna, new_energy)
@@ -59,8 +67,10 @@ end
 class Eo_Body
   
   BODY_MASS = 10
+  RECOVERY_CONSTANT = 1.0/50.0
+  DAMAGE_CONSTANT = 1.0/10.0
   
-  attr_reader :owner,:shell,:max_speed,:efficiency,:mass
+  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
   
   def initialize owner, shell, max_speed, efficiency
     @owner = owner
@@ -69,6 +79,21 @@ class Eo_Body
     @max_speed = max_speed
     @efficiency = efficiency
     @mass = BODY_MASS
+    
+    @hp = @shell
+  end
+  
+  def recover_hp
+    if @hp < @shell
+      @hp += @shell*RECOVERY_CONSTANT
+      if @hp > @shell
+        @hp = @shell
+      end
+    end
+  end
+  
+  def poked poke_force
+    @hp -= poke_force*DAMAGE_CONSTANT
   end
   
 end
