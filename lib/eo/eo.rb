@@ -27,6 +27,9 @@ class Eo
   end
   
   def initialize environment,dna,energy=0,pos_x=0,pos_y=0,angle=0
+    
+    super
+    
     @dna = dna
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
