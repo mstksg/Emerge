@@ -101,7 +101,7 @@ class Eo
     @body.poked poke_force
   end
   
-  def mutate new_energy = 0
+  def mutate new_energy=0
     new_dna = @dna.mutate
     return Eo.new(new_dna, new_energy)
   end
