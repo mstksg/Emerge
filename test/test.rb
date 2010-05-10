@@ -14,7 +14,7 @@ class TestEo < Test::Unit::TestCase
     assert_equal([1,2], test_dna.b_containers)
     assert_equal([2,3,4], test_dna.b_programs)
     
-    test_eo = Eo.new(test_dna,10)
+    test_eo = Eo.new(test_dna,10)           ## no longer valid; Eo requires environment
     
     assert_equal(10,test_eo.energy)
     assert_equal(1,test_eo.body.shell)

@@ -1,16 +1,49 @@
+require "rubygems"
+require "rubygame"
+
+include Rubygame
+
 class Feeler
+  include Sprites::Sprite
   
   POKE_FORCE_FACTOR = 1.0/2.0
   
   attr_reader :owner, :length, :strength, :sensitivity, :mass
   
+  def graphic
+    return @f_graphic if @f_graphic
+    
+    pen_thickness = @strength/5
+    pen = Surface.new([pen_thickness,pen_thickness],0)
+    pen.draw_circle_s([pen_thickness/2,pen_thickness/2],pen_thickness/2,[100,100,100])
+    
+    @f_graphic = Surface.new([10,10],0)
+    @f_graphic.fill([0,0,0])
+    
+    @f_graphic.colorkey = [0,0,0]
+    
+    y_pos = 10
+    
+    while y_pos > 10-length
+      pen.blit(@f_graphic,[5,y_pos])
+      y_pos -= 0.25
+    end
+    
+    return @f_graphic
+  end
+  
   def initialize owner, length, strength, sensitivity
     @owner = owner
     
+    raise "Maximum length is 10" if length > 10
     @length = length
+    
     @strength = strength
     @sensitivity = sensitivity
     @mass = length*strength/10    # define this more later on
+    
+    @image = graphic
+    @rect = @image.make_rect
   end
   
   def trigger momentum
