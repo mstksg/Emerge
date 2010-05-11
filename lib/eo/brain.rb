@@ -2,7 +2,7 @@ class Brain
   
   attr_reader :owner
   
-  def initialize owner, container_walls, programs
+  def initialize (owner, container_walls, programs)
     
     if programs.size() != container_walls.size() + 1
       raise "Improper brain settings"

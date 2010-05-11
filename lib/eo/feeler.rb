@@ -13,9 +13,12 @@ class Feeler
   def graphic
     return @f_graphic if @f_graphic
     
-    pen_thickness = @strength/5
+    pen_thickness = (@strength/2).to_i
     pen = Surface.new([pen_thickness,pen_thickness],0)
-    pen.draw_circle_s([pen_thickness/2,pen_thickness/2],pen_thickness/2,[100,100,100])
+    pen.fill([100,100,100])
+    
+    
+#    pen.draw_circle_s([pen_thickness/2,pen_thickness/2],pen_thickness/2,[100,100,100])
     
     @f_graphic = Surface.new([10,10],0)
     @f_graphic.fill([0,0,0])
@@ -25,7 +28,7 @@ class Feeler
     y_pos = 10
     
     while y_pos > 10-length
-      pen.blit(@f_graphic,[5,y_pos])
+      pen.blit(@f_graphic,[5-pen_thickness/2,y_pos])
       y_pos -= 0.25
     end
     
@@ -33,6 +36,9 @@ class Feeler
   end
   
   def initialize owner, length, strength, sensitivity
+    
+    super()
+    
     @owner = owner
     
     raise "Maximum length is 10" if length > 10

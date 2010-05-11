@@ -6,13 +6,14 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
-  attr_reader :body,:feeler,:energy,:velocity,:age,:brain,:dna
-  attr_accessor :pos,:angle
+  attr_reader :body,:feeler,:energy,:age,:brain,:dna
+  attr_accessor :pos,:velocity,:angle
   
   def graphic
-    return @eo_graphic if @eographic
+    return @eo_graphic if @eo_graphic
     
     @eo_graphic = Surface.new([30,30],0)
+    @eo_graphic.colorkey = [10,10,10]
     @eo_graphic.fill([10,10,10])
     
     @body.rect.center = [15,15]
@@ -21,14 +22,12 @@ class Eo
     @feeler.rect.center = [15,5]
     @feeler.draw(@eo_graphic)
     
-    @eo_graphic.colorkey = [10,10,10]
-    
     return @eo_graphic
   end
   
-  def initialize environment,dna,energy=0,pos_x=0,pos_y=0,angle=0
+  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0)
     
-    super
+    super()
     
     @dna = dna
     
@@ -45,22 +44,49 @@ class Eo
     @pos = [pos_x,pos_y]
     @angle = angle
     
-    @image = graphic
-    @rect = @image.make_rect
+    @col_rect = Rect.new(0,0,10,10)
+    
+    update_image_rot
+    set_rects
+  end
+  
+  def set_rects
+    @rect.center = Array.new(@pos)
+    @col_rect.center = @rect.center
   end
   
   def update
     @body.recover_hp
     energy_decay
-    @pos = Array.new(2) { |i| ar1[i] + ar2[i] }
-#    draw
+    update_pos
+    
+    set_rects
+    
+    if @environment.eo_in_rect(@rect).size > 0
+#      @velocity = Array.new(2) { |i| -@velocity[i] }
+    end
   end
   
-#  def draw
-#    @image.undraw(@environment.screen,@environment.background)
-#    @rect.bottomright = Array.new(2) { |i| @pos[i] + 5}
-#    @image.blit(@environment.screen,@rect)
-#  end
+  def update_pos
+    @pos = Array.new(2) { |i| @pos[i] + @velocity[i] }
+    
+    for i in 0..1
+    
+      if @pos[i] <= 0
+        @pos[i] += @environment.game.size[i]
+      elsif @pos[i] > @environment.game.size[i]
+        @pos[i] -= @environment.game.size[i]
+      end
+    
+    end
+  end
+  
+  def update_image_rot
+    @image = graphic.rotozoom(@angle,1)
+    @image.colorkey = [10,10,10]
+    
+    @rect = @image.make_rect
+  end
   
   def feeler_triggered momentum
     @brain.process(momentum)
@@ -68,12 +94,12 @@ class Eo
   
   def energy_decay
     ## Placeholder energy decay algorithm
-   @energy *= 0.95 if @hp < @shell
-    @energy -= velo_magnitude/efficiency
-  end 
+    @energy *= 0.95 if @body.hp < @body.shell
+    @energy -= velo_magnitude/@body.efficiency
+  end
   
   def velo_magnitude
-    Math.sqrt(velocity[0]**2 + velocity[1]**2)
+    Math.sqrt(@velocity[0]**2 + @velocity[1]**2)
   end
   
   def momentum_magnitude
@@ -124,10 +150,10 @@ class Eo_Body
     return @body_graphic if @body_graphic
     
     @body_graphic = Surface.new([10,10],0)
-    @body_graphic.draw_circle([5,5],4,[200,200,200])
+    @body_graphic.draw_circle([5,5],4,@owner.dna.dna_color)
     
-    new_thick = 4-(@shell*0.5)
-    new_thick = 0 if new_thick < 0
+    new_thick = 5-(@shell*0.45)
+#    new_thick = 0 if new_thick < 0
     
     @body_graphic.draw_circle([5,5],new_thick,[200,200,200])
     

@@ -7,28 +7,37 @@ include Rubygame
  
 class Main
   
-  attr_reader :screen, :background
+  attr_reader :screen, :background, :width, :height, :size
   
   def initialize
-    @screen = Rubygame::Screen.new [640,480], 0, [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
+    
+#    @size = [640,480]
+    @size = [400,300]
+    
+    @width = size[0]
+    @height = size[1]
+    
+    @screen = Rubygame::Screen.new [@width,@height], 0, [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
     @screen.title = "Emerge"
  
     @queue = Rubygame::EventQueue.new
     @clock = Rubygame::Clock.new
-    @clock.target_framerate = 50
+    @clock.target_framerate = 30
     
     @background = Surface.new( @screen.size )
     @background.fill( Color::ColorRGB.new([0.1, 0.2, 0.35]) )
     
     @background.blit(@screen,[0,0])
     
-    @test_dna = Eo_DNA.new(1,2,3,8,5,6,[1,2],[2,3,4])
-    @test_env = Environment.new()
+    @environment = Environment.new(self)
     
-    @test_eo = Eo.new(@test_env,@test_dna,10)
+    for i in 0...10
     
-    @test_eo.rect.center = [100,100]
-    @test_eo.draw(@screen)
+      @environment.add_eo(Eo_DNA.generate,10,rand*width,rand*height,rand*360)
+    
+    end
+    
+    @environment.draw
     
     @screen.update()
     
@@ -36,6 +45,7 @@ class Main
  
   def run
     loop do
+      undraw
       update
       draw
       @clock.tick
@@ -50,9 +60,16 @@ class Main
           exit
       end
     end
+    @environment.update
+    screen.title = @clock.framerate.to_s
+  end
+ 
+  def undraw
+    @environment.undraw
   end
  
   def draw
+    @environment.draw
     @screen.update()
   end
 end

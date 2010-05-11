@@ -15,26 +15,24 @@ class Eo_DNA
     @f_length = f_length
     @f_strength = f_strength
     @f_sensitivity = f_sensitivity
-    @b_containers = b_containers
-    @b_programs = b_programs
+    @b_containers = Array.new(b_containers)
+    @b_programs = Array.new(b_programs)
   end
   
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-      f_strength=1,f_sensitivity=1,b_containers=[],b_programs=["",""])
+      f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[""])
     shell_arr = rand_array(shell)
     max_speed_arr = rand_array(max_speed)
     efficiency_arr = rand_array(efficiency)
     f_length_arr = rand_array(f_length)
     f_strength_arr = rand_array(f_strength)
     f_sensitivity_arr = rand_array(f_sensitivity)
-    b_containers_arr = []
-    b_programs_arr = ["",""]
     return Eo_DNA.new(shell_arr,max_speed_arr,efficiency_arr,
       f_length_arr,f_strength_arr,f_sensitivity_arr,
-      b_containers_arr,b_programs_arr)
+      b_containers,b_programs)
   end
   
-  def rand_aray(scale=1, size=10)
+  def self.rand_array(scale=1, size=10)
     Array.new(size) { |i| rand*scale }
   end
   
@@ -46,7 +44,7 @@ class Eo_DNA
     sum_vars @shell
   end
   def max_speed
-    sum_vars @max_speed
+    sum_vars(@max_speed) / 4
   end
   def efficiency
     sum_vars @efficiency
@@ -62,7 +60,7 @@ class Eo_DNA
   end
   
   def dna_color
-    return [0,0,0]
+    return [(shell+max_speed)*12.8,(efficiency+f_length)*12.8,(f_strength+f_sensitivity)*12.8]
   end
   
   def mutate!
