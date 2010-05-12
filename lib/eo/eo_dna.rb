@@ -3,8 +3,6 @@
 
 class Eo_DNA
   
-  MUTATION_FACTOR=0.175
-  
   attr_reader :b_containers,:b_programs
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
@@ -19,6 +17,7 @@ class Eo_DNA
     @b_programs = Array.new(b_programs)
   end
   
+  ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
       f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[""])
     shell_arr = rand_array(shell)
@@ -89,7 +88,7 @@ class Eo_DNA
   
   def mutate_array array
     Array.new(array.size) do |i|
-      if rand < MUTATION_FACTOR
+      if rand < $MUTATION_FACTOR
         rand
       else
         array[i]

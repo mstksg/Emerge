@@ -1,0 +1,28 @@
+settings:
+ environment:
+  choice: small
+  large:
+   w: 640
+   h: 480
+   food_start: 150
+   food_rate: 25
+  small:
+   w: 400
+   h: 300
+   food_start: 50
+   food_rate: 50
+  food_mass: 0.2
+ eo_constants:
+  main:
+   rep_threshold: 15
+   rep_rate: 2000
+   healing_drain: 0.98
+  body:
+   mass: 10
+   recovery: 0.01
+   damage: 0.2
+  feeler:
+   poke_force_factor: 0.5
+   mass_factor: 0.1
+  dna:
+   mutation_factor: 0.3

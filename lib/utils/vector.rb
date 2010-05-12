@@ -22,6 +22,22 @@ class Vector_Array < Array
     
   end
   
+  def add other
+    if self.size != other.size
+      raise "Can only dot two similar-sized vectors"
+    end
+    
+    Vector_Array.new(self.size) { |i| self[i] + other[i] }
+  end
+  
+  def sub other
+    if self.size != other.size
+      raise "Can only dot two similar-sized vectors"
+    end
+    
+    Vector_Array.new(self.size) { |i| self[i] - other[i] }
+  end
+  
   def unit_vector
     mag = magnitude
     Vector_Array.new(self.size) { |i| self[i]/mag }

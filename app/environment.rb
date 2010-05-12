@@ -101,7 +101,13 @@ class Environment
   end
   
   def update
-    if rand*40 < 1
+    
+    if @eos.size == 0
+      sprinkle_eo(5)
+      puts "~REPOPULATE~"
+    end
+    
+    if rand*$ENV_FOOD_RATE < 1
       sprinkle_food
     end
     
@@ -110,6 +116,9 @@ class Environment
 #    end
     
     @eos.update
+    
+    File.open($log, 'a') {|f| f.write("#{@game.clock.ticks},#{@eos.size},#{@foods.size}\n") } if @game.clock.ticks % 20 == 0
+    
 #    @foods.update
   end
   

@@ -7,12 +7,11 @@ include Rubygame
 
 class Main
   
-  attr_reader :screen, :background, :width, :height, :size
+  attr_reader :screen, :background, :width, :height, :size, :clock
   
   def initialize
     
-    @size = [640,480]
-#    @size = [400,300]
+    @size = [$ENV_WIDTH,$ENV_HEIGHT]
     
     @width = size[0]
     @height = size[1]
@@ -31,9 +30,9 @@ class Main
     
     @environment = Environment.new(self)
     
-    @environment.sprinkle_eo(40)
+    @environment.sprinkle_eo(1)
     
-    @environment.sprinkle_food(120)
+    @environment.sprinkle_food($ENV_INIT_FOOD)
     
     @environment.draw
     

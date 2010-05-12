@@ -57,6 +57,7 @@ class Eo
   end
   
   def update
+    @age += 1
     unless reproduce
       @body.recover_hp
       energy_decay
@@ -117,24 +118,12 @@ class Eo
         if vec.magnitude <= @feeler.max_dist
           
           feeler_dist = @angle_vect.distance_to_point(other.pos,@pos)
-          if feeler_dist < 10
+          if feeler_dist <= 5
             
-            x_diff = other.pos[0] - @pos[0]
-            if (x_diff > 0)&(@angle > 180)
-              possible_collide = true
-            elsif (x_diff < 0)&(@angle < 180)
-              possible_collide = true
-            else
-              y_diff = other.pos[1]-@pos[1]
-              if (y_diff > 0)&(@angle > 90)&(@angle < 270)
-                possible_collide = true
-              else
-                possible_collide = (y_diff < 0)& ((@angle < 90) || (@angle > 270))
-              end
-            end
-            
-            if possible_collide
-              @feeler.trigger momentum_magnitude ## maybe make directional somehow
+            feel_vect = Vector_Array.from_angle(@angle+90)
+            if feel_vect.dot(vec) < 1
+              diff = Vector_Array.new(velocity).sub(other.velocity).magnitude
+              @feeler.trigger other.mass*diff  ## maybe make directional somehow
               @feeler.poke other
             end
             
@@ -153,9 +142,18 @@ class Eo
       for food in collisions
         
         vec = Vector_Array.from_points(food.pos,@pos)
-        if vec.magnitude <= 5
+        dist = vec.magnitude
+        if dist <= 5
           
           eat(food)
+          
+        elsif dist <= 6+@feeler.length
+          
+          feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
+          if feeler_dist < 1.5
+            @feeler.trigger food.mass*velo_magnitude
+          end
+          
           
         end
         
@@ -165,9 +163,10 @@ class Eo
   
   def energy_decay
     ## Placeholder energy decay algorithm
-    @energy *= 0.975 if @body.hp < @body.shell
-    @energy -= (velo_magnitude+0.25)/(@body.efficiency*10+0.0001)
+    @energy *= $HEAL_DRAIN if @body.hp < @body.shell
+    @energy -= (velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
+      puts "#{@age}; drain"
       die
     end
   end
@@ -193,6 +192,7 @@ class Eo
   end
   
   def eat food
+    ## maybe have food wasted?
     collect_energy food.energy
     food.eaten
   end
@@ -216,12 +216,11 @@ class Eo
   
   def reproduce
     
-    if (@energy > 15) & (rand*5000 < @energy)
+    if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      puts @energy
-      puts @dna
+      puts "#{@dna}, #{@energy}, #{@age}"
       
-      @energy -= (10-@body.efficiency)
+      @energy -= (5-@body.efficiency/2)
       
       @environment.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360)
       @environment.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360)
@@ -234,6 +233,7 @@ class Eo
   end
   
   def eaten
+    puts "#{@age}; eaten (#{@energy})"
     @energy = 0
     die
   end
@@ -254,9 +254,7 @@ end
 class Eo_Body
   include Sprites::Sprite
   
-  BODY_MASS = 10
-  RECOVERY_CONSTANT = 0.01
-  DAMAGE_CONSTANT = 1.0/4.0
+  DAMAGE_CONSTANT = 1.0/5.0
   
   attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
   
@@ -282,7 +280,7 @@ class Eo_Body
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
-    @mass = BODY_MASS
+    @mass = $B_MASS
     
     @hp = @shell
     
@@ -292,7 +290,7 @@ class Eo_Body
   
   def recover_hp
     if @hp < @shell
-      @hp += @shell*RECOVERY_CONSTANT
+      @hp += @shell*$B_RECOVERY
       if @hp > @shell
         @hp = @shell
       end
@@ -301,7 +299,7 @@ class Eo_Body
   end
   
   def poked poke_force, poker
-    @hp -= poke_force*DAMAGE_CONSTANT
+    @hp -= poke_force*$B_DAMAGE
     if @hp < 0
       poker.eat @owner
     end

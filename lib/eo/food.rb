@@ -34,7 +34,7 @@ class Food
   end
 
   def mass
-    return @amount/5
+    return @energy*$ENV_FOOD_MASS
   end
   
   def eaten

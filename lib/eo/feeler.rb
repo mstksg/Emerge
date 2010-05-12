@@ -6,8 +6,6 @@ include Rubygame
 class Feeler
   include Sprites::Sprite
   
-  POKE_FORCE_FACTOR = 1.0/4.0
-  
   attr_reader :owner, :length, :strength, :sensitivity, :mass
   
   def graphic
@@ -46,7 +44,7 @@ class Feeler
     @length = length
     @strength = strength
     @sensitivity = sensitivity
-    @mass = length*strength/10    # define this more later on
+    @mass = length*strength*$F_MASS    # define this more later on
     
     @image = graphic
     @rect = @image.make_rect
@@ -64,7 +62,8 @@ class Feeler
   
   def poke target
     # should be poking an Eo
-    poke_force = @strength*(@owner.velo_magnitude+1)*POKE_FORCE_FACTOR
+    diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
+    poke_force = @strength*(diff)*$F_POKE
     target.poked(poke_force,@owner)
   end
   
