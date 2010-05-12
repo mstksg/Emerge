@@ -3,7 +3,7 @@
 
 class Eo_DNA
   
-  MUTATION_FACTOR=0.2
+  MUTATION_FACTOR=0.175
   
   attr_reader :b_containers,:b_programs
   
@@ -102,6 +102,10 @@ class Eo_DNA
   end
   def mutate_b_programs
     
+  end
+  
+  def to_s
+    return [shell.to_i,(max_speed*4).to_i,efficiency.to_i,f_length.to_i,f_strength.to_i,f_sensitivity.to_i].to_s
   end
   
 end

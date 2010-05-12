@@ -6,7 +6,7 @@ include Rubygame
 class Feeler
   include Sprites::Sprite
   
-  POKE_FORCE_FACTOR = 1.0/2.0
+  POKE_FORCE_FACTOR = 1.0/4.0
   
   attr_reader :owner, :length, :strength, :sensitivity, :mass
   
@@ -42,14 +42,19 @@ class Feeler
     @owner = owner
     
     raise "Maximum length is 10" if length > 10
-    @length = length
     
+    @length = length
     @strength = strength
     @sensitivity = sensitivity
     @mass = length*strength/10    # define this more later on
     
     @image = graphic
     @rect = @image.make_rect
+  end
+  
+  def max_dist
+    return @max_dist if @max_dist
+    @max_dist = (100+(@length+5)**2)**0.5
   end
   
   def trigger momentum
@@ -60,7 +65,7 @@ class Feeler
   def poke target
     # should be poking an Eo
     poke_force = @strength*(@owner.velo_magnitude+1)*POKE_FORCE_FACTOR
-    target.poked(poke_force)
+    target.poked(poke_force,@owner)
   end
   
 end

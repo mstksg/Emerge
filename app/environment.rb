@@ -16,13 +16,17 @@ class Environment
     @eos.extend(Sprites::DepthSortGroup)
     @eos.extend(Sprites::UpdateGroup)
     
+    @foods = Sprites::Group.new
+    @foods.extend(Sprites::DepthSortGroup)
+    @foods.extend(Sprites::UpdateGroup)
+    
   end
   
   def add_eo_still(dna, energy=0, x=0, y=0, rot=0)
     add_eo(dna,energy,x,y,rot,[0,0])
   end
   
-  def add_eo(dna, energy=0, x=0, y=0, rot=0, velo=false)
+  def add_eo(dna, energy=10, x=0, y=0, rot=0, velo=false)
     new_eo = Eo.new(self,dna,energy,x,y,rot)
     
     if velo
@@ -33,6 +37,25 @@ class Environment
       new_eo.velocity = [Math.d_cos(new_velo_dir)*new_velo,Math.d_sin(new_velo_dir)*new_velo]
     end
     @eos << new_eo
+    
+#    @eos << Food.new(self,rand*20,rand*200,rand*200)
+  end
+  
+  def add_food(energy=10,x=0,y=0)
+    new_food = Food.new(self,energy,x,y)
+    @foods << new_food
+  end
+  
+  def sprinkle_food(amount=1,max_energy=20,min_energy=5)
+    for i in 0...amount
+      add_food(rand*(max_energy-min_energy)+min_energy,rand*@game.width,rand*@game.height)
+    end
+  end
+  
+  def sprinkle_eo(amount=1,energy=10)
+    for i in 0...amount
+      add_eo(Eo_DNA.generate,energy,rand*@game.width,rand*@game.height,rand*360)
+    end
   end
   
   def remove_eo(to_remove)
@@ -48,12 +71,10 @@ class Environment
     Array.new(coll_indxs.size) { |i| @eos[coll_indxs[i]] }
   end
   
-  def eo_collides_sprite sprite
-    collisions = @eos.collide_sprite(sprite)
-    collisions.delete(sprite)
-    return collisions
+  def food_in_rect rect
+    coll_indxs = rect.collide_array_all(@foods)
+    Array.new(coll_indxs.size) { |i| @foods[coll_indxs[i]] }
   end
-  
   
   ## An unfortunate case of premature optimization; will work on later
 #  def find_collisions
@@ -75,14 +96,25 @@ class Environment
 #  end
   
   def undraw
+    @foods.undraw(@game.screen,@game.background)
     @eos.undraw(@game.screen,@game.background)
   end
   
   def update
+    if rand*40 < 1
+      sprinkle_food
+    end
+    
+#    if rand*200 < 1
+#      sprinkle_eo
+#    end
+    
     @eos.update
+#    @foods.update
   end
   
   def draw
+    @foods.draw(@game.screen)
     @eos.draw(@game.screen)
   end
   

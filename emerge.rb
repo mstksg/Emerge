@@ -1,4 +1,4 @@
-require "lib/ruby_mods/ruby_mods.rb"
-require "lib/ruby_mods/rubygame_mods.rb"
+require "lib/utils/ruby_mods.rb"
+Dir.require_all("lib/utils/")
 
 require "app/main.rb"
