@@ -1,6 +1,6 @@
 require "yaml"
 
-config = YAML::load(File.open(File.dirname(__FILE__)+"/../config/config.yaml"))
+config = YAML::load(File.open(File.dirname(__FILE__)+"/../../config/config.yaml"))
 settings = config["settings"]
 
 ## Environment Settings
