@@ -19,7 +19,7 @@ class Eo_DNA
   
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-                    f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command_Block.new_block])
+                    f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command_Block.fresh_block])
     shell_arr = rand_array(shell)
     max_speed_arr = rand_array(max_speed)
     efficiency_arr = rand_array(efficiency)
@@ -105,10 +105,25 @@ class Eo_DNA
   def mutate_b_containers
     
     for c in @b_containers
-      if rand < $MUTATION_FACTOR/5
+      if rand < $MUTATION_FACTOR/4
         @b_containers.delete c
-        unless rand < $MUTATION_FACTOR/10
-          @b_containers << c + rand*10-5
+        unless rand < $FORGET_FACTOR
+          new_c = c + rand*10-5
+          if new_c > 80
+            if @b_containers.include? 80
+              new_c = 80-rand*10
+            else
+              new_c = 80
+            end
+          elsif new_c < 0
+            if @b_containers.include? 0
+              new_c = 0+rand*10
+            else
+              new_c = 0
+            end
+          end
+          
+          @b_containers << new_c
         else
           @b_programs.delete @b_programs.pick_rand
         end
@@ -122,7 +137,7 @@ class Eo_DNA
       
       
       insert_spot = rand(@b_programs.size+1)
-      @b_programs.insert insert_spot, Command_Block.new_block   ## should probably be a better way
+      @b_programs.insert insert_spot, Command_Block.fresh_block   ## should probably be a better way
     end
     
     @b_containers.sort!
@@ -133,14 +148,17 @@ class Eo_DNA
     
     for prog in b_programs
       
-      prog.mutate
+      prog.mutate!
       
     end
     
   end
   
-  def to_s
+  def inspect
     return [shell.to_i,(max_speed*4).to_i,efficiency.to_i,f_length.to_i,f_strength.to_i,f_sensitivity.to_i].to_s
+  end
+  def to_s
+    inspect
   end
   
 end
@@ -148,20 +166,20 @@ end
 module Command_Data
   @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,:set_speed,:if]
   @@COMMAND_WEIGHTS   = { :move           => 1.5,
-                          :wait           => 1  ,
-                          :turn           => 1  ,
+                          :wait           => 1.0,
+                          :turn           => 1.0,
                           :stop           => 0.5,
-                          :emit_energy    => 1  ,
+                          :emit_energy    => 0.5,
                           :multiply_speed => 0.5,
                           :set_speed      => 0.5,
-                          :if             => 1   }
+                          :if             => 1.0 }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   
   @@COMMAND_RANGES    = { :move           => [[-180,180],[0,1]]       ,
                           :wait           => [[0,300]]                ,
                           :turn           => [[-180,180]]             ,
                           :stop           => []                       ,
-                          :emit_energy    => [[0,10],[-180,180],[0,5]],
+                          :emit_energy    => [[0,10],[-180,180],[1,6]],
                           :multiply_speed => [[0,2.5]]                ,
                           :set_speed      => [[0,1]]                   }
   
@@ -201,29 +219,33 @@ class Eo_Command
     @args = args
   end
   
-  def mutate
+  def rand_params
+    unless @command == :if
+      return Array.new(args.size) { |i| pick_rand @@COMMAND_RANGES[@command][i] }
+    else
+      return [@args[0],@@IF_COMPS[rand(2)], pick_rand(@@IF_RANGES[@args[0]])]
+    end
+  end
+  
+  def mutate!
     if rand < $MUTATION_FACTOR
-      randomize_params
+      unless @command == :if
+        max_min = rand(2)       ## average with either max or min; placeholder function.
+                                ## still kinda normative though
+        @args = Array.new(args.size) { |i| (@args[i]*2+@@COMMAND_RANGES[@command][i][max_min])/3 }
+      else
+        if rand(2) == 1
+          @args = [@args[0],@@IF_COMPS[rand(2)], @args[2]]
+        else
+          max_min = rand(2)
+          @args = [@args[0],@args[1], (@args[2]*2+@@IF_RANGES[@args[0]][max_min])/3]
+        end
+      end
     end
   end
   
   def randomize_params
-    unless @command == :if
-      @args = Array.new(args.size) { |i| pick_rand @@COMMAND_RANGES[@command][i] }
-    else
-      ## do not change condition
-      #      pick = rand
-      #      for cond in @@POSSIBLE_IF_CONDS
-      #        if @@IF_WEIGHTS[cond] > pick
-      #          args[0] = @@IF_WEIGHTS[cond] 
-      #        else
-      #          pick -= @@IF_WEIGHTS[cond]
-      #        end
-      #      end
-      
-      @args = [@args[0],@@IF_COMPS[rand(2)], pick_rand(@@IF_RANGES[@args[0]])]
-      
-    end
+    @args = rand_params
     return self
   end
   
@@ -260,21 +282,38 @@ class Eo_Command
     Eo_Command.new(@command,Array.new(@args))
   end
   
+  def inspect
+    #    "(#{@command}:#{args.join(",")})"
+    unless @command == :if
+      return "(#{@command})"
+    else
+      return "(#{@command} #{@args[0]})"
+    end
+  end
+  def to_s
+    inspect
+  end
+  
 end
 
 class Command_Block < Array
   
-  def mutate
+  def mutate!
     for b in self
-      if rand < $MUTATION_FACTOR/10
+      if rand < $FORGET_FACTOR
         self.delete b
       end
-      b.mutate
+      b.mutate!
     end
     
     if rand < $MUTATION_FACTOR
       insert_spot = rand(self.size+1)
-      self.insert insert_spot, Command_Block.new_block
+      if rand(2) == 0
+        self.insert insert_spot, Command_Block.new_block
+      else
+        self.insert insert_spot, Eo_Command.new_command
+      end
+      
     end
     
     
@@ -286,6 +325,25 @@ class Command_Block < Array
   
   def clone
     Command_Block.new(self.size) { |i| self[i].clone }
+  end
+  
+  def self.fresh_block
+    new_block = Command_Block.new([Eo_Command.new_command])
+     (2/$MUTATION_FACTOR).to_i.times do
+      new_block.mutate!
+    end
+    return new_block
+  end
+  
+  def inspect
+    str = "["
+    for b in self
+      str += b.inspect
+    end
+    str += "]"
+  end
+  def to_s
+    inspect
   end
   
 end

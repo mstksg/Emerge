@@ -25,7 +25,7 @@ class Brain
       run_program @programs[0]
     else
       count = 0
-      while @container_walls[count] < momentum
+      while count < @container_walls.size and @container_walls[count] < momentum
         count += 1
       end
       run_program @programs[count]
@@ -92,7 +92,7 @@ class Brain
   
   def read_program
     
-    if @waiting == 0
+    if @waiting <= 0
       
       curr_command = pull_next_command
       

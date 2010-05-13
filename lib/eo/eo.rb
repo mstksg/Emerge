@@ -152,7 +152,7 @@ class Eo
   end
   
   def handle_food_collisions
-    collisions = @environment.food_in_rect(@col_rect)
+    collisions = @environment.food_in_rect(@rect)
     if collisions.size > 0
       
       for food in @food_triggered
@@ -271,7 +271,7 @@ class Eo
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      puts "#{@dna}, #{@energy}, #{@age}"
+      puts "#{@dna}, #{@energy}, #{@age}, #{@dna.b_programs[0]}"
       
       @energy -= (5-@body.efficiency/2)
       
