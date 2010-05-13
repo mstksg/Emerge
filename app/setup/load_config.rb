@@ -5,6 +5,7 @@ settings = config["settings"]
 
 ## Environment Settings
 $ENV_FOOD_MASS = settings["environment"]["food_mass"]
+$ENV_LOG_FREQ = settings["environment"]["log_freq"]
 
 env_choice = settings["environment"]["choice"]
 env_settings = settings["environment"][env_choice]

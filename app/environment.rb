@@ -117,7 +117,7 @@ class Environment
     
     @eos.update
     
-    File.open($log, 'a') {|f| f.write("#{@game.clock.ticks},#{@eos.size},#{@foods.size}\n") } if @game.clock.ticks % 20 == 0
+    File.open($log, 'a') {|f| f.write("#{@game.clock.ticks},#{@eos.size},#{@foods.size}\n") } if @game.clock.ticks % $ENV_LOG_FREQ == 0
     
 #    @foods.update
   end

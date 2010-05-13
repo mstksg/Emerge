@@ -29,6 +29,7 @@ class Brain
   
   def run_program program
     ## executing program
+    @owner.move(0,1)
   end
   
 end

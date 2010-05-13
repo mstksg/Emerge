@@ -43,7 +43,7 @@ class Eo
     @environment = environment
     @pos = [pos_x,pos_y]
     @angle = angle
-    @angle_vect = Vector_Array.from_angle @angle
+    @angle_vect = Vector_Array.from_angle(270-@angle)
     
     @col_rect = Rect.new(0,0,10,10)
     
@@ -87,7 +87,7 @@ class Eo
     @angle += 360 if @angle < 0
     @angle -= 360 if @angle >= 360
     
-    @angle_vect = Vector_Array.from_angle @angle
+    @angle_vect = Vector_Array.from_angle(270-@angle)
     
     @image = graphic.rotozoom(@angle,1)
     @image.colorkey = [10,10,10]
@@ -120,10 +120,9 @@ class Eo
           feeler_dist = @angle_vect.distance_to_point(other.pos,@pos)
           if feeler_dist <= 5
             
-            feel_vect = Vector_Array.from_angle(@angle+90)
-            if feel_vect.dot(vec) < 1
+            if @angle_vect.dot(vec) <= 0
               diff = Vector_Array.new(velocity).sub(other.velocity).magnitude
-              @feeler.trigger other.mass*diff  ## maybe make directional somehow
+#              @feeler.trigger other.mass*diff  ## maybe make directional somehow
               @feeler.poke other
             end
             
@@ -147,10 +146,11 @@ class Eo
           
           eat(food)
           
-        elsif dist <= 6+@feeler.length
+        elsif dist < 6+@feeler.length
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
-          if feeler_dist < 1.5
+          if feeler_dist < velo_magnitude*2 and @angle_vect.dot(vec) <= 0 
+#            puts "bloop #{vec}, #{feeler_dist}, #{velo_magnitude}"
             @feeler.trigger food.mass*velo_magnitude
           end
           
@@ -239,7 +239,7 @@ class Eo
   end
   
   def die
-#    puts "alas! i am spent; (#{@energy},#{@body.hp})"
+    #    puts "alas! i am spent; (#{@energy},#{@body.hp})"
     @environment.remove_eo(self)
     kill
     ## more stuff later

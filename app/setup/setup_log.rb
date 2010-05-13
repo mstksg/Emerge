@@ -1,7 +1,7 @@
 def setup_log dir, name
   
   time_sig = Time.new.strftime("%y%m%d-%H%M%S")
-  file_path = "#{dir}/#{name}#{time_sig}"
+  file_path = "#{dir}/#{name}_#{time_sig}"
   
   unless File.exists?("#{file_path}.txt")
     $log = "#{file_path}.txt"

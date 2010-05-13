@@ -50,7 +50,18 @@ class Vector_Array < Array
   
   def distance_to_point(point,starting)
     r = Vector_Array.from_points point, starting
-    (unit_vector.dot(r)).abs
+    (unit_vector.ortho_2D.dot(r)).abs
+  end
+  
+  def ortho_2D
+    ortho = Vector_Array.new(2)
+    ortho[0] = -self[1]
+    ortho[1] = self[0]
+    return ortho
+  end
+  
+  def to_s
+    "[#{self.join(",")}]"
   end
   
 end
