@@ -10,6 +10,12 @@ class Dir
   end
 end
 
+class Array
+  def pick_rand
+    self[Kernel.rand(length)]
+  end
+end
+
 module Math
   
   def self.d2r d

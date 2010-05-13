@@ -6,7 +6,7 @@ class Eo_DNA
   attr_reader :b_containers,:b_programs
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
-      f_sensitivity,b_containers,b_programs)
+                 f_sensitivity,b_containers,b_programs)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
@@ -19,7 +19,7 @@ class Eo_DNA
   
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-      f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command.new(:wait,0)])
+                    f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command_Block.new_block])
     shell_arr = rand_array(shell)
     max_speed_arr = rand_array(max_speed)
     efficiency_arr = rand_array(efficiency)
@@ -27,12 +27,10 @@ class Eo_DNA
     f_strength_arr = rand_array(f_strength)
     f_sensitivity_arr = rand_array(f_sensitivity)
     
-    new_block = Command_Block.new()
-    new_block << Command.new(:emit_energy,[1,90,2])
     
     return Eo_DNA.new(shell_arr,max_speed_arr,efficiency_arr,
-      f_length_arr,f_strength_arr,f_sensitivity_arr,
-      b_containers,[new_block])
+                      f_length_arr,f_strength_arr,f_sensitivity_arr,
+                      b_containers,b_programs)
   end
   
   def self.rand_array(scale=1, size=10)
@@ -81,8 +79,12 @@ class Eo_DNA
   
   def clone
     Eo_DNA.new(Array.new(@shell),Array.new(@max_speed),
-      Array.new(@efficiency),Array.new(@f_length),Array.new(@f_strength),
-      Array.new(@f_sensitivity),Array.new(@b_containers),Array.new(@b_programs))
+    Array.new(@efficiency),Array.new(@f_length),Array.new(@f_strength),
+    Array.new(@f_sensitivity),Array.new(@b_containers),clone_b_programs)
+  end
+  
+  def clone_b_programs
+    Array.new(@b_programs.size) { |i| @b_programs[i].clone }
   end
   
   def mutate
@@ -105,11 +107,9 @@ class Eo_DNA
   end
   def mutate_b_programs
     
-    for progs in b_programs
+    for prog in b_programs
       
-      for blocks in progs
-#        blocks.mutate
-      end
+      prog.mutate
       
     end
     
@@ -121,7 +121,54 @@ class Eo_DNA
   
 end
 
-class Command
+module Command_Data
+  @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,:set_speed,:if]
+  @@COMMAND_WEIGHTS   = { :move           => 1.5,
+                          :wait           => 1.2,
+                          :turn           => 1  ,
+                          :stop           => 0.5,
+                          :emit_energy    => 1  ,
+                          :multiply_speed => 0.5,
+                          :set_speed      => 0.5,
+                          :if             => 1   }
+  @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
+  
+  @@COMMAND_RANGES    = { :move           => [[-180,180],[0,1]]       ,
+                          :wait           => [[0,300]]                ,
+                          :turn           => [[-180,180]]             ,
+                          :stop           => []                       ,
+                          :emit_energy    => [[0,10],[-180,180],[0,5]],
+                          :multiply_speed => [[0,2.5]]                ,
+                          :set_speed      => [[0,1]]                   }
+  
+  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:random]
+  @@IF_WEIGHTS        = { :energy   => 1  ,
+                          :age      => 0.5,
+                          :velocity => 0.7,
+                          :momentum => 0.5,
+                          :random   => 0.2 }
+  @@IF_WEIGHT_SUM     = @@IF_WEIGHTS.values.inject { |sum,n| sum+n }
+  
+  @@IF_RANGES         = { :energy   => [0,50]  ,    ## find ways to indicate tendency
+                          :age      => [0,5000],
+                          :velocity => [0,4]   ,
+                          :momentum => [0,80]  ,
+                          :random   => [0,1]    }
+  @@IF_COMPS          = [:lt,:gt]
+  
+  
+  for command in @@POSSIBLE_COMMANDS
+    @@COMMAND_WEIGHTS[command] /= @@COMMAND_WEIGHT_SUM
+  end
+  for cond in @@POSSIBLE_IF_CONDS
+    @@IF_WEIGHTS[cond] /= @@IF_WEIGHT_SUM
+  end
+  
+end
+
+class Eo_Command
+  include Command_Data
+  
   
   attr_reader :command, :args
   
@@ -130,10 +177,89 @@ class Command
     @args = args
   end
   
+  def mutate
+    randomize_params
+  end
+  
+  def randomize_params
+    unless @command == :if
+      @args = Array.new(args.size) { |i| pick_rand @@COMMAND_RANGES[@command][i] }
+    else
+      ## do not change condition
+      #      pick = rand
+      #      for cond in @@POSSIBLE_IF_CONDS
+      #        if @@IF_WEIGHTS[cond] > pick
+      #          args[0] = @@IF_WEIGHTS[cond] 
+      #        else
+      #          pick -= @@IF_WEIGHTS[cond]
+      #        end
+      #      end
+      
+      @args = [@args[0],@@IF_COMPS[rand(2)], pick_rand(@@IF_RANGES[@args[0]])]
+      
+    end
+    return self
+  end
+  
+  def pick_rand new_range
+    return rand*(new_range[1]-new_range[0])+new_range[0]
+  end
+  
+  def self.new_command
+    pick = rand
+    for command in @@POSSIBLE_COMMANDS
+      if @@COMMAND_WEIGHTS[command] > pick
+        unless command == :if
+          new_command = Eo_Command.new command, Array.new(@@COMMAND_RANGES[command].size)
+          return new_command.randomize_params
+        else
+          pick2 = rand
+          for cond in @@POSSIBLE_IF_CONDS
+            if @@IF_WEIGHTS[cond] > pick2
+              new_command = Eo_Command.new command, [cond,nil,nil]
+              return new_command.randomize_params
+            else
+              pick2 -= @@IF_WEIGHTS[cond]
+            end
+          end  
+        end
+      else
+        pick -= @@COMMAND_WEIGHTS[command]
+      end
+    end
+    raise "Some horrible error making a new command"
+  end
+  
+  def clone
+    Eo_Command.new(@command,Array.new(@args))
+  end
+  
 end
 
 class Command_Block < Array
   
+  def mutate
+    for b in self
+      if rand < $MUTATION_FACTOR/10
+        self.delete b
+      end
+      b.mutate
+    end
+    
+    if rand < $MUTATION_FACTOR
+      insert_spot = (rand*self.size+1).to_i
+      self.insert insert_spot, Command_Block.new_block
+    end
+    
+    
+  end
   
+  def self.new_block
+    Command_Block.new([Eo_Command.new_command])
+  end
+  
+  def clone
+    Command_Block.new(self.size) { |i| self[i].clone }
+  end
   
 end

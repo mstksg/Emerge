@@ -220,10 +220,10 @@ class Eo
   end
   
   def set_speed velocity_fraction
-    new_speed = @body.max_speed*velocity_faction
+    new_speed = @body.max_speed*velocity_fraction
     speed_frac = new_speed/velo_magnitude
     
-    @owner.velocity = Array.new(2) { |i| @owner.velocity[i]*speed_frac }
+    @velocity = Array.new(2) { |i| @velocity[i]*speed_frac }
   end
   
   def turn(angle)
@@ -307,8 +307,6 @@ end
 
 class Eo_Body
   include Sprites::Sprite
-  
-  DAMAGE_CONSTANT = 1.0/5.0
   
   attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
   

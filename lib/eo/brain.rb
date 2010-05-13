@@ -45,7 +45,7 @@ class Brain
           @program_queue.unshift(curr_command.pop)
         end
         return pull_next_command
-      elsif curr_command.class == Command
+      elsif curr_command.class == Eo_Command
         if curr_command.command == :if
           if @program_queue.first == "]"
             @program_queue.shift  ## optimization
@@ -57,7 +57,7 @@ class Brain
             when :age then @owner.age
             when :velocity then @owner.velo_magnitude
             when :momentum then @momentum_trigger
-            when :random then rand
+            when :random then rand()
             else "Bad 'if' condition"
             end   ## maybe add more conditions later
             
@@ -105,7 +105,7 @@ class Brain
           end
           @owner.move(curr_command.args[0],curr_command.args[1])
         when :wait
-          @waiting = curr_command.args[0]
+          @waiting = curr_command.args[0].to_i
         when :turn
           @owner.turn(curr_command.args[0])
         when :stop

@@ -27,4 +27,4 @@ settings:
    poke_force_factor: 0.5
    mass_factor: 0.1
   dna:
-   mutation_factor: 0.3
+   mutation_factor: 0.25
