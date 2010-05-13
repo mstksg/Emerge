@@ -1,6 +1,6 @@
 settings:
  environment:
-  choice: small
+  choice: large
   large:
    w: 640
    h: 480
@@ -13,7 +13,7 @@ settings:
    food_rate: 45
   food_mass: 0.2
   log_freq: 25
-  drag: 0.05
+  drag: 0.04
  eo_constants:
   main:
    rep_threshold: 15

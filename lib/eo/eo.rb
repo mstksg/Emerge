@@ -161,7 +161,6 @@ class Eo
       end
       
       for food in collisions
-        next if @food_triggered.include? food
         
         
         vec = Vector_Array.from_points(food.pos,@pos)
@@ -170,7 +169,7 @@ class Eo
           
           eat(food)
           
-        elsif dist < 7+@feeler.length
+        elsif dist < 7+@feeler.length and not @food_triggered.include? food
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
           if (feeler_dist < 3 or feeler_dist < velo_magnitude*2) and @angle_vect.dot(vec) <= 0 

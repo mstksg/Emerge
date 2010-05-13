@@ -104,6 +104,30 @@ class Eo_DNA
   
   def mutate_b_containers
     
+    for c in @b_containers
+      if rand < $MUTATION_FACTOR/5
+        @b_containers.delete c
+        unless rand < $MUTATION_FACTOR/10
+          @b_containers << c + rand*10-5
+        else
+          @b_programs.delete @b_programs.pick_rand
+        end
+      end
+    end
+    
+    if rand < $MUTATION_FACTOR/5
+      
+      new_wall_spot = rand*80
+      @b_containers << new_wall_spot
+      
+      
+      insert_spot = rand(@b_programs.size+1)
+      @b_programs.insert insert_spot, Command_Block.new_block   ## should probably be a better way
+    end
+    
+    @b_containers.sort!
+    
+    
   end
   def mutate_b_programs
     
@@ -178,7 +202,9 @@ class Eo_Command
   end
   
   def mutate
-    randomize_params
+    if rand < $MUTATION_FACTOR
+      randomize_params
+    end
   end
   
   def randomize_params
@@ -247,7 +273,7 @@ class Command_Block < Array
     end
     
     if rand < $MUTATION_FACTOR
-      insert_spot = (rand*self.size+1).to_i
+      insert_spot = rand(self.size+1)
       self.insert insert_spot, Command_Block.new_block
     end
     
