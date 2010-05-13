@@ -11,9 +11,15 @@ class Brain
     @owner = owner
     @container_walls = container_walls
     @programs = programs
+    
+    @program_queue = []
+    @momentum_trigger = 0
+    @waiting = 0
   end
   
   def process momentum
+    
+    @momentum_trigger = momentum
     
     if @container_walls.size() == 0
       run_program @programs[0]
@@ -27,9 +33,107 @@ class Brain
     
   end
   
+  def pull_next_command
+    if @program_queue.size > 0
+      curr_command = @program_queue.shift
+      
+      if curr_command.class == String
+        return pull_next_command
+      elsif curr_command.class == Command_Block
+        @program_queue.unshift("]")        
+        while curr_command.size < 0
+          @program_queue.unshift(curr_command.pop)
+        end
+        return pull_next_command
+      elsif curr_command.class == Command
+        if curr_command.command == :if
+          if @program_queue.first == "]"
+            @program_queue.shift  ## optimization
+            return pull_next_command
+          else
+            
+            cond = case curr_command.args[0]
+            when :energy then @owner.energy
+            when :age then @owner.age
+            when :velocity then @owner.velo_magnitude
+            when :momentum then @momentum_trigger
+            when :random then rand
+            else "Bad 'if' condition"
+            end   ## maybe add more conditions later
+            
+            if curr_command.args[1] == :lt
+              eval_true = cond < curr_command.args[2]
+            else
+              eval_true = cond > curr_command.args[2]
+            end
+            
+            if eval_true
+              return pull_next_command
+            else
+              if pull_next_command
+                return pull_next_command    ## better test this to make sure
+              else                          ## it deals with consecutive if's
+                return false
+              end
+            end
+            
+            
+          end
+        else
+          return curr_command
+        end
+      end
+      
+      
+    else
+      return false
+    end
+  end
+  
+  def read_program
+    
+    if @waiting == 0
+      
+      curr_command = pull_next_command
+      
+      if curr_command
+        
+        case curr_command.command
+        when :move
+          if curr_command.args[1] > 1
+            raise "Bad arguments for 'move'"
+          end
+          @owner.move(curr_command.args[0],curr_command.args[1])
+        when :wait
+          @waiting = curr_command.args[0]
+        when :turn
+          @owner.turn(curr_command.args[0])
+        when :stop
+          @owner.stop
+        when :emit_energy
+          @owner.emit_energy(curr_command.args[0],curr_command.args[1],curr_command.args[2])
+        when :multiply_speed
+          @owner.multiply_speed(curr_command.args[0])
+        when :set_speed
+          @owner.set_speed(curr_command.args[0])
+        else
+          raise "Bad command"
+        end
+      end
+      
+      
+    else
+      @waiting -= 1
+    end
+    
+  end
+  
   def run_program program
     ## executing program
-    @owner.move(0,1)
+    
+    @program_queue = Array.new(program)
+    
+    @waiting = 0
   end
   
 end

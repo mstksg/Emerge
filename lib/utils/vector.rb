@@ -22,6 +22,10 @@ class Vector_Array < Array
     
   end
   
+  def mult scalar
+    Vector_Array.new(self.size) { |i| self[i]*scalar }
+  end
+  
   def add other
     if self.size != other.size
       raise "Can only dot two similar-sized vectors"
@@ -58,6 +62,11 @@ class Vector_Array < Array
     ortho[0] = -self[1]
     ortho[1] = self[0]
     return ortho
+  end
+  
+  def angle deg=true
+    return Math.d_atan(self[1]/self[0]) if deg
+    Math.atan(self[1]/self[0])
   end
   
   def to_s

@@ -35,7 +35,7 @@ module Math
   def self.d_acos x
     r2d( acos(x) )
   end
-  def self.d_atan
+  def self.d_atan x
     r2d( atan(x) )
   end
   

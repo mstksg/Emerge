@@ -19,16 +19,20 @@ class Eo_DNA
   
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-      f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[""])
+      f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command.new(:wait,0)])
     shell_arr = rand_array(shell)
     max_speed_arr = rand_array(max_speed)
     efficiency_arr = rand_array(efficiency)
     f_length_arr = rand_array(f_length)
     f_strength_arr = rand_array(f_strength)
     f_sensitivity_arr = rand_array(f_sensitivity)
+    
+    new_block = Command_Block.new()
+    new_block << Command.new(:emit_energy,[1,90,2])
+    
     return Eo_DNA.new(shell_arr,max_speed_arr,efficiency_arr,
       f_length_arr,f_strength_arr,f_sensitivity_arr,
-      b_containers,b_programs)
+      b_containers,[new_block])
   end
   
   def self.rand_array(scale=1, size=10)
@@ -101,10 +105,35 @@ class Eo_DNA
   end
   def mutate_b_programs
     
+    for progs in b_programs
+      
+      for blocks in progs
+#        blocks.mutate
+      end
+      
+    end
+    
   end
   
   def to_s
     return [shell.to_i,(max_speed*4).to_i,efficiency.to_i,f_length.to_i,f_strength.to_i,f_sensitivity.to_i].to_s
   end
+  
+end
+
+class Command
+  
+  attr_reader :command, :args
+  
+  def initialize command, args
+    @command = command
+    @args = args
+  end
+  
+end
+
+class Command_Block < Array
+  
+  
   
 end

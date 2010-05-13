@@ -13,12 +13,16 @@ class Environment
     @game = game
     
     @eos = Sprites::Group.new
-    @eos.extend(Sprites::DepthSortGroup)
+    #    @eos.extend(Sprites::DepthSortGroup)
     @eos.extend(Sprites::UpdateGroup)
     
     @foods = Sprites::Group.new
-    @foods.extend(Sprites::DepthSortGroup)
+    #    @foods.extend(Sprites::DepthSortGroup)
     @foods.extend(Sprites::UpdateGroup)
+    
+    @packets = Sprites::Group.new
+    #    @packets.extend(Sprites::DepthSortGroup)
+    @packets.extend(Sprites::UpdateGroup)
     
   end
   
@@ -38,12 +42,16 @@ class Environment
     end
     @eos << new_eo
     
-#    @eos << Food.new(self,rand*20,rand*200,rand*200)
   end
   
   def add_food(energy=10,x=0,y=0)
-    new_food = Food.new(self,energy,x,y)
+    new_food = Food.new(energy,x,y)
     @foods << new_food
+  end
+  
+  def add_packet(energy,x=0,y=0,speed=0,angle=0)
+    new_packet = Packet.new(self,energy,x,y,speed,angle)
+    @packets << new_packet
   end
   
   def sprinkle_food(amount=1,max_energy=20,min_energy=5)
@@ -73,37 +81,43 @@ class Environment
   
   def food_in_rect rect
     coll_indxs = rect.collide_array_all(@foods)
-    Array.new(coll_indxs.size) { |i| @foods[coll_indxs[i]] }
+    foods = Array.new(coll_indxs.size) { |i| @foods[coll_indxs[i]] }
+    if @packets.size > 1
+      coll_indxs = rect.collide_array_all(@packets)
+      foods += Array.new(coll_indxs.size) { |i| @packets[coll_indxs[i]] }
+    end
+    return foods
   end
   
   ## An unfortunate case of premature optimization; will work on later
-#  def find_collisions
-#    temp_group = @eos.clone
-#    while temp_group.size > 0
-#      curr_eo = temp_group.pop
-#      
-#      collisions = temp_group.collide_sprite(curr_eo)
-#      
-#      for i in collisions
-#        curr_eo.add_coll_queue i
-#        i.add_coll_queue curr_eo
-#        for j in collisions
-#          i.add_coll_queue j if i != j
-#        end
-#      end
-#      
-#    end
-#  end
+  #  def find_collisions
+  #    temp_group = @eos.clone
+  #    while temp_group.size > 0
+  #      curr_eo = temp_group.pop
+  #      
+  #      collisions = temp_group.collide_sprite(curr_eo)
+  #      
+  #      for i in collisions
+  #        curr_eo.add_coll_queue i
+  #        i.add_coll_queue curr_eo
+  #        for j in collisions
+  #          i.add_coll_queue j if i != j
+  #        end
+  #      end
+  #      
+  #    end
+  #  end
   
   def undraw
     @foods.undraw(@game.screen,@game.background)
+    @packets.undraw(@game.screen,@game.background)
     @eos.undraw(@game.screen,@game.background)
   end
   
   def update
     
     if @eos.size == 0
-      sprinkle_eo(5)
+      sprinkle_eo(1)
       puts "~REPOPULATE~"
     end
     
@@ -111,19 +125,24 @@ class Environment
       sprinkle_food
     end
     
-#    if rand*200 < 1
-#      sprinkle_eo
-#    end
+    #    if rand*200 < 1
+    #      sprinkle_eo
+    #    end
     
     @eos.update
+    @packets.update
     
-    File.open($log, 'a') {|f| f.write("#{@game.clock.ticks},#{@eos.size},#{@foods.size}\n") } if @game.clock.ticks % $ENV_LOG_FREQ == 0
+    if @game.clock.ticks % $ENV_LOG_FREQ == 0
+      File.open($log, 'a') {|f| f.write("#{@game.clock.ticks},#{@eos.size},#{@foods.size}\n") }
+    end
     
-#    @foods.update
+    
+    #    @foods.update
   end
   
   def draw
     @foods.draw(@game.screen)
+    @packets.draw(@game.screen)
     @eos.draw(@game.screen)
   end
   

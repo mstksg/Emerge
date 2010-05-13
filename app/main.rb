@@ -30,7 +30,7 @@ class Main
     
     @environment = Environment.new(self)
     
-    @environment.sprinkle_eo(1)
+    @environment.sprinkle_eo(15)
     
     @environment.sprinkle_food($ENV_INIT_FOOD)
     

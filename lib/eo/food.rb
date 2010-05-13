@@ -20,44 +20,74 @@ class Food
     return @f_graphic
   end
   
-  def initialize environment,energy,x=0,y=0
+  def initialize energy,x=0,y=0
     super()
-    @environment = environment
+    
     @energy = energy
     @pos = [x,y]
     
     @image = graphic
     @rect = @image.make_rect
     @rect.center = @pos
-    
-#    @velocity = [1,1]
   end
-
+  
   def mass
     return @energy*$ENV_FOOD_MASS
   end
   
   def eaten
-#    @environment.remove_eo(self)
     kill
   end
   
-#  def update
-#    update_pos
-#    @rect.center = @pos
-#  end
+end
+
+class Packet < Food
   
-#  def update_pos
-#    @pos = Array.new(2) { |i| @pos[i] + @velocity[i] }
-#    
-#    for i in 0..1
-#      
-#      if @pos[i] <= 0
-#        @pos[i] += @environment.game.size[i]
-#      elsif @pos[i] > @environment.game.size[i]
-#        @pos[i] -= @environment.game.size[i]
-#      end
-#      
-#    end
-#  end
+  def initialize environment,energy,x=0,y=0,speed=0,angle=0
+    super(energy,x,y)
+    
+    @environment = environment
+    
+    move_angle = 270-angle
+    @velocity = Vector_Array.new([Math.d_cos(move_angle)*speed,Math.d_sin(move_angle)*speed])
+  end
+  
+  def update
+    update_velo
+    update_pos
+    
+    if @velocity == [0,0]
+      turn_into_food
+    else
+      @rect.center = @pos
+    end
+  end
+  
+  def update_velo
+    if @velocity.magnitude < $ENV_DRAG
+      @velocity = [0,0]
+    else
+      @velocity = @velocity.sub(@velocity.unit_vector.mult($ENV_DRAG))
+    end
+  end
+  
+  def update_pos
+    @pos = Array.new(2) { |i| @pos[i] + @velocity[i] }
+    
+    for i in 0..1
+      
+      if @pos[i] <= 0
+        @pos[i] += @environment.game.size[i]
+      elsif @pos[i] > @environment.game.size[i]
+        @pos[i] -= @environment.game.size[i]
+      end
+      
+    end
+  end
+  
+  def turn_into_food
+    kill
+    @environment.add_food(@energy,@pos[0],@pos[1])
+  end
+  
 end
