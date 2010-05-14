@@ -3,7 +3,8 @@
 
 class Eo_DNA
   
-  attr_reader :b_containers,:b_programs
+  attr_reader :shell,:efficiency,:f_length,:f_strength,:f_sensitivity,
+              :b_containers,:b_programs
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
                  f_sensitivity,b_containers,b_programs)
@@ -20,57 +21,30 @@ class Eo_DNA
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
                     f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command_Block.fresh_block])
-    shell_arr = rand_array(shell)
-    max_speed_arr = rand_array(max_speed)
-    efficiency_arr = rand_array(efficiency)
-    f_length_arr = rand_array(f_length)
-    f_strength_arr = rand_array(f_strength)
-    f_sensitivity_arr = rand_array(f_sensitivity)
-    
-    
-    return Eo_DNA.new(shell_arr,max_speed_arr,efficiency_arr,
-                      f_length_arr,f_strength_arr,f_sensitivity_arr,
-                      b_containers,b_programs)
+    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
+    Mutations.rand_norm_dist(0,10*max_speed),
+    Mutations.rand_norm_dist(0,10*efficiency),
+    Mutations.rand_norm_dist(0,10*f_length),
+    Mutations.rand_norm_dist(0,10*f_strength),
+    Mutations.rand_norm_dist(0,10*f_sensitivity),
+    b_containers,b_programs)
   end
   
-  def self.rand_array(scale=1, size=10)
-    Array.new(size) { |i| rand*scale }
-  end
-  
-  def sum_vars array
-    return array.inject { |sum,n| sum+n }
-  end
-  
-  def shell
-    sum_vars @shell
-  end
   def max_speed
-    sum_vars(@max_speed) / 4
-  end
-  def efficiency
-    sum_vars @efficiency
-  end
-  def f_length
-    sum_vars @f_length
-  end
-  def f_strength
-    sum_vars @f_strength
-  end
-  def f_sensitivity
-    sum_vars @f_sensitivity
+    @max_speed / 4
   end
   
   def dna_color
-    return [(shell+max_speed)*12.8,(efficiency+f_length)*12.8,(f_strength+f_sensitivity)*12.8]
+    return [(@shell+@max_speed)*12.8,(@efficiency+@f_length)*12.8,(@f_strength+@f_sensitivity)*12.8]
   end
   
   def mutate!
-    @shell = mutate_array @shell
-    @max_speed = mutate_array @max_speed
-    @efficiency = mutate_array @efficiency
-    @f_length = mutate_array @f_length
-    @f_strength = mutate_array @f_strength
-    @f_sensitivity = mutate_array @f_sensitivity
+    @shell = mutate_value @shell
+    @max_speed = mutate_value @max_speed
+    @efficiency = mutate_value @efficiency
+    @f_length = mutate_value @f_length
+    @f_strength = mutate_value @f_strength
+    @f_sensitivity = mutate_value @f_sensitivity
     mutate_b_containers
     mutate_b_programs
     
@@ -78,9 +52,9 @@ class Eo_DNA
   end
   
   def clone
-    Eo_DNA.new(Array.new(@shell),Array.new(@max_speed),
-    Array.new(@efficiency),Array.new(@f_length),Array.new(@f_strength),
-    Array.new(@f_sensitivity),Array.new(@b_containers),clone_b_programs)
+    Eo_DNA.new(@shell,@max_speed,@efficiency,
+               @f_length,@f_strength,@f_sensitivity,
+               Array.new(@b_containers),clone_b_programs)
   end
   
   def clone_b_programs
@@ -92,13 +66,11 @@ class Eo_DNA
     new_dna.mutate!
   end
   
-  def mutate_array array
-    Array.new(array.size) do |i|
-      if rand < $MUTATION_FACTOR
-        rand
-      else
-        array[i]
-      end
+  def mutate_value curr
+    if rand < $MUTATION_FACTOR
+      return Mutations.mutate(curr)
+    else
+      return curr
     end
   end
   
@@ -108,22 +80,7 @@ class Eo_DNA
       if rand < $MUTATION_FACTOR/4
         @b_containers.delete c
         unless rand < $FORGET_FACTOR
-          new_c = c + rand*10-5
-          if new_c > 80
-            if @b_containers.include? 80
-              new_c = 80-rand*10
-            else
-              new_c = 80
-            end
-          elsif new_c < 0
-            if @b_containers.include? 0
-              new_c = 0+rand*10
-            else
-              new_c = 0
-            end
-          end
-          
-          @b_containers << new_c
+          @b_containers << Mutations.mutate(c,0,80,7.5)
         else
           @b_programs.delete @b_programs.pick_rand
         end
@@ -163,51 +120,6 @@ class Eo_DNA
   
 end
 
-module Command_Data
-  @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,:set_speed,:if]
-  @@COMMAND_WEIGHTS   = { :move           => 1.5,
-                          :wait           => 1.0,
-                          :turn           => 1.0,
-                          :stop           => 0.5,
-                          :emit_energy    => 0.5,
-                          :multiply_speed => 0.5,
-                          :set_speed      => 0.5,
-                          :if             => 1.0 }
-  @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
-  
-  @@COMMAND_RANGES    = { :move           => [[-180,180],[0,1]]       ,
-                          :wait           => [[0,100]]                ,
-                          :turn           => [[-180,180]]             ,
-                          :stop           => []                       ,
-                          :emit_energy    => [[0,10],[-180,180],[1,6]],
-                          :multiply_speed => [[0,2.5]]                ,
-                          :set_speed      => [[0,1]]                   }
-  
-  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:random]
-  @@IF_WEIGHTS        = { :energy   => 1  ,
-                          :age      => 0.5,
-                          :velocity => 0.7,
-                          :momentum => 0.5,
-                          :random   => 0.2 }
-  @@IF_WEIGHT_SUM     = @@IF_WEIGHTS.values.inject { |sum,n| sum+n }
-  
-  @@IF_RANGES         = { :energy   => [0,50]  ,    ## find ways to indicate tendency
-                          :age      => [0,2500],
-                          :velocity => [0,4]   ,
-                          :momentum => [0,80]  ,
-                          :random   => [0,1]    }
-  @@IF_COMPS          = [:lt,:gt]
-  
-  
-  for command in @@POSSIBLE_COMMANDS
-    @@COMMAND_WEIGHTS[command] /= @@COMMAND_WEIGHT_SUM
-  end
-  for cond in @@POSSIBLE_IF_CONDS
-    @@IF_WEIGHTS[cond] /= @@IF_WEIGHT_SUM
-  end
-  
-end
-
 class Eo_Command
   include Command_Data
   
@@ -230,15 +142,18 @@ class Eo_Command
   def mutate!
     if rand < $MUTATION_FACTOR
       unless @command == :if
-        max_min = rand(2)       ## average with either max or min; placeholder function.
-        ## still kinda normative though
-        @args = Array.new(args.size) { |i| (@args[i]*2+@@COMMAND_RANGES[@command][i][max_min])/3 }
+        @args = Array.new(args.size) { |i|
+          Mutations.mutate_percent(@args[i],
+          @@COMMAND_RANGES[@command][i][0],
+          @@COMMAND_RANGES[@command][i][1]) }
       else
         if rand(2) == 1
           @args = [@args[0],@@IF_COMPS[rand(2)], @args[2]]
         else
-          max_min = rand(2)
-          @args = [@args[0],@args[1], (@args[2]*2+@@IF_RANGES[@args[0]][max_min])/3]
+          @args = [@args[0],@args[1],
+                    Mutations.mutate_percent(@args[2],
+                      @@IF_RANGES[@args[0]][0]       ,
+                      @@IF_RANGES[@args[0]][1])       ]
         end
       end
     end
@@ -338,9 +253,9 @@ class Command_Block < Array
     Command_Block.new(self.size) { |i| self[i].clone }
   end
   
-  def self.fresh_block
+  def self.fresh_block iterations=2
     new_block = Command_Block.new([Eo_Command.new_command])
-     (2/$MUTATION_FACTOR).to_i.times do
+     (iterations/$MUTATION_FACTOR).to_i.times do
       new_block.mutate!
     end
     return new_block
