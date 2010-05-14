@@ -52,29 +52,21 @@ class Brain
             return pull_next_command
           else
             
-            cond = case curr_command.args[0]
-            when :energy then @owner.energy
-            when :age then @owner.age
-            when :velocity then @owner.velo_magnitude
-            when :momentum then @momentum_trigger
-            when :random then rand()
-            else "Bad 'if' condition"
-            end   ## maybe add more conditions later
-            
-            if curr_command.args[1] == :lt
-              eval_true = cond < curr_command.args[2]
-            else
-              eval_true = cond > curr_command.args[2]
-            end
+            eval_true = eval_if curr_command
             
             if eval_true
               return pull_next_command
             else
-              if pull_next_command
-                return pull_next_command    ## better test this to make sure
-              else                          ## it deals with consecutive if's
-                return false
+              return false if @program_queue.size == 0
+              
+              if @program_queue.first.class == Command_Block
+                @program_queue.shift
+              elsif @program_queue.first.command == :if
+                @program_queue.shift
+                @program_queue.shift
               end
+              
+              return pull_next_command
             end
             
             
@@ -87,6 +79,23 @@ class Brain
       
     else
       return false
+    end
+  end
+  
+  def eval_if if_command
+    cond = case if_command.args[0]
+    when :energy then @owner.energy
+    when :age then @owner.age
+    when :velocity then @owner.velo_magnitude
+    when :momentum then @momentum_trigger
+    when :random then rand()
+    else "Bad 'if' condition"
+    end   ## maybe add more conditions later
+    
+    if if_command.args[1] == :lt
+      return cond < if_command.args[2]
+    else
+      return cond > if_command.args[2]
     end
   end
   

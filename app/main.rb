@@ -7,7 +7,7 @@ include Rubygame
 
 class Main
   
-  attr_reader :screen, :background, :width, :height, :size, :clock
+  attr_reader :screen, :background, :width, :height, :size, :clock, :environment
   
   def initialize
     
@@ -30,7 +30,7 @@ class Main
     
     @environment = Environment.new(self)
     
-    @environment.sprinkle_eo(5)
+    @environment.sprinkle_eo(15)
     
     @environment.sprinkle_food($ENV_INIT_FOOD)
     
@@ -52,7 +52,7 @@ class Main
   def update
     @queue.each do |ev|
       case ev
-        when Rubygame::QuitEvent
+      when Rubygame::QuitEvent
         Rubygame.quit
         exit
       end
@@ -72,6 +72,15 @@ class Main
 end
 
 main = Main.new
-main.run
+
+begin
+  main.run
+rescue Exception => err
+  for eo in main.environment.eos
+    puts pos
+  end
+  puts err.class.name + ": " + err.message
+  puts err.backtrace.join( "\n" )
+end
 
 Rubygame.quit

@@ -7,7 +7,7 @@ include Rubygame
 
 class Environment
   
-  attr_reader :game
+  attr_reader :game, :eos # for debug
   
   def initialize game
     @game = game
@@ -42,7 +42,7 @@ class Environment
   def add_eo(dna, energy=10, x=0, y=0, rot=0, velo=false)
     
     x = transform x,@game.width
-    y = transform y,@game.width
+    y = transform y,@game.height
     
     new_eo = Eo.new(self,dna,energy,x,y,rot)
     
@@ -59,14 +59,14 @@ class Environment
   
   def add_food(energy=10,x=0,y=0)
     x = transform x,@game.width
-    y = transform y,@game.width
+    y = transform y,@game.height
     new_food = Food.new(energy,x,y)
     @foods << new_food
   end
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
     x = transform x,@game.width
-    y = transform y,@game.width
+    y = transform y,@game.height
     new_packet = Packet.new(self,energy,x,y,speed,angle)
     @packets << new_packet
   end

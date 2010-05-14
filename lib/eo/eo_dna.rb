@@ -176,7 +176,7 @@ module Command_Data
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   
   @@COMMAND_RANGES    = { :move           => [[-180,180],[0,1]]       ,
-                          :wait           => [[0,300]]                ,
+                          :wait           => [[0,100]]                ,
                           :turn           => [[-180,180]]             ,
                           :stop           => []                       ,
                           :emit_energy    => [[0,10],[-180,180],[1,6]],
@@ -192,7 +192,7 @@ module Command_Data
   @@IF_WEIGHT_SUM     = @@IF_WEIGHTS.values.inject { |sum,n| sum+n }
   
   @@IF_RANGES         = { :energy   => [0,50]  ,    ## find ways to indicate tendency
-                          :age      => [0,5000],
+                          :age      => [0,2500],
                           :velocity => [0,4]   ,
                           :momentum => [0,80]  ,
                           :random   => [0,1]    }
@@ -231,7 +231,7 @@ class Eo_Command
     if rand < $MUTATION_FACTOR
       unless @command == :if
         max_min = rand(2)       ## average with either max or min; placeholder function.
-                                ## still kinda normative though
+        ## still kinda normative though
         @args = Array.new(args.size) { |i| (@args[i]*2+@@COMMAND_RANGES[@command][i][max_min])/3 }
       else
         if rand(2) == 1
@@ -298,13 +298,24 @@ end
 
 class Command_Block < Array
   
+  def make_top
+    @top = true
+  end
+  
   def mutate!
     for b in self
       if rand < $FORGET_FACTOR
         self.delete b
+        next
       end
+      
       b.mutate!
+      
+      if b.class == Command_Block and b.size == 0
+        self.delete b
+      end
     end
+    
     
     if rand < $MUTATION_FACTOR
       insert_spot = rand(self.size+1)
