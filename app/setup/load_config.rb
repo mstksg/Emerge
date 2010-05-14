@@ -35,4 +35,5 @@ $F_MASS = eo_consts["feeler"]["mass_factor"]
 
 ## DNA
 $MUTATION_FACTOR = eo_consts["dna"]["mutation_factor"]
+$MUTATION_VARIANCE = eo_consts["dna"]["mutation_variance"]
 $FORGET_FACTOR = eo_consts["dna"]["forget_factor"]

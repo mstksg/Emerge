@@ -77,7 +77,7 @@ begin
   main.run
 rescue Exception => err
   for eo in main.environment.eos
-    puts pos
+      puts eo.pos.join(",")
   end
   puts err.class.name + ": " + err.message
   puts err.backtrace.join( "\n" )

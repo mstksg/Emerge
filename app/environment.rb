@@ -26,23 +26,11 @@ class Environment
     
   end
   
-  def transform to_trans,max
-    if to_trans <= 0
-      return to_trans+max
-    elsif to_trans > max
-      return to_trans-max
-    end
-    return to_trans
-  end
-  
   def add_eo_still(dna, energy=0, x=0, y=0, rot=0)
     add_eo(dna,energy,x,y,rot,[0,0])
   end
   
   def add_eo(dna, energy=10, x=0, y=0, rot=0, velo=false)
-    
-    x = transform x,@game.width
-    y = transform y,@game.height
     
     new_eo = Eo.new(self,dna,energy,x,y,rot)
     
@@ -58,15 +46,11 @@ class Environment
   end
   
   def add_food(energy=10,x=0,y=0)
-    x = transform x,@game.width
-    y = transform y,@game.height
     new_food = Food.new(energy,x,y)
     @foods << new_food
   end
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
-    x = transform x,@game.width
-    y = transform y,@game.height
     new_packet = Packet.new(self,energy,x,y,speed,angle)
     @packets << new_packet
   end
@@ -142,10 +126,6 @@ class Environment
       sprinkle_food
     end
     
-    #    if rand*200 < 1
-    #      sprinkle_eo
-    #    end
-    
     @eos.update
     @packets.update
     
@@ -154,7 +134,15 @@ class Environment
     end
     
     
-    #    @foods.update
+    for eo in @eos
+      if eo.pos[0].nan?
+        puts "#{eo}"
+        puts "#{eo.velocity},#{eo.energy}"
+        for prog in eo.dna.b_programs
+          puts "#{prog}"
+        end
+      end
+    end
   end
   
   def draw

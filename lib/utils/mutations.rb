@@ -4,7 +4,7 @@ module Mutations
     Array.new(curve) { |i| rand*(max-min)+min }.inject { |sum,n| sum+n }/curve
   end
   
-  def self.mutate curr,min=0,max=10,variance=3,curve=3
+  def self.mutate curr,min=0,max=10,variance=$MUTATION_VARIANCE,curve=3
     
     new_num = curr + rand_norm_dist(-variance,variance,curve)
     
@@ -19,7 +19,7 @@ module Mutations
     
   end
   
-  def self.mutate_percent curr,min=0,max=10,variance_percent=0.2,curve=3
+  def self.mutate_percent curr,min=0,max=10,variance_percent=$MUTATION_VARIANCE/10,curve=3
     mutate(curr,min,max,(max-min)*variance_percent,curve)
   end
   

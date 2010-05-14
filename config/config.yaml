@@ -5,7 +5,7 @@ settings:
    w: 640
    h: 480
    food_start: 150
-   food_rate: 25
+   food_rate: 20
   small:
    w: 400
    h: 300
@@ -28,4 +28,5 @@ settings:
    mass_factor: 0.1
   dna:
    mutation_factor: 0.15
+   mutation_variance: 2.0
    forget_factor: 0.015

@@ -56,14 +56,15 @@ class Feeler
   end
   
   def trigger momentum
-    ## should add some fuzzying of momentum due to sensitivity here
-    @owner.feeler_triggered(momentum)
+    felt_momentum = Mutations.mutate(momentum,0,80,5-@sensitivity/2)
+    ## er...is this fuzzying really necessary?  I actually don't think so.
+    @owner.feeler_triggered(felt_momentum)
   end
   
   def poke target
     # should be poking an Eo
     diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
-    poke_force = @strength*(diff)*$F_POKE
+    poke_force = @strength*(diff+0.25)*$F_POKE
     target.poked(poke_force,@owner)
   end
   

@@ -211,19 +211,25 @@ class Eo
   end
   
   def multiply_speed factor
-    new_speed = velo_magnitude*factor
-    if new_speed >= @body.max_speed
-      set_speed 1
-    else
-      set_speed(new_speed/@body.max_speed)
+    unless  velo_magnitude == 0
+      new_speed = velo_magnitude*factor
+      if new_speed >= @body.max_speed
+        set_speed 1
+      else
+        set_speed(new_speed/@body.max_speed)
+      end
     end
   end
   
   def set_speed velocity_fraction
-    new_speed = @body.max_speed*velocity_fraction
-    speed_frac = new_speed/velo_magnitude
-    
-    @velocity = Array.new(2) { |i| @velocity[i]*speed_frac }
+    if velo_magnitude == 0
+      move(0,velocity_fraction)
+    else
+      new_speed = @body.max_speed*velocity_fraction
+      speed_frac = new_speed/velo_magnitude
+      
+      @velocity = Array.new(2) { |i| @velocity[i]*speed_frac }
+    end
   end
   
   def turn(angle)
