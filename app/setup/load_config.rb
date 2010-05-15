@@ -8,8 +8,8 @@ $LOG_POP = settings["log"]["types"]["population"]
 $LOG_ACT = settings["log"]["types"]["activity"]
 
 $LOG_POP_FREQ = settings["log"]["pop_freq"]
-$LOG_CONSOLE_LEVEL = settings["log"]["level"]
-$LOG_FILE_LEVEL = settings["log"]["level"]
+$LOG_CONSOLE_LEVEL = settings["log"]["console_level"].to_i
+$LOG_FILE_LEVEL = settings["log"]["file_level"].to_i
 
 
 ## Environment Settings

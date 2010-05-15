@@ -6,10 +6,17 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
-  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,:velocity,:velo_magnitude,:mass
+  @@count = 0
+  
+  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+              :velocity,:velo_magnitude,:mass,:id,:generation
   attr_accessor :pos
   
-  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0)
+  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
+    
+    @id = @@count
+    @@count += 1
+    @generation = generation
     
     super()
     
@@ -37,6 +44,8 @@ class Eo
     
     set_angle @angle
     set_rects
+    
+    $LOGGER.info "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
   end
   
   def graphic
@@ -185,7 +194,7 @@ class Eo
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
-            @feeler.trigger food.mass*@velo_magnitude
+            @feeler.trigger(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
           
@@ -200,7 +209,7 @@ class Eo
     @energy *= $HEAL_DRAIN if @body.hp < @body.shell
     @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
-      $LOGGER.info "Starvation;\t#{@age}"
+      $LOGGER.info "Eo_#{@id}\tStarved;\t(#{@age})"
       die
     end
   end
@@ -232,12 +241,12 @@ class Eo
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      $LOGGER.info "Replication;\t#{@dna}, #{@energy}, #{@age}, [#{@dna.b_containers.join(",")}]: #{@dna.b_programs[0]}"
+      $LOGGER.info "Eo_#{@id}\tReplicates;\t(#{@energy.to_i}, #{@age})"
       
       @energy -= (5-@body.efficiency/2)
       
-      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360)
-      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360)
+      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
+      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
       die
       
       return true
@@ -296,7 +305,6 @@ class Eo
   end
   
   def eaten
-    $LOGGER.info "Eaten;\t\t#{@age} (#{@energy})"
     @energy = 0
     die
   end
@@ -357,6 +365,7 @@ class Eo_Body
     if @hp < 0
       poker.eat @owner
       @owner.eaten
+      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\t(#{@owner.energy.to_i}, #{@owner.age})"
     end
   end
   

@@ -24,7 +24,7 @@ def setup_log dir, name
   
   if $LOG_ACT
     file_format = PatternFormatter.new(:pattern => "[ %d ] %l\t %m")
-    log.add FileOutputter.new("file", :filename => log_file, :trunc => false,
+    log.add FileOutputter.new("file", :filename => logfile, :trunc => false,
                                 :formatter=>file_format, :level => $LOG_FILE_LEVEL)
   end
   

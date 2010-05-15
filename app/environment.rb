@@ -56,16 +56,16 @@ class Environment
   #    return neighbors
   #  end
   
-  def add_eo_still(dna, energy=0, x=0, y=0, rot=0)
-    add_eo(dna,energy,x,y,rot,[0,0])
+  def add_eo_still(dna, energy=0, x=0, y=0, rot=0, generation=1)
+    add_eo(dna,energy,x,y,rot,generation,[0,0])
   end
   
-  def add_eo(dna, energy=10, x=0, y=0, rot=0, direction=false, speed_frac=false)
+  def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
     
     x = x.boundarize(0,@game.width,false,true)
     y = y.boundarize(0,@game.height,false,true)
     
-    new_eo = Eo.new(self,dna,energy,x,y,rot)
+    new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
     
     if direction and speed_frac
       new_eo.move(direction,speed)  

@@ -56,7 +56,7 @@ class Feeler
   end
   
   def trigger momentum
-    felt_momentum = Mutations.mutate(momentum,0,80,5-@sensitivity/2)
+    felt_momentum = Mutations.mutate(momentum,0,80,5.1-@sensitivity/2)
     ## er...is this fuzzying really necessary?  I actually don't think so.
     @owner.feeler_triggered(felt_momentum)
   end

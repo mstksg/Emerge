@@ -4,8 +4,8 @@ settings:
   file_level: 1
   pop_freq: 25
   types:
-   activity: false
-   population: true
+   activity: true
+   population: false
  environment:
   choice: large
   large:

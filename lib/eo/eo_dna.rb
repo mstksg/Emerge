@@ -87,7 +87,7 @@ class Eo_DNA
       end
     end
     
-    if rand < $MUTATION_FACTOR/5
+    if rand < $MUTATION_FACTOR/3
       
       new_wall_spot = rand*80
       @b_containers << new_wall_spot
@@ -112,10 +112,28 @@ class Eo_DNA
   end
   
   def inspect
-    return [shell.to_i,(max_speed*4).to_i,efficiency.to_i,f_length.to_i,f_strength.to_i,f_sensitivity.to_i].to_s
+    "#{inspect_physical}/#{inspect_programs}"
   end
   def to_s
     inspect
+  end
+  
+  def inspect_physical
+    "#{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}#{@f_length.to_i}#{@f_strength.to_i}#{@f_sensitivity.to_i}"
+  end
+  
+  
+  def inspect_programs
+    if @b_containers.size == 0
+      return "[0:#{@b_programs[0]}]"
+    else
+      inspected = "[0:"
+      for i in 0...@b_containers.size
+        inspected += "#{@b_programs[i]}|#{@b_containers[i].to_i}:"
+      end
+      
+      inspected += "#{@b_programs[-1]}]"
+    end
   end
   
 end
@@ -144,16 +162,16 @@ class Eo_Command
       unless @command == :if
         @args = Array.new(args.size) { |i|
           Mutations.mutate_percent(@args[i],
-          @@COMMAND_RANGES[@command][i][0],
-          @@COMMAND_RANGES[@command][i][1]) }
+                                   @@COMMAND_RANGES[@command][i][0],
+                                   @@COMMAND_RANGES[@command][i][1]) }
       else
         if rand(2) == 1
           @args = [@args[0],@@IF_COMPS[rand(2)], @args[2]]
         else
           @args = [@args[0],@args[1],
-                    Mutations.mutate_percent(@args[2],
-                      @@IF_RANGES[@args[0]][0]       ,
-                      @@IF_RANGES[@args[0]][1])       ]
+          Mutations.mutate_percent(@args[2],
+                                   @@IF_RANGES[@args[0]][0]       ,
+                                   @@IF_RANGES[@args[0]][1])       ]
         end
       end
     end
@@ -200,9 +218,9 @@ class Eo_Command
   def inspect
     #    "(#{@command}:#{args.join(",")})"
     unless @command == :if
-      return "(#{@command})"
+      return "#{@@ALIASES[@command]}"
     else
-      return "(#{@command} #{@args[0]})"
+      return "f[#{@@ALIASES[@args[0]]}:"
     end
   end
   def to_s
@@ -253,7 +271,7 @@ class Command_Block < Array
     Command_Block.new(self.size) { |i| self[i].clone }
   end
   
-  def self.fresh_block iterations=2
+  def self.fresh_block iterations=3
     new_block = Command_Block.new([Eo_Command.new_command])
      (iterations/$MUTATION_FACTOR).to_i.times do
       new_block.mutate!
@@ -262,11 +280,11 @@ class Command_Block < Array
   end
   
   def inspect
-    str = "["
+    str = "("
     for b in self
       str += b.inspect
     end
-    str += "]"
+    str += ")"
   end
   def to_s
     inspect

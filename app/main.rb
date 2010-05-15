@@ -31,9 +31,9 @@ class Main
     
     @environment = Environment.new(self)
     
-    @environment.sprinkle_eo($ENV_INIT_EO)
-    
     $LOGGER.info "Populating pool..."
+    
+    @environment.sprinkle_eo($ENV_INIT_EO)
     
     @environment.sprinkle_food($ENV_INIT_FOOD)
     
@@ -75,6 +75,17 @@ class Main
 end
 
 main = Main.new
-main.run
+begin
+  main.run
+rescue SystemExit
+  
+rescue Exception => err
+  $LOGGER.error err.class.name+": "+err.message
+  for i in err.backtrace
+    $LOGGER.error i
+  end
+end
 
+$LOGGER.info "Quitting..."
 Rubygame.quit
+$LOGGER.info "Closed."

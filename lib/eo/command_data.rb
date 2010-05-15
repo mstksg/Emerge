@@ -18,6 +18,8 @@ module Command_Data
                           :multiply_speed => [[0,2.5]]                ,
                           :set_speed      => [[0,1]]                   }
   
+  
+  
   @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:random]
   @@IF_WEIGHTS        = { :energy   => 1  ,
                           :age      => 0.5,
@@ -40,5 +42,20 @@ module Command_Data
   for cond in @@POSSIBLE_IF_CONDS
     @@IF_WEIGHTS[cond] /= @@IF_WEIGHT_SUM
   end
+  
+  @@ALIASES           = { :move           => "m" ,
+                          :wait           => "w" ,
+                          :turn           => "t" ,
+                          :stop           => "s" ,
+                          :emit_energy    => "e" ,
+                          :multiply_speed => "m" ,
+                          :set_speed      => "s" ,
+                          :if             => "f" ,
+                          
+                          :energy         => "e" ,
+                          :age            => "a" ,
+                          :velocity       => "v" ,
+                          :momentum       => "m" ,
+                          :random         => "r"  }
   
 end
