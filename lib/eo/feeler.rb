@@ -8,6 +8,23 @@ class Feeler
   
   attr_reader :owner, :length, :strength, :sensitivity, :mass
   
+  def initialize owner, length, strength, sensitivity
+    
+    super()
+    
+    @owner = owner
+    
+    raise "Maximum length is 10" if length > 10
+    
+    @length = length
+    @strength = strength
+    @sensitivity = sensitivity
+    @mass = length*strength*$F_MASS    # define this more later on
+    
+    @image = graphic
+    @rect = @image.make_rect
+  end
+  
   def graphic
     return @f_graphic if @f_graphic
     
@@ -33,23 +50,6 @@ class Feeler
     return @f_graphic
   end
   
-  def initialize owner, length, strength, sensitivity
-    
-    super()
-    
-    @owner = owner
-    
-    raise "Maximum length is 10" if length > 10
-    
-    @length = length
-    @strength = strength
-    @sensitivity = sensitivity
-    @mass = length*strength*$F_MASS    # define this more later on
-    
-    @image = graphic
-    @rect = @image.make_rect
-  end
-  
   def max_dist
     return @max_dist if @max_dist
     @max_dist = (100+(@length+5)**2)**0.5
@@ -64,7 +64,7 @@ class Feeler
   def poke target
     # should be poking an Eo
     diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
-    poke_force = @strength*(diff+0.25)*$F_POKE
+    poke_force = @strength*(diff+0.2)*$F_POKE
     target.poked(poke_force,@owner)
   end
   

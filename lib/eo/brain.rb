@@ -33,6 +33,11 @@ class Brain
     
   end
   
+  def run_program program
+    @program_queue = Array.new(program)
+    @waiting = 0
+  end
+  
   def pull_next_command
     if @program_queue.size > 0
       curr_command = @program_queue.shift
@@ -135,14 +140,6 @@ class Brain
       @waiting -= 1
     end
     
-  end
-  
-  def run_program program
-    ## executing program
-    
-    @program_queue = Array.new(program)
-    
-    @waiting = 0
   end
   
 end

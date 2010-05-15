@@ -76,11 +76,7 @@ class Packet < Food
     
     for i in 0..1
       
-      if @pos[i] <= 0
-        @pos[i] += @environment.game.size[i]
-      elsif @pos[i] > @environment.game.size[i]
-        @pos[i] -= @environment.game.size[i]
-      end
+      @pos[i] = @pos[i].boundarize(0,@environment.game.size[i],false,true)
       
     end
   end

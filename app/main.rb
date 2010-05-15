@@ -16,12 +16,13 @@ class Main
     @width = size[0]
     @height = size[1]
     
-    @screen = Rubygame::Screen.new [@width,@height], 0, [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
+    @screen = Rubygame::Screen.new @size, 0,
+                [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
     @screen.title = "Emerge"
     
     @queue = Rubygame::EventQueue.new
     @clock = Rubygame::Clock.new
-    @clock.target_framerate = 50
+    @clock.target_framerate = $ENV_FRAMERATE
     
     @background = Surface.new( @screen.size )
     @background.fill( Color::ColorRGB.new([0.1, 0.2, 0.35]) )
@@ -30,13 +31,15 @@ class Main
     
     @environment = Environment.new(self)
     
-    @environment.sprinkle_eo(15)
+    @environment.sprinkle_eo($ENV_INIT_EO)
+    
+    $LOGGER.info "Populating pool..."
     
     @environment.sprinkle_food($ENV_INIT_FOOD)
     
     @environment.draw
     
-    @screen.update()
+    @screen.flip()
     
   end
   
@@ -67,20 +70,11 @@ class Main
   
   def draw
     @environment.draw
-    @screen.update()
+    @screen.flip()
   end
 end
 
 main = Main.new
-
-begin
-  main.run
-rescue Exception => err
-  for eo in main.environment.eos
-      puts eo.pos.join(",")
-  end
-  puts err.class.name + ": " + err.message
-  puts err.backtrace.join( "\n" )
-end
+main.run
 
 Rubygame.quit

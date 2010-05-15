@@ -6,8 +6,38 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
-  attr_reader :body,:feeler,:energy,:age,:brain,:dna
-  attr_accessor :pos,:velocity,:angle
+  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,:velocity,:velo_magnitude,:mass
+  attr_accessor :pos
+  
+  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0)
+    
+    super()
+    
+    @dna = dna
+    
+    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
+    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength,@dna.f_sensitivity)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs)
+    
+    @mass = @feeler.mass + @body.mass
+    @energy = energy
+    set_velocity [0,0]
+    @age = 0
+    
+    @food_triggered = []
+    @eo_triggered = []
+    
+    
+    @environment = environment
+    @pos = [pos_x,pos_y]
+    @angle = angle
+    @angle_vect = Vector_Array.from_angle(270-@angle)
+    
+    @col_rect = Rect.new(0,0,10,10)
+    
+    set_angle @angle
+    set_rects
+  end
   
   def graphic
     return @eo_graphic if @eo_graphic
@@ -23,35 +53,6 @@ class Eo
     @feeler.draw(@eo_graphic)
     
     return @eo_graphic
-  end
-  
-  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0)
-    
-    super()
-    
-    @dna = dna
-    
-    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
-    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength,@dna.f_sensitivity)
-    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs)
-    
-    @energy = energy
-    @velocity = [0,0]
-    @age = 0
-    
-    @food_triggered = []
-    @eo_triggered = []
-    
-    
-    @environment = environment
-    @pos = [pos_x,pos_y]
-    @angle = angle
-    @angle_vect = Vector_Array.from_angle(270-@angle)
-    
-    @col_rect = Rect.new(0,0,10,10)
-    
-    update_rot
-    set_rects
   end
   
   def set_rects
@@ -79,16 +80,19 @@ class Eo
     
     for i in 0..1
       
-      if @pos[i] <= 0
-        @pos[i] += @environment.game.size[i]
-      elsif @pos[i] > @environment.game.size[i]
-        @pos[i] -= @environment.game.size[i]
-      end
+      @pos[i] = @pos[i].boundarize(0,@environment.game.size[i],false,true)
       
     end
   end
   
-  def update_rot
+  def set_velocity velo
+    @velocity = Vector_Array.new(velo)
+    @velo_magnitude = @velocity.magnitude
+  end
+  
+  def set_angle angle
+    
+    @angle = angle
     
     @angle += 360 if @angle < 0
     @angle -= 360 if @angle >= 360
@@ -101,6 +105,10 @@ class Eo
     @rect = @image.make_rect
   end
   
+  def add_angle added_angle
+    set_angle @angle+added_angle
+  end
+  
   def feeler_triggered momentum
     @brain.process(momentum)
   end
@@ -111,7 +119,8 @@ class Eo
   end
   
   def handle_eo_collisions
-    collisions = @environment.eo_in_rect(@rect)
+    #    collisions = @environment.eo_in_rect(@rect)
+    collisions = @environment.find_possible_eo_collisions self
     if collisions.size > 0
       
       for eo in @eo_triggered
@@ -152,7 +161,8 @@ class Eo
   end
   
   def handle_food_collisions
-    collisions = @environment.food_in_rect(@rect)
+    #    collisions = @environment.food_in_rect(@rect)
+    collisions = @environment.find_possible_food_collisions self
     if collisions.size > 0
       
       for food in @food_triggered
@@ -169,13 +179,13 @@ class Eo
         if dist <= 5
           
           eat(food)
+          food.eaten
           
         elsif dist < 7+@feeler.length and not @food_triggered.include? food
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
-          if (feeler_dist < 3 or feeler_dist < velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
-            #            puts "bloop #{vec}, #{feeler_dist}, #{velo_magnitude}"
-            @feeler.trigger food.mass*velo_magnitude
+          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
+            @feeler.trigger food.mass*@velo_magnitude
             @food_triggered << food
           end
           
@@ -187,81 +197,26 @@ class Eo
   end
   
   def energy_decay
-    ## Placeholder energy decay algorithm
     @energy *= $HEAL_DRAIN if @body.hp < @body.shell
-    @energy -= (velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
+    @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
-      puts "#{@age}; drain"
+      $LOGGER.info "Starvation;\t#{@age}"
       die
     end
   end
   
-  def velo_magnitude
-    Math.sqrt(@velocity[0]**2 + @velocity[1]**2)
-  end
-  
   def momentum_magnitude
-    velo_magnitude*(@body.mass + @feeler.mass)
-  end
-  
-  def move angle,velocity_fraction
-    move_angle = 270 - (@angle+angle)
-    new_velo = velocity_fraction*@body.max_speed
-    @velocity = [Math.d_cos(move_angle)*new_velo,Math.d_sin(move_angle)*new_velo]
-  end
-  
-  def multiply_speed factor
-    unless  velo_magnitude == 0
-      new_speed = velo_magnitude*factor
-      if new_speed >= @body.max_speed
-        set_speed 1
-      else
-        set_speed(new_speed/@body.max_speed)
-      end
-    end
-  end
-  
-  def set_speed velocity_fraction
-    if velo_magnitude == 0
-      move(0,velocity_fraction)
-    else
-      new_speed = @body.max_speed*velocity_fraction
-      speed_frac = new_speed/velo_magnitude
-      
-      @velocity = Array.new(2) { |i| @velocity[i]*speed_frac }
-    end
-  end
-  
-  def turn(angle)
-    @angle += angle
-    update_rot
-  end
-  
-  def stop
-    move(0,0)
+    @velo_magnitude*@mass
   end
   
   def eat food
     ## maybe have food wasted?
     collect_energy food.energy
-    food.eaten
+    #    food.eaten
   end
   
   def collect_energy amount
     @energy += amount
-  end
-  
-  def emit_energy amount, angle, speed
-    velo_vect = Vector_Array.new(@velocity)
-    packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
-    packet_final_vect = packet_angle_vect.mult(speed).add(velo_vect)
-    
-    new_x = @pos[0] + packet_angle_vect[0]*7
-    new_y = @pos[1] + packet_angle_vect[1]*7
-    
-    @environment.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
-    
-    @energy -= amount
   end
   
   def poked poke_force, poker
@@ -277,7 +232,7 @@ class Eo
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      puts "#{@dna}, #{@energy}, #{@age}, #{@dna.b_programs[0]}"
+      $LOGGER.info "Replication;\t#{@dna}, #{@energy}, #{@age}, [#{@dna.b_containers.join(",")}]: #{@dna.b_programs[0]}"
       
       @energy -= (5-@body.efficiency/2)
       
@@ -291,22 +246,64 @@ class Eo
     return false
   end
   
+  def move angle,velocity_fraction
+    move_angle = 270 - (@angle+angle)
+    new_velo = velocity_fraction*@body.max_speed
+    set_velocity [Math.d_cos(move_angle)*new_velo,Math.d_sin(move_angle)*new_velo]
+  end
+  
+  def multiply_speed factor
+    unless @velo_magnitude == 0
+      new_speed = @velo_magnitude*factor
+      if new_speed >= @body.max_speed
+        set_speed 1
+      else
+        set_speed(new_speed/@body.max_speed)
+      end
+    end
+  end
+  
+  def set_speed velocity_fraction
+    if @velo_magnitude == 0
+      move(0,velocity_fraction)
+    else
+      new_speed = @body.max_speed*velocity_fraction
+      speed_frac = new_speed/@velo_magnitude
+      
+      set_velocity = Array.new(2) { |i| @velocity[i]*speed_frac }
+    end
+  end
+  
+  def turn(angle)
+    add_angle angle
+  end
+  
+  def stop
+    move(0,0)
+  end
+  
+  def emit_energy amount, angle, speed
+    velo_vect = Vector_Array.new(@velocity)
+    packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
+    packet_final_vect = packet_angle_vect.mult(speed).add(velo_vect)
+    
+    new_x = @pos[0] + packet_angle_vect[0]*7
+    new_y = @pos[1] + packet_angle_vect[1]*7
+    
+    @environment.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
+    
+    @energy -= amount
+  end
+  
   def eaten
-    puts "#{@age}; eaten (#{@energy})"
+    $LOGGER.info "Eaten;\t\t#{@age} (#{@energy})"
     @energy = 0
     die
   end
   
   def die
-    #    puts "alas! i am spent; (#{@energy},#{@body.hp})"
     @environment.remove_eo(self)
     kill
-    ## more stuff later
-  end
-  
-  def mass
-    return @mass if @mass
-    @mass = @body.mass + @feeler.mass
   end
   
 end
@@ -315,6 +312,20 @@ class Eo_Body
   include Sprites::Sprite
   
   attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+  
+  def initialize owner, shell, max_speed, efficiency
+    @owner = owner
+    
+    @shell = shell
+    @max_speed = max_speed
+    @efficiency = efficiency
+    @mass = $B_MASS
+    
+    @hp = @shell
+    
+    @image = graphic
+    @rect = @image.make_rect
+  end
   
   def graphic
     return @body_graphic if @body_graphic
@@ -332,27 +343,12 @@ class Eo_Body
     return @body_graphic
   end
   
-  def initialize owner, shell, max_speed, efficiency
-    @owner = owner
-    
-    @shell = shell
-    @max_speed = max_speed
-    @efficiency = efficiency
-    @mass = $B_MASS
-    
-    @hp = @shell
-    
-    @image = graphic
-    @rect = @image.make_rect
-  end
-  
   def recover_hp
     if @hp < @shell
       @hp += @shell*$B_RECOVERY
       if @hp > @shell
         @hp = @shell
       end
-      
     end
   end
   
@@ -360,6 +356,7 @@ class Eo_Body
     @hp -= poke_force*$B_DAMAGE
     if @hp < 0
       poker.eat @owner
+      @owner.eaten
     end
   end
   

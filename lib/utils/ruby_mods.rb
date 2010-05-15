@@ -46,3 +46,40 @@ module Math
   end
   
 end
+
+module Boundarizer
+  
+  def boundarize min=0,max=1,allow_min=true,allow_max=false 
+    
+    raise "Improper boundaries" if min >= max
+    
+    min_test = case allow_min
+    when true then lambda { |num| num < min  }
+    when false then lambda { |num| num <= min }
+    end
+    max_test = case allow_max
+    when true then lambda { |num| num > max  }
+    when false then lambda { |num| num >= max }
+    end
+    
+    new_num = self
+    
+    while min_test.call(new_num)
+      new_num += max
+    end
+    while max_test.call(new_num)
+      new_num -= max
+    end
+    
+    return new_num
+    
+  end
+  
+end
+
+class Float
+  include Boundarizer
+end
+class Integer
+  include Boundarizer
+end

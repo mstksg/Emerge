@@ -3,10 +3,20 @@ require "yaml"
 config = YAML::load(File.open(File.dirname(__FILE__)+"/../../config/config.yaml"))
 settings = config["settings"]
 
+## Log settings
+$LOG_POP = settings["log"]["types"]["population"]
+$LOG_ACT = settings["log"]["types"]["activity"]
+
+$LOG_POP_FREQ = settings["log"]["pop_freq"]
+$LOG_CONSOLE_LEVEL = settings["log"]["level"]
+$LOG_FILE_LEVEL = settings["log"]["level"]
+
+
 ## Environment Settings
 $ENV_FOOD_MASS = settings["environment"]["food_mass"]
 $ENV_LOG_FREQ = settings["environment"]["log_freq"]
 $ENV_DRAG = settings["environment"]["drag"]
+$ENV_FRAMERATE = settings["environment"]["framerate"]
 
 env_choice = settings["environment"]["choice"]
 env_settings = settings["environment"][env_choice]
@@ -15,6 +25,8 @@ $ENV_WIDTH = env_settings["w"]
 $ENV_HEIGHT = env_settings["h"]
 $ENV_INIT_FOOD = env_settings["food_start"]
 $ENV_FOOD_RATE = env_settings["food_rate"]
+$ENV_INIT_EO = env_settings["eo_start"]
+$ENV_REPOP_COUNT = env_settings["repop"]
 
 ## Eo Constants
 eo_consts = settings["eo_constants"]

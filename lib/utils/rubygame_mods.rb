@@ -19,3 +19,11 @@ module Sprites
   end
   
 end
+
+class Rect
+  
+  def corners
+    [topleft.clone,topright.clone,bottomleft.clone,bottomright.clone]
+  end
+  
+end

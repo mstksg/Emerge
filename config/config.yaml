@@ -1,4 +1,11 @@
 settings:
+ log:
+  console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
+  file_level: 1
+  pop_freq: 25
+  types:
+   activity: false
+   population: true
  environment:
   choice: large
   large:
@@ -6,11 +13,16 @@ settings:
    h: 480
    food_start: 150
    food_rate: 20
+   eo_start: 6
+   repop: 5
   small:
    w: 400
    h: 300
    food_start: 50
    food_rate: 45
+   eo_start: 4
+   repop: 2
+  frame_rate: 10
   food_mass: 0.2
   log_freq: 25
   drag: 0.04
