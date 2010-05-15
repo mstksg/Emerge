@@ -129,7 +129,7 @@ class Eo_DNA
     else
       inspected = "[0:"
       for i in 0...@b_containers.size
-        inspected += "#{@b_programs[i]}|#{@b_containers[i].to_i}:"
+        inspected += "#{@b_programs[i]},#{@b_containers[i].to_i}:"
       end
       
       inspected += "#{@b_programs[-1]}]"
@@ -220,7 +220,7 @@ class Eo_Command
     unless @command == :if
       return "#{@@ALIASES[@command]}"
     else
-      return "f[#{@@ALIASES[@args[0]]}:"
+      return "f[#{@@ALIASES[@args[0]]}]"
     end
   end
   def to_s
