@@ -5,7 +5,7 @@ settings:
   pop_freq: 25
   types:
    activity: true
-   population: false
+   population: true
  environment:
   choice: large
   large:
@@ -22,10 +22,11 @@ settings:
    food_rate: 45
    eo_start: 4
    repop: 2
-  frame_rate: 10
+  framerate: 10
   food_mass: 0.2
   log_freq: 25
   drag: 0.04
+  zones: 4
  eo_constants:
   main:
    rep_threshold: 15
@@ -39,6 +40,6 @@ settings:
    poke_force_factor: 0.5
    mass_factor: 0.1
   dna:
-   mutation_factor: 0.15
-   mutation_variance: 2.0
-   forget_factor: 0.015
+   mutation_factor: 0.12
+   mutation_variance: 1.25
+   forget_factor: 0.012

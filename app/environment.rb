@@ -7,6 +7,8 @@ include Rubygame
 
 class Environment
   
+  @@total_zones = $ENV_ZONES*$ENV_ZONES
+  
   attr_reader :game, :eos # for debug
   
   def initialize game
@@ -29,32 +31,17 @@ class Environment
   end
   
   def make_zones
-    @zone_width = @game.width/5
-    @zone_height = @game.height/5
+    @zone_width = @game.width/$ENV_ZONES
+    @zone_height = @game.height/$ENV_ZONES
     @zone_rects = Array.new()
-    for i in 0...5
-      for j in 0...5
+    for i in 0...$ENV_ZONES
+      for j in 0...$ENV_ZONES
         @zone_rects << Rect.new(@zone_width*j,@zone_height*i,@zone_width,@zone_height)
       end
     end
     
     update_zones
   end
-  
-  #  def get_zone_neighbors zone_id
-  #    neighbors = Array.new
-  #    neighbors << (zone_id-6) if zone_id % 5 > 0 and  zone_id > 4
-  #    neighbors << (zone_id-5)                      if zone_id > 4
-  #    neighbors << (zone_id-4) if zone_id % 5 < 4 and  zone_id > 4
-  #    neighbors << (zone_id-1) if zone_id % 5 > 0
-  #    neighbors << (zone_id+1) if zone_id % 5 < 4
-  #    neighbors << (zone_id+4) if zone_id % 5 > 0 and  zone_id < 20
-  #    neighbors << (zone_id+5)                      if zone_id < 20
-  #    neighbors << (zone_id+6) if zone_id % 5 < 4 and  zone_id < 20
-  #    neighbors.reject! { |n| n < 0 }
-  #    neighbors.reject! { |n| n > 24 }
-  #    return neighbors
-  #  end
   
   def add_eo_still(dna, energy=0, x=0, y=0, rot=0, generation=1)
     add_eo(dna,energy,x,y,rot,generation,[0,0])
@@ -84,7 +71,7 @@ class Environment
       
       col = (corner[0].boundarize(0,@game.width,true,false)/@zone_width).to_i
       row = (corner[1].boundarize(0,@game.height,true,false)/@zone_height).to_i
-      @eo_zones[row*5+col] << new_eo unless @eo_zones[row*5+col].include? new_eo
+      @eo_zones[row*$ENV_ZONES+col] << new_eo unless @eo_zones[row*$ENV_ZONES+col].include? new_eo
       
     end
     
@@ -124,8 +111,8 @@ class Environment
   end
   
   def update_zones
-    @eo_zones = Array.new(25) { |i| Array.new(eo_in_rect(@zone_rects[i])) }
-    @food_zones = Array.new(25) { |i| Array.new(food_in_rect(@zone_rects[i])) }
+    @eo_zones = Array.new(@@total_zones) { |i| Array.new(eo_in_rect(@zone_rects[i])) }
+    @food_zones = Array.new(@@total_zones) { |i| Array.new(food_in_rect(@zone_rects[i])) }
   end
   
   def eo_in_rect rect, group=@eos
@@ -135,7 +122,7 @@ class Environment
   
   def find_possible_eo_collisions eo
     checks = Array.new
-    for i in 0...25
+    for i in 0...16
       if @eo_zones[i].include? eo
         checks |= @eo_zones[i]
       end
@@ -145,7 +132,7 @@ class Environment
   
   def find_possible_food_collisions eo
     checks = Array.new
-    for i in 0...25
+    for i in 0...16
       if @eo_zones[i].include? eo
         checks |= @food_zones[i]
       end
@@ -194,6 +181,10 @@ class Environment
   end
   
   def update
+    @fr = @game.clock.framerate
+    if @fr != 0 and @fr < 0.05
+      raise "Computational overload; Framerate = #{@game.clock.framerate}"
+    end
     
     if rand*$ENV_FOOD_RATE < 1
       sprinkle_food

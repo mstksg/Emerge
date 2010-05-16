@@ -28,8 +28,9 @@ def setup_log dir, name
                                 :formatter=>file_format, :level => $LOG_FILE_LEVEL)
   end
   
+  pop_log_file = logfile.sub(".","[p].")
+  
   if $LOG_POP
-    pop_log_file = logfile.sub(".","[p].")
     pop_log = Logger.new "population_log"
     format = PatternFormatter.new(:pattern => "%m")
     pop_log.add FileOutputter.new("pop_output", :filename => pop_log_file, :formatter => format)
@@ -39,5 +40,6 @@ def setup_log dir, name
   $LOGGER = log
   
   $LOGGER.info "Logger loaded"
-  $LOGGER.info "Logging in #{logfile}" if $LOG_ACT
+  $LOGGER.info "Logging in activity in #{logfile}" if $LOG_ACT
+  $LOGGER.info "Logging in population in #{pop_log_file}" if $LOG_POP
 end

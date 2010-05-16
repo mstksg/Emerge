@@ -17,6 +17,7 @@ $ENV_FOOD_MASS = settings["environment"]["food_mass"]
 $ENV_LOG_FREQ = settings["environment"]["log_freq"]
 $ENV_DRAG = settings["environment"]["drag"]
 $ENV_FRAMERATE = settings["environment"]["framerate"]
+$ENV_ZONES = settings["environment"]["zones"]
 
 env_choice = settings["environment"]["choice"]
 env_settings = settings["environment"][env_choice]

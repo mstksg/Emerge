@@ -52,10 +52,10 @@ module Command_Data
                           :set_speed      => "s" ,
                           :if             => "f" ,
                           
-                          :energy         => "e" ,
-                          :age            => "a" ,
-                          :velocity       => "v" ,
-                          :momentum       => "m" ,
-                          :random         => "r"  }
+                          :energy         => "E" ,
+                          :age            => "A" ,
+                          :velocity       => "V" ,
+                          :momentum       => "M" ,
+                          :random         => "R"  }
   
 end

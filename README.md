@@ -15,7 +15,7 @@ intelligences.
 
 # The "Eo" #
 
-The basic organism is known as the "Eo", which comes from "(Hopefully) Emergent Organism".
+The basic organism is known as the **Eo**, which comes from "(Hopefully) Emergent Organism".
 Eos float around more or less aimlessly around the toroidal pool.  Food is sprinkled
 randomly around the pool; Eos need this food to survive.  Their energy drains as they move.
 
@@ -24,7 +24,7 @@ slightly mutated versions of itself.
 
 ## Feelers ##
 
-Every Eo has one input trigger: a feeler, poking from their body, of varying length
+Every Eo has one input trigger: a **feeler**, poking from their body, of varying length
 and thickness (determined by DNA).  When an Eo's feeler pokes into another, it damages the
 target; eventually, the target may die, and the attacker will gain all of his energy.
 

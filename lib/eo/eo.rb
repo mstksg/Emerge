@@ -14,7 +14,7 @@ class Eo
   
   def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
     
-    @id = @@count
+    @id = @@count.to_s(36)
     @@count += 1
     @generation = generation
     
@@ -241,7 +241,7 @@ class Eo
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      $LOGGER.info "Eo_#{@id}\tReplicates;\t(#{@energy.to_i}, #{@age})"
+      $LOGGER.info "Eo_#{@id}\tReplicates;\t(#{@age}, #{@energy.to_i})"
       
       @energy -= (5-@body.efficiency/2)
       
@@ -365,7 +365,7 @@ class Eo_Body
     if @hp < 0
       poker.eat @owner
       @owner.eaten
-      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\t(#{@owner.energy.to_i}, #{@owner.age})"
+      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\t(#{@owner.age}, #{@owner.energy.to_i})"
     end
   end
   

@@ -220,7 +220,7 @@ class Eo_Command
     unless @command == :if
       return "#{@@ALIASES[@command]}"
     else
-      return "f[#{@@ALIASES[@args[0]]}]"
+      return "f#{@@ALIASES[@args[0]]}"
     end
   end
   def to_s
@@ -252,7 +252,7 @@ class Command_Block < Array
     
     if rand < $MUTATION_FACTOR
       insert_spot = rand(self.size+1)
-      if rand(2) == 0
+      if rand < 0.4
         self.insert insert_spot, Command_Block.new_block
       else
         self.insert insert_spot, Eo_Command.new_command
