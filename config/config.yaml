@@ -1,5 +1,5 @@
 settings:
- choice: large
+ choice: small
  environment:
   framerate: 10
   large:
@@ -12,7 +12,7 @@ settings:
   large:
    food_start: 150
    food_rate: 20
-   eo_start: 6
+   eo_start: 8
    repop: 5
   small:
    food_start: 50

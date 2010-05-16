@@ -119,22 +119,34 @@ class Pond
   end
   
   def find_possible_eo_collisions eo
+    
     checks = Array.new
-    for i in 0...16
-      if @eo_zones[i].include? eo
-        checks |= @eo_zones[i]
-      end
+    
+    for corner in eo.rect.corners
+      
+      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
+      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      
+      checks |= @eo_zones[row*$POND_ZONES+col]
+      
     end
+    
     return eo_in_rect(eo.rect,checks)
+    
   end
   
   def find_possible_food_collisions eo
     checks = Array.new
-    for i in 0...16
-      if @eo_zones[i].include? eo
-        checks |= @food_zones[i]
-      end
+    
+    for corner in eo.rect.corners
+      
+      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
+      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      
+      checks |= @food_zones[row*$POND_ZONES+col]
+      
     end
+    
     return food_in_zone_rect(eo.rect,checks)
   end
   
@@ -152,25 +164,6 @@ class Pond
     coll_indxs = rect.collide_array_all(zone)
     Array.new(coll_indxs.size) { |i| zone[coll_indxs[i]] }
   end
-  
-  ## An unfortunate case of premature optimization; will work on later
-  #  def find_collisions
-  #    temp_group = @eos.clone
-  #    while temp_group.size > 0
-  #      curr_eo = temp_group.pop
-  #      
-  #      collisions = temp_group.collide_sprite(curr_eo)
-  #      
-  #      for i in collisions
-  #        curr_eo.add_coll_queue i
-  #        i.add_coll_queue curr_eo
-  #        for j in collisions
-  #          i.add_coll_queue j if i != j
-  #        end
-  #      end
-  #      
-  #    end
-  #  end
   
   def undraw
     @foods.undraw(@environment.screen,@environment.background)

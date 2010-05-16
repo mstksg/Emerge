@@ -76,7 +76,7 @@ class Packet < Food
     
     for i in 0..1
       
-      @pos[i] = @pos[i].boundarize(0,@pond.game.size[i],false,true)
+      @pos[i] = @pos[i].boundarize(0,@pond.environment.size[i],false,true)
       
     end
   end

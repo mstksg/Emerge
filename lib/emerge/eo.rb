@@ -312,6 +312,13 @@ class Eo
     kill
   end
   
+  def inspect
+    to_s
+  end
+  def to_s
+    "Eo_#{@id}"
+  end
+  
 end
 
 class Eo_Body
@@ -367,6 +374,13 @@ class Eo_Body
     end
   end
   
+  def inspect
+    to_s
+  end
+  def to_s
+    "Body of #{@owner.to_s}; #{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}"
+  end
+  
 end
 
 class Feeler
@@ -418,7 +432,7 @@ class Feeler
   
   def max_dist
     return @max_dist if @max_dist
-    @max_dist = (100+(@length+5)**2)**0.5
+    @max_dist = (100+(@length+5)*(@length+5))**0.5
   end
   
   def trigger momentum
@@ -432,6 +446,13 @@ class Feeler
     diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
     poke_force = @strength*(diff+0.2)*$F_POKE
     target.poked(poke_force,@owner)
+  end
+  
+  def inspect
+    to_s
+  end
+  def to_s
+    "Feeler of #{@owner.to_s}; #{@f_length.to_i}#{@f_strength.to_i}#{@f_sensitivity.to_i}"
   end
   
 end
