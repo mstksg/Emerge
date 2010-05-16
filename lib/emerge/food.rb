@@ -32,7 +32,7 @@ class Food
   end
   
   def mass
-    return @energy*$ENV_FOOD_MASS
+    return @energy*$POND_FOOD_MASS
   end
   
   def eaten
@@ -43,10 +43,10 @@ end
 
 class Packet < Food
   
-  def initialize environment,energy,x=0,y=0,speed=0,angle=0
+  def initialize pond,energy,x=0,y=0,speed=0,angle=0
     super(energy,x,y)
     
-    @environment = environment
+    @pond = pond
     
     move_angle = 270-angle
     @velocity = Vector_Array.new([Math.d_cos(move_angle)*speed,Math.d_sin(move_angle)*speed])
@@ -64,10 +64,10 @@ class Packet < Food
   end
   
   def update_velo
-    if @velocity.magnitude < $ENV_DRAG
+    if @velocity.magnitude < $POND_DRAG
       @velocity = [0,0]
     else
-      @velocity = @velocity.sub(@velocity.unit_vector.mult($ENV_DRAG))
+      @velocity = @velocity.sub(@velocity.unit_vector.mult($POND_DRAG))
     end
   end
   
@@ -76,14 +76,14 @@ class Packet < Food
     
     for i in 0..1
       
-      @pos[i] = @pos[i].boundarize(0,@environment.game.size[i],false,true)
+      @pos[i] = @pos[i].boundarize(0,@pond.game.size[i],false,true)
       
     end
   end
   
   def turn_into_food
     kill
-    @environment.add_food(@energy,@pos[0],@pos[1])
+    @pond.add_food(@energy,@pos[0],@pos[1])
   end
   
 end

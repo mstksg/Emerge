@@ -94,7 +94,7 @@ class Eo_DNA
       
       
       insert_spot = rand(@b_programs.size+1)
-      @b_programs.insert insert_spot, Command_Block.fresh_block   ## should probably be a better way
+      @b_programs.insert insert_spot, @b_programs.pick_rand.clone
     end
     
     @b_containers.sort!
@@ -271,7 +271,7 @@ class Command_Block < Array
     Command_Block.new(self.size) { |i| self[i].clone }
   end
   
-  def self.fresh_block iterations=3
+  def self.fresh_block iterations=2
     new_block = Command_Block.new([Eo_Command.new_command])
      (iterations/$MUTATION_FACTOR).to_i.times do
       new_block.mutate!

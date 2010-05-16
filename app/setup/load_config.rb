@@ -12,22 +12,22 @@ $LOG_CONSOLE_LEVEL = settings["log"]["console_level"].to_i
 $LOG_FILE_LEVEL = settings["log"]["file_level"].to_i
 
 
-## Environment Settings
-$ENV_FOOD_MASS = settings["environment"]["food_mass"]
-$ENV_LOG_FREQ = settings["environment"]["log_freq"]
-$ENV_DRAG = settings["environment"]["drag"]
-$ENV_FRAMERATE = settings["environment"]["framerate"]
-$ENV_ZONES = settings["environment"]["zones"]
+## Pond Settings
+$POND_FOOD_MASS = settings["pond"]["food_mass"]
+$POND_LOG_FREQ = settings["pond"]["log_freq"]
+$POND_DRAG = settings["pond"]["drag"]
+$POND_FRAMERATE = settings["pond"]["framerate"]
+$POND_ZONES = settings["pond"]["zones"]
 
-env_choice = settings["environment"]["choice"]
-env_settings = settings["environment"][env_choice]
+env_choice = settings["pond"]["choice"]
+env_settings = settings["pond"][env_choice]
 
-$ENV_WIDTH = env_settings["w"]
-$ENV_HEIGHT = env_settings["h"]
-$ENV_INIT_FOOD = env_settings["food_start"]
-$ENV_FOOD_RATE = env_settings["food_rate"]
-$ENV_INIT_EO = env_settings["eo_start"]
-$ENV_REPOP_COUNT = env_settings["repop"]
+$POND_WIDTH = env_settings["w"]
+$POND_HEIGHT = env_settings["h"]
+$POND_INIT_FOOD = env_settings["food_start"]
+$POND_FOOD_RATE = env_settings["food_rate"]
+$POND_INIT_EO = env_settings["eo_start"]
+$POND_REPOP_COUNT = env_settings["repop"]
 
 ## Eo Constants
 eo_consts = settings["eo_constants"]

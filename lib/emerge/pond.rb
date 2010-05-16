@@ -1,13 +1,11 @@
 require "rubygems"
 require "rubygame"
 
-Dir.require_all("lib/eo/")
-
 include Rubygame
 
-class Environment
+class Pond
   
-  @@total_zones = $ENV_ZONES*$ENV_ZONES
+  @@total_zones = $POND_ZONES**2
   
   attr_reader :game, :eos # for debug
   
@@ -31,11 +29,11 @@ class Environment
   end
   
   def make_zones
-    @zone_width = @game.width/$ENV_ZONES
-    @zone_height = @game.height/$ENV_ZONES
+    @zone_width = @game.width/$POND_ZONES
+    @zone_height = @game.height/$POND_ZONES
     @zone_rects = Array.new()
-    for i in 0...$ENV_ZONES
-      for j in 0...$ENV_ZONES
+    for i in 0...$POND_ZONES
+      for j in 0...$POND_ZONES
         @zone_rects << Rect.new(@zone_width*j,@zone_height*i,@zone_width,@zone_height)
       end
     end
@@ -71,7 +69,7 @@ class Environment
       
       col = (corner[0].boundarize(0,@game.width,true,false)/@zone_width).to_i
       row = (corner[1].boundarize(0,@game.height,true,false)/@zone_height).to_i
-      @eo_zones[row*$ENV_ZONES+col] << new_eo unless @eo_zones[row*$ENV_ZONES+col].include? new_eo
+      @eo_zones[row*$POND_ZONES+col] << new_eo unless @eo_zones[row*$POND_ZONES+col].include? new_eo
       
     end
     
@@ -186,7 +184,7 @@ class Environment
       raise "Computational overload; Framerate = #{@game.clock.framerate}"
     end
     
-    if rand*$ENV_FOOD_RATE < 1
+    if rand*$POND_FOOD_RATE < 1
       sprinkle_food
     end
     
@@ -197,7 +195,7 @@ class Environment
     
     
     if $LOG_POP
-      if @game.clock.ticks % $ENV_LOG_FREQ == 0
+      if @game.clock.ticks % $POND_LOG_FREQ == 0
         $POP_LOG.info "#{@game.clock.ticks},\t#{@eos.size},\t#{@foods.size}"
       end
     end
@@ -214,7 +212,7 @@ class Environment
     #    end
     
     if @eos.size == 0
-      sprinkle_eo($ENV_REPOP_COUNT)
+      sprinkle_eo($POND_REPOP_COUNT)
       @logger.warn "Repopulating empty pool..."
     end
     

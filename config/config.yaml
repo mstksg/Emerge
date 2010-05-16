@@ -6,7 +6,7 @@ settings:
   types:
    activity: true
    population: true
- environment:
+ pond:
   choice: large
   large:
    w: 640

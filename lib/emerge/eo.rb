@@ -12,7 +12,7 @@ class Eo
               :velocity,:velo_magnitude,:mass,:id,:generation
   attr_accessor :pos
   
-  def initialize (environment,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
+  def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
     
     @id = @@count.to_s(36)
     @@count += 1
@@ -35,7 +35,7 @@ class Eo
     @eo_triggered = []
     
     
-    @environment = environment
+    @pond = pond
     @pos = [pos_x,pos_y]
     @angle = angle
     @angle_vect = Vector_Array.from_angle(270-@angle)
@@ -89,7 +89,7 @@ class Eo
     
     for i in 0..1
       
-      @pos[i] = @pos[i].boundarize(0,@environment.game.size[i],false,true)
+      @pos[i] = @pos[i].boundarize(0,@pond.game.size[i],false,true)
       
     end
   end
@@ -128,8 +128,7 @@ class Eo
   end
   
   def handle_eo_collisions
-    #    collisions = @environment.eo_in_rect(@rect)
-    collisions = @environment.find_possible_eo_collisions self
+    collisions = @pond.find_possible_eo_collisions self
     if collisions.size > 0
       
       for eo in @eo_triggered
@@ -170,8 +169,7 @@ class Eo
   end
   
   def handle_food_collisions
-    #    collisions = @environment.food_in_rect(@rect)
-    collisions = @environment.find_possible_food_collisions self
+    collisions = @pond.find_possible_food_collisions self
     if collisions.size > 0
       
       for food in @food_triggered
@@ -245,8 +243,8 @@ class Eo
       
       @energy -= (5-@body.efficiency/2)
       
-      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
-      @environment.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
+      @pond.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
+      @pond.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
       die
       
       return true
@@ -299,7 +297,7 @@ class Eo
     new_x = @pos[0] + packet_angle_vect[0]*7
     new_y = @pos[1] + packet_angle_vect[1]*7
     
-    @environment.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
+    @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
     
     @energy -= amount
   end
@@ -310,7 +308,7 @@ class Eo
   end
   
   def die
-    @environment.remove_eo(self)
+    @pond.remove_eo(self)
     kill
   end
   
@@ -367,6 +365,73 @@ class Eo_Body
       @owner.eaten
       $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\t(#{@owner.age}, #{@owner.energy.to_i})"
     end
+  end
+  
+end
+
+class Feeler
+  include Sprites::Sprite
+  
+  attr_reader :owner, :length, :strength, :sensitivity, :mass
+  
+  def initialize owner, length, strength, sensitivity
+    
+    super()
+    
+    @owner = owner
+    
+    raise "Maximum length is 10" if length > 10
+    
+    @length = length
+    @strength = strength
+    @sensitivity = sensitivity
+    @mass = length*strength*$F_MASS    # define this more later on
+    
+    @image = graphic
+    @rect = @image.make_rect
+  end
+  
+  def graphic
+    return @f_graphic if @f_graphic
+    
+    pen_thickness = (@strength/2).to_i
+    pen = Surface.new([pen_thickness,pen_thickness],0)
+    pen.fill([100,100,100])
+    
+    
+    #    pen.draw_circle_s([pen_thickness/2,pen_thickness/2],pen_thickness/2,[100,100,100])
+    
+    @f_graphic = Surface.new([10,10],0)
+    @f_graphic.fill([0,0,0])
+    
+    @f_graphic.colorkey = [0,0,0]
+    
+    y_pos = 10
+    
+    while y_pos > 10-length
+      pen.blit(@f_graphic,[5-pen_thickness/2,y_pos])
+      y_pos -= 0.25
+    end
+    
+    return @f_graphic
+  end
+  
+  def max_dist
+    return @max_dist if @max_dist
+    @max_dist = (100+(@length+5)**2)**0.5
+  end
+  
+  def trigger momentum
+    felt_momentum = Mutations.mutate(momentum,0,80,5.1-@sensitivity/2)
+    ## er...is this fuzzying really necessary?  I actually don't think so.
+    @owner.feeler_triggered(felt_momentum)
+  end
+  
+  def poke target
+    # should be poking an Eo
+    diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
+    poke_force = @strength*(diff+0.2)*$F_POKE
+    target.poked(poke_force,@owner)
   end
   
 end

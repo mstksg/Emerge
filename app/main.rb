@@ -1,17 +1,16 @@
 require "rubygems"
 require "rubygame"
-Dir.require_all("lib/eo/")
-Dir.require_all("app/")
+Dir.require_all("lib/emerge/")
 
 include Rubygame
 
 class Main
   
-  attr_reader :screen, :background, :width, :height, :size, :clock, :environment
+  attr_reader :screen, :background, :width, :height, :size, :clock, :pond
   
   def initialize
     
-    @size = [$ENV_WIDTH,$ENV_HEIGHT]
+    @size = [$POND_WIDTH,$POND_HEIGHT]
     
     @width = size[0]
     @height = size[1]
@@ -22,22 +21,22 @@ class Main
     
     @queue = Rubygame::EventQueue.new
     @clock = Rubygame::Clock.new
-    @clock.target_framerate = $ENV_FRAMERATE
+    @clock.target_framerate = $POND_FRAMERATE
     
     @background = Surface.new( @screen.size )
     @background.fill( Color::ColorRGB.new([0.1, 0.2, 0.35]) )
     
     @background.blit(@screen,[0,0])
     
-    @environment = Environment.new(self)
+    @pond = Pond.new(self)
     
     $LOGGER.info "Populating pool..."
     
-    @environment.sprinkle_eo($ENV_INIT_EO)
+    @pond.sprinkle_eo($POND_INIT_EO)
     
-    @environment.sprinkle_food($ENV_INIT_FOOD)
+    @pond.sprinkle_food($POND_INIT_FOOD)
     
-    @environment.draw
+    @pond.draw
     
     @screen.flip()
     
@@ -60,16 +59,16 @@ class Main
         exit
       end
     end
-    @environment.update
+    @pond.update
     screen.title = @clock.framerate.to_s
   end
   
   def undraw
-    @environment.undraw
+    @pond.undraw
   end
   
   def draw
-    @environment.draw
+    @pond.draw
     @screen.flip()
   end
 end
