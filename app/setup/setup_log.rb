@@ -28,7 +28,7 @@ def setup_log dir, name
                                 :formatter=>file_format, :level => $LOG_FILE_LEVEL)
   end
   
-  pop_log_file = logfile.sub(".","[p].")
+  pop_log_file = logfile.sub(".txt","[p].csv")
   
   if $LOG_POP
     pop_log = Logger.new "population_log"

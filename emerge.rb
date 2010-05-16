@@ -8,4 +8,4 @@ require "app/setup/setup_log.rb"
 
 setup_log "logs", "log"
 
-require "app/main.rb"
+require "app/launch.rb"

@@ -7,10 +7,10 @@ class Pond
   
   @@total_zones = $POND_ZONES**2
   
-  attr_reader :game, :eos # for debug
+  attr_reader :environment, :eos, :foods # for debug
   
-  def initialize game
-    @game = game
+  def initialize environment
+    @environment = environment
     
     @eos = Sprites::Group.new
     #    @eos.extend(Sprites::DepthSortGroup)
@@ -29,8 +29,8 @@ class Pond
   end
   
   def make_zones
-    @zone_width = @game.width/$POND_ZONES
-    @zone_height = @game.height/$POND_ZONES
+    @zone_width = @environment.width/$POND_ZONES
+    @zone_height = @environment.height/$POND_ZONES
     @zone_rects = Array.new()
     for i in 0...$POND_ZONES
       for j in 0...$POND_ZONES
@@ -47,8 +47,8 @@ class Pond
   
   def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
     
-    x = x.boundarize(0,@game.width,false,true)
-    y = y.boundarize(0,@game.height,false,true)
+    x = x.boundarize(0,@environment.width,false,true)
+    y = y.boundarize(0,@environment.height,false,true)
     
     new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
     
@@ -67,8 +67,8 @@ class Pond
     
     for corner in new_eo.rect.corners
       
-      col = (corner[0].boundarize(0,@game.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@game.height,true,false)/@zone_height).to_i
+      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
+      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
       @eo_zones[row*$POND_ZONES+col] << new_eo unless @eo_zones[row*$POND_ZONES+col].include? new_eo
       
     end
@@ -76,8 +76,8 @@ class Pond
   end
   
   def add_food(energy=10,x=0,y=0)
-    x = x.boundarize(0,@game.width,false,true)
-    y = y.boundarize(0,@game.height,false,true)
+    x = x.boundarize(0,@environment.width,false,true)
+    y = y.boundarize(0,@environment.height,false,true)
     
     new_food = Food.new(energy,x,y)
     @foods << new_food
@@ -85,8 +85,8 @@ class Pond
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
     
-    x = x.boundarize(0,@game.width,false,true)
-    y = y.boundarize(0,@game.height,false,true)
+    x = x.boundarize(0,@environment.width,false,true)
+    y = y.boundarize(0,@environment.height,false,true)
     
     new_packet = Packet.new(self,energy,x,y,speed,angle)
     @packets << new_packet
@@ -94,13 +94,13 @@ class Pond
   
   def sprinkle_food(amount=1,max_energy=20,min_energy=5)
     for i in 0...amount
-      add_food(rand*(max_energy-min_energy)+min_energy,rand*@game.width,rand*@game.height)
+      add_food(rand*(max_energy-min_energy)+min_energy,rand*@environment.width,rand*@environment.height)
     end
   end
   
   def sprinkle_eo(amount=1,energy=10)
     for i in 0...amount
-      add_eo(Eo_DNA.generate,energy,rand*@game.width,rand*@game.height,rand*360)
+      add_eo(Eo_DNA.generate,energy,rand*@environment.width,rand*@environment.height,rand*360)
     end
   end
   
@@ -173,15 +173,15 @@ class Pond
   #  end
   
   def undraw
-    @foods.undraw(@game.screen,@game.background)
-    @packets.undraw(@game.screen,@game.background)
-    @eos.undraw(@game.screen,@game.background)
+    @foods.undraw(@environment.screen,@environment.background)
+    @packets.undraw(@environment.screen,@environment.background)
+    @eos.undraw(@environment.screen,@environment.background)
   end
   
   def update
-    @fr = @game.clock.framerate
+    @fr = @environment.clock.framerate
     if @fr != 0 and @fr < 0.05
-      raise "Computational overload; Framerate = #{@game.clock.framerate}"
+      raise "Computational overload; Framerate = #{@environment.clock.framerate}"
     end
     
     if rand*$POND_FOOD_RATE < 1
@@ -192,14 +192,6 @@ class Pond
     
     @eos.update
     @packets.update
-    
-    
-    if $LOG_POP
-      if @game.clock.ticks % $POND_LOG_FREQ == 0
-        $POP_LOG.info "#{@game.clock.ticks},\t#{@eos.size},\t#{@foods.size}"
-      end
-    end
-    
     
     #    for eo in @eos
     #      if eo.pos[0].nan?
@@ -219,9 +211,9 @@ class Pond
   end
   
   def draw
-    @foods.draw(@game.screen)
-    @packets.draw(@game.screen)
-    @eos.draw(@game.screen)
+    @foods.draw(@environment.screen)
+    @packets.draw(@environment.screen)
+    @eos.draw(@environment.screen)
   end
   
 end
