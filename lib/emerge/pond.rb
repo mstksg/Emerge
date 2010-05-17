@@ -87,13 +87,15 @@ class Pond
     new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
     
     if direction and speed_frac
-      new_eo.move(direction,speed)  
+      new_eo.move(direction,speed_frac)
     else
       new_eo.move(rand*360,rand)
     end
     @eos << new_eo
     
     put_in_zones new_eo
+    
+    ## should probably return the new_eo, but would impact performance
     
   end
   

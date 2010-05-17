@@ -6,10 +6,10 @@ class Eo_DNA
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
   attr_reader :shell,:efficiency,:f_length,:f_strength,
-              :b_containers,:b_programs,:color
+              :b_containers,:b_programs,:birth_program,:color
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
-                 b_containers,b_programs,color)
+                 b_containers,b_programs,birth_program,color)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
@@ -17,18 +17,21 @@ class Eo_DNA
     @f_strength = f_strength
     @b_containers = Array.new(b_containers)
     @b_programs = Array.new(b_programs)
+    @birth_program = birth_program.clone
     @color = color
   end
   
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-                    f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block])
+                    f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
+                    birth_program=Command_Block.blank_block)
     return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
     Mutations.rand_norm_dist(0,10*max_speed),
     Mutations.rand_norm_dist(0,10*efficiency),
     Mutations.rand_norm_dist(0,10*f_length),
     Mutations.rand_norm_dist(0,10*f_strength),
-    b_containers,b_programs,[rand*255,rand*255,rand*255])
+    b_containers,b_programs,birth_program,
+    [rand*255,rand*255,rand*255])
   end
   
   def max_speed
@@ -43,6 +46,7 @@ class Eo_DNA
     @f_strength = mutate_value @f_strength
     mutate_b_containers
     mutate_b_programs
+    @birth_program.mutate!
     @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,@@COLOR_VAR,5) }
     
     return self
@@ -51,7 +55,7 @@ class Eo_DNA
   def clone
     Eo_DNA.new(@shell,@max_speed,@efficiency,
                @f_length,@f_strength,Array.new(@b_containers),
-               clone_b_programs,Array.new(color))
+    clone_b_programs,@birth_program.clone,Array.new(color))
   end
   
   def clone_b_programs
@@ -88,18 +92,15 @@ class Eo_DNA
       
       
       
-      insert_spot = rand(@b_containers.size).to_i
+      new_wall_spot = rand*80
       
-      min = case insert_spot
-      when 0 then 0
-      else @b_containers[insert_spot-1]
-      end
-      max = case insert_spot
-      when @b_containers.size then 80
-      else @b_containers[insert_spot]
+      insert_spot = 0
+      unless @container_walls.size() == 0
+        while insert_spot < @container_walls.size and @container_walls[insert_spot] < new_wall_spot
+          insert_spot += 1
+        end
       end
       
-      new_wall_spot = rand*(max-min)+min
       @b_containers << new_wall_spot
       
       @b_programs.insert insert_spot+1, @b_programs[insert_spot].clone
@@ -138,9 +139,9 @@ class Eo_DNA
   
   def inspect_programs
     if @b_containers.size == 0
-      return "[0:#{@b_programs[0]}]"
+      return "[b:#{@birth_program},0:#{@b_programs[0]}]"
     else
-      inspected = "[0:"
+      inspected = "[b:#{@birth_program},0:"
       for i in 0...@b_containers.size
         inspected += "#{@b_programs[i]},#{@b_containers[i].to_i}:"
       end
@@ -278,6 +279,10 @@ class Command_Block < Array
   
   def self.new_block
     Command_Block.new([Eo_Command.new_command])
+  end
+  
+  def self.blank_block
+    Command_Block.new()
   end
   
   def clone

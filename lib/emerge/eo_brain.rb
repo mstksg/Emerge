@@ -2,7 +2,7 @@ class Brain
   
   attr_reader :owner
   
-  def initialize (owner, container_walls, programs)
+  def initialize (owner, container_walls, programs, birth_program)
     
     if programs.size() != container_walls.size() + 1
       raise "Improper brain settings; #{programs.size} programs for #{container_walls.size} walls"
@@ -11,6 +11,7 @@ class Brain
     @owner = owner
     @container_walls = container_walls
     @programs = programs
+    @birth_program = birth_program
     
     @program_queue = []
     @momentum_trigger = 0
@@ -31,6 +32,10 @@ class Brain
       run_program @programs[count]
     end
     
+  end
+  
+  def run_birth_program
+    run_program @birth_program
   end
   
   def run_program program

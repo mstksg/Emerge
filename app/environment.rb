@@ -9,6 +9,8 @@ class Environment
   
   def initialize
     
+    $LOGGER.debug "Initializing #{$ENV_WIDTH}x#{$ENV_HEIGHT} environment..."
+    
     @size = [$ENV_WIDTH,$ENV_HEIGHT]
     
     @width = size[0]

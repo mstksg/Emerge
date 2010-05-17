@@ -57,7 +57,7 @@ class Vector_Array < Array
     (unit_vector.ortho_2D.dot(r)).abs
   end
   
-  def ortho_2D
+  def ortho_2D    ## counter clockwise
     ortho = Vector_Array.new(2)
     ortho[0] = -self[1]
     ortho[1] = self[0]
@@ -73,4 +73,10 @@ class Vector_Array < Array
     "[#{self.join(",")}]"
   end
   
+  def angle_to other, deg=true
+    return Math.d_acos(self.unit_vector.dot(other.unit_vector)) if deg
+    Math.acos(self.unit_vector.dot(other.unit_vector))
+  end
+  
+  alias :normalize :unit_vector
 end

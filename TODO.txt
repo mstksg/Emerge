@@ -3,4 +3,4 @@
 - Replication creating a T-shape, predictable direction
 - Add detection for feeler-to-feeler collisions? (probably not)
 - Okay, wtf at eos not catching food packets. perhaps make packets push collisions
-- birth programs to run
+- Also, what the heck at long streams of food packets?

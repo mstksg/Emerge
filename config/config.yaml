@@ -1,8 +1,11 @@
-choice: large
+choice: regular
 settings:
  environment:
   framerate: 10
   large:
+   w: 800
+   h: 600
+  regular:
    w: 640
    h: 480
   small:
@@ -13,6 +16,11 @@ settings:
    h: 480
  pond:
   large:
+   food_start: 234
+   food_rate: 35
+   eo_start: 16
+   repop: 10
+  regular:
    food_start: 150
    food_rate: 20
    eo_start: 10
@@ -33,7 +41,7 @@ settings:
  eo_constants:
   main:
    rep_threshold: 15
-   rep_rate: 3000
+   rep_rate: 3300
    healing_drain: 0.98
   body:
    mass: 10
@@ -51,7 +59,7 @@ settings:
    mutation_curve: 3
    color_var_factor: 1.5
  log:
-  console_level: 1					## 1:debug,2:info,3:warn,4:error,5:fatal
+  console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
   file_level: 1
   pop_freq: 25
   types:

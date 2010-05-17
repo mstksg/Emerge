@@ -24,7 +24,7 @@ class Eo
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
     @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
-    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program)
     
     @mass = @feeler.mass + @body.mass
     @energy = energy
@@ -46,6 +46,8 @@ class Eo
     set_rects
     
     $LOGGER.info "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
+    
+    @brain.run_birth_program
   end
   
   def graphic
@@ -73,7 +75,7 @@ class Eo
   
   def update
     @age += 1
-    unless reproduce
+    unless replicate
       @body.recover_hp
       energy_decay
       
@@ -134,9 +136,7 @@ class Eo
     if collisions.size > 0
       
       for eo in @eo_triggered
-        unless collisions.include? eo
-          @eo_triggered.delete eo
-        end
+        @eo_triggered.delete eo unless collisions.include? eo
       end
       
       for other in collisions
@@ -175,9 +175,7 @@ class Eo
     if collisions.size > 0
       
       for food in @food_triggered
-        unless collisions.include? food
-          @food_triggered.delete food
-        end
+        @food_triggered.delete food unless collisions.include? food
       end
       
       for food in collisions
@@ -237,7 +235,7 @@ class Eo
     return Eo.new(new_dna, new_energy)
   end
   
-  def reproduce
+  def replicate
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
@@ -245,9 +243,39 @@ class Eo
       
       @energy -= (5-@body.efficiency/2)
       
-      @pond.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
-      @pond.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
-      die
+#      ortho = @velocity.ortho_2D.mult(0.5)
+#      
+#      left_disp = @velocity.sub(ortho).normalize.mult(10).add(@pos)
+#      right_disp = @velocity.add(ortho).normalize.mult(10).add(@pos)
+#      
+#      #      curr_dir = Math.d_atan(@velocity[1]/@velocity[0])
+#      #      angle_disp = curr_dir+@angle-270    # curr_dir - (270 - @angle)
+#      
+#      speed_frac = @velo_magnitude/@body.max_speed
+#      
+#      velo_unit = @velocity.unit_vector
+#      angle_disp = Math.d_acos(@angle_vect.dot(velo_unit))
+#      
+#      move_angle = 270 - (@angle+angle_disp)
+#      test_velo = Vector_Array.new([Math.d_cos(move_angle)*@velo_magnitude,
+#                                    Math.d_sin(move_angle)*@velo_magnitude])
+#      
+#      $LOGGER.info angle_disp
+#      $LOGGER.info test_velo
+#      $LOGGER.info velo_unit
+#      if test_velo != velo_unit
+#        angle_disp *= -1
+#      end
+#      
+#      @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
+#                   @angle+30,@generation+1,-angle_disp,speed_frac)
+#      @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
+#                   @angle-30,@generation+1,angle_disp,speed_frac)
+#      die
+      
+            @pond.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
+            @pond.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
+            die
       
       return true
     end
