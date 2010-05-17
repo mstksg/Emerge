@@ -1,5 +1,5 @@
+choice: large
 settings:
- choice: small
  environment:
   framerate: 10
   large:
@@ -8,6 +8,9 @@ settings:
   small:
    w: 400
    h: 300
+  profile:
+   w: 640
+   h: 480
  pond:
   large:
    food_start: 150
@@ -19,14 +22,19 @@ settings:
    food_rate: 45
    eo_start: 4
    repop: 2
+  profile:
+   food_start: 150
+   food_rate: 20
+   eo_start: 40
+   repop: 5
   pop_log_freq: 25
   food_mass: 0.2
   drag: 0.04
-  zones: 4
+  zones: 2					## optimal zone = eos^(1/4)...but to find a integer zone? z^2*t + (t/z)^2
  eo_constants:
   main:
    rep_threshold: 15
-   rep_rate: 2000
+   rep_rate: 3000
    healing_drain: 0.98
   body:
    mass: 10
@@ -37,8 +45,11 @@ settings:
    mass_factor: 0.1
   dna:
    mutation_factor: 0.12
-   mutation_variance: 1.25
+   mutation_variance: 1.1
+   brain_mutate_factor: 0.11
    forget_factor: 0.012
+   initial_variance: 2
+   mutation_curve: 3
  log:
   console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
   file_level: 1
@@ -46,3 +57,8 @@ settings:
   types:
    activity: true
    population: true
+override:
+ profile:
+  eo_constants:
+   dna:
+    initial_variance: 5

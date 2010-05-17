@@ -38,6 +38,9 @@ class Pond
       end
     end
     
+    $LOGGER.info @zone_width
+    $LOGGER.info @zone_height
+    
     update_zones
   end
   
@@ -174,7 +177,7 @@ class Pond
   def update
     @fr = @environment.clock.framerate
     if @fr != 0 and @fr < 0.05
-      raise "Computational overload; Framerate = #{@environment.clock.framerate}"
+      raise "Computational overload; Framerate = #{@fr}"
     end
     
     if rand*$POND_FOOD_RATE < 1

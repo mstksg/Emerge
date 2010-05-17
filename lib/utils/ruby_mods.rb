@@ -51,24 +51,28 @@ module Boundarizer
   
   def boundarize min=0,max=1,allow_min=true,allow_max=false 
     
-    raise "Improper boundaries" if min >= max
-    
-    min_test = case allow_min
-    when true then lambda { |num| num < min  }
-    when false then lambda { |num| num <= min }
-    end
-    max_test = case allow_max
-    when true then lambda { |num| num > max  }
-    when false then lambda { |num| num >= max }
-    end
+    raise "Improper boundaries #{min}/#{max}" if min >= max
     
     new_num = self
     
-    while min_test.call(new_num)
-      new_num += max
+    if allow_min
+      while new_num < min
+        new_num += max
+      end
+    else
+      while new_num <= min
+        new_num += max
+      end
     end
-    while max_test.call(new_num)
-      new_num -= max
+    
+    if allow_max
+      while new_num > max
+        new_num -= max
+      end
+    else
+      while new_num >= max
+        new_num -= max
+      end
     end
     
     return new_num

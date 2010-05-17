@@ -2,3 +2,4 @@
 
 - Replication creating a T-shape, predictable direction
 - Better zoning; check only squares instead of iterating through many
+- better color formula

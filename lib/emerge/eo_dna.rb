@@ -77,24 +77,36 @@ class Eo_DNA
   def mutate_b_containers
     
     for c in @b_containers
-      if rand < $MUTATION_FACTOR/4
+      if rand < $BRAIN_MUTATE_FACTOR/4
         @b_containers.delete c
         unless rand < $FORGET_FACTOR
-          @b_containers << Mutations.mutate(c,0,80,7.5)
+          @b_containers << Mutations.mutate(c,0,80,7.5,5)
         else
           @b_programs.delete @b_programs.pick_rand
         end
       end
     end
     
-    if rand < $MUTATION_FACTOR/3
+    if rand < $BRAIN_MUTATE_FACTOR/3
       
-      new_wall_spot = rand*80
+      
+      
+      insert_spot = rand(@b_containers.size).to_i
+      
+      min = case insert_spot
+      when 0 then 0
+      else @b_containers[insert_spot-1]
+      end
+      max = case insert_spot
+      when @b_containers.size then 80
+      else @b_containers[insert_spot]
+      end
+      
+      new_wall_spot = rand*(max-min)+min
       @b_containers << new_wall_spot
       
+      @b_programs.insert insert_spot+1, @b_programs[insert_spot].clone
       
-      insert_spot = rand(@b_programs.size+1)
-      @b_programs.insert insert_spot, @b_programs.pick_rand.clone
     end
     
     @b_containers.sort!
@@ -158,7 +170,7 @@ class Eo_Command
   end
   
   def mutate!
-    if rand < $MUTATION_FACTOR
+    if rand < $BRAIN_MUTATE_FACTOR
       unless @command == :if
         @args = Array.new(args.size) { |i|
           Mutations.mutate_percent(@args[i],
@@ -250,7 +262,7 @@ class Command_Block < Array
     end
     
     
-    if rand < $MUTATION_FACTOR
+    if rand < $BRAIN_MUTATE_FACTOR
       insert_spot = rand(self.size+1)
       if rand < 0.4
         self.insert insert_spot, Command_Block.new_block
@@ -271,7 +283,7 @@ class Command_Block < Array
     Command_Block.new(self.size) { |i| self[i].clone }
   end
   
-  def self.fresh_block iterations=2
+  def self.fresh_block iterations=$DNA_INITIAL_VARIANCE
     new_block = Command_Block.new([Eo_Command.new_command])
      (iterations/$MUTATION_FACTOR).to_i.times do
       new_block.mutate!

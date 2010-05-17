@@ -28,7 +28,7 @@ class Vector_Array < Array
   
   def add other
     if self.size != other.size
-      raise "Can only dot two similar-sized vectors"
+      raise "Can only add two similar-sized vectors"
     end
     
     Vector_Array.new(self.size) { |i| self[i] + other[i] }
@@ -36,7 +36,7 @@ class Vector_Array < Array
   
   def sub other
     if self.size != other.size
-      raise "Can only dot two similar-sized vectors"
+      raise "Can only subtract two similar-sized vectors"
     end
     
     Vector_Array.new(self.size) { |i| self[i] - other[i] }

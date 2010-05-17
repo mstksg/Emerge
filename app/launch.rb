@@ -12,7 +12,7 @@ begin
 rescue SystemExit
   
 rescue Exception => err
-  $LOGGER.error err.class.name+": "+err.message
+  $LOGGER.fatal err.class.name+": "+err.message
   for i in err.backtrace
     $LOGGER.error i
   end

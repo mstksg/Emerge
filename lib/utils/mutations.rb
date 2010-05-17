@@ -4,20 +4,18 @@ module Mutations
     Array.new(curve) { |i| rand*(max-min)+min }.inject { |sum,n| sum+n }/curve
   end
   
-  def self.mutate curr,min=0,max=10,variance=$MUTATION_VARIANCE,curve=3
+  def self.mutate curr,min=0,max=10,variance=$MUTATION_VARIANCE,curve=$DNA_MUTATION_CURVE
     
-    raise "Bad min/max" if min >= max
+    raise "Bad min/max #{min}/#{max}" if min >= max
     
     new_num = curr + rand_norm_dist(-variance,variance,curve)
     
-    if new_num >= max
-      #      $LOGGER.debug "Over-Mutate, Too High\t(#{curr},#{min},#{max},#{variance},#{curve},#{new_num})"
-      return mutate(curr,min,max,(max-curr),curve)
-    end
-    if new_num <= min
-      #      $LOGGER.debug "Over-Mutate, Too Low\t(#{curr},#{min},#{max},#{variance},#{curve},#{new_num})"      
-      return mutate(curr,min,max,(curr-min),curve)
-    end
+      if new_num >= max
+        return (curr*curve+max)/(curve+1)
+      end
+      if new_num <= min
+        return (curr*curve+min)/(curve+1)
+      end
     
     return new_num
     

@@ -1,8 +1,12 @@
 require "yaml"
 
 config = YAML::load(File.open(File.dirname(__FILE__)+"/../../config/config.yaml"))
+env_choice = config["choice"]
+
 settings = config["settings"]
-env_choice = settings["choice"]
+
+
+# perhaps implement way to override temporarily
 
 ##### Environment Settings #####
 $ENV_FRAMERATE = settings["environment"]["framerate"]
@@ -16,7 +20,7 @@ $ENV_HEIGHT = env_settings["h"]
 $POND_FOOD_MASS = settings["pond"]["food_mass"]
 $POND_POP_LOG_FREQ = settings["pond"]["pop_log_freq"]
 $POND_DRAG = settings["pond"]["drag"]
-$POND_ZONES = settings["pond"]["zones"]
+$POND_ZONES = settings["pond"]["zones"].to_f
 
 pond_settings = settings["pond"][env_choice]
 
@@ -45,7 +49,10 @@ $F_MASS = eo_consts["feeler"]["mass_factor"]
 # DNA #
 $MUTATION_FACTOR = eo_consts["dna"]["mutation_factor"]
 $MUTATION_VARIANCE = eo_consts["dna"]["mutation_variance"]
+$BRAIN_MUTATE_FACTOR = eo_consts["dna"]["brain_mutate_factor"]
 $FORGET_FACTOR = eo_consts["dna"]["forget_factor"]
+$DNA_INITIAL_VARIANCE = eo_consts["dna"]["initial_variance"]
+$DNA_MUTATION_CURVE = eo_consts["dna"]["mutation_curve"]
 
 ##### Log settings #####
 $LOG_POP = settings["log"]["types"]["population"]

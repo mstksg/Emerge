@@ -61,6 +61,8 @@ class Eo
     @feeler.rect.center = [15,5]
     @feeler.draw(@eo_graphic)
     
+    @eo_graphic = @eo_graphic.to_display
+    
     return @eo_graphic
   end
   
@@ -207,7 +209,7 @@ class Eo
     @energy *= $HEAL_DRAIN if @body.hp < @body.shell
     @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
-      $LOGGER.info "Eo_#{@id}\tStarved;\t(#{@age})"
+      $LOGGER.info "Eo_#{@id}\tStarved;\ta#{@age}"
       die
     end
   end
@@ -239,7 +241,7 @@ class Eo
     
     if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
       
-      $LOGGER.info "Eo_#{@id}\tReplicates;\t(#{@age}, #{@energy.to_i})"
+      $LOGGER.info "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
       
       @energy -= (5-@body.efficiency/2)
       
@@ -353,6 +355,8 @@ class Eo_Body
     
     @body_graphic.colorkey = [0,0,0]
     
+    @body_graphic = @body_graphic.to_display
+    
     return @body_graphic
   end
   
@@ -370,7 +374,7 @@ class Eo_Body
     if @hp < 0
       poker.eat @owner
       @owner.eaten
-      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\t(#{@owner.age}, #{@owner.energy.to_i})"
+      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
     end
   end
   
@@ -394,7 +398,7 @@ class Feeler
     
     @owner = owner
     
-    raise "Maximum length is 10" if length > 10
+    raise "Maximum length is 10 (given #{length})" if length > 10
     
     @length = length
     @strength = strength
@@ -426,6 +430,8 @@ class Feeler
       pen.blit(@f_graphic,[5-pen_thickness/2,y_pos])
       y_pos -= 0.25
     end
+    
+    @f_graphic = @f_graphic.to_display
     
     return @f_graphic
   end

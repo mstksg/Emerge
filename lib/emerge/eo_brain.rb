@@ -5,7 +5,7 @@ class Brain
   def initialize (owner, container_walls, programs)
     
     if programs.size() != container_walls.size() + 1
-      raise "Improper brain settings"
+      raise "Improper brain settings; #{programs.size} programs for #{container_walls.size} walls"
     end
     
     @owner = owner
@@ -94,7 +94,7 @@ class Brain
     when :velocity then @owner.velo_magnitude
     when :momentum then @momentum_trigger
     when :random then rand()
-    else "Bad 'if' condition"
+    else raise "Bad 'if' condition #{if_command.args[0]}"
     end   ## maybe add more conditions later
     
     if if_command.args[1] == :lt
@@ -115,7 +115,7 @@ class Brain
         case curr_command.command
         when :move
           if curr_command.args[1] > 1
-            raise "Bad arguments for 'move'"
+            raise "Bad velocity for 'move': #{curr_command.args[1]}"
           end
           @owner.move(curr_command.args[0],curr_command.args[1])
         when :wait
@@ -129,9 +129,12 @@ class Brain
         when :multiply_speed
           @owner.multiply_speed(curr_command.args[0])
         when :set_speed
+          if curr_command.args[0] > 1
+            raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
+          end
           @owner.set_speed(curr_command.args[0])
         else
-          raise "Bad command"
+          raise "Bad command #{curr_command.command}"
         end
       end
       
