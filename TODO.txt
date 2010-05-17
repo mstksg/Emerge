@@ -1,5 +1,6 @@
 ## TODO
 
 - Replication creating a T-shape, predictable direction
-- Better zoning; check only squares instead of iterating through many
-- better color formula
+- Add detection for feeler-to-feeler collisions? (probably not)
+- Okay, wtf at eos not catching food packets. perhaps make packets push collisions
+- birth programs to run

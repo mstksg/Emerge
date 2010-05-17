@@ -5,8 +5,6 @@ include Rubygame
 
 class Pond
   
-  @@total_zones = $POND_ZONES**2
-  
   attr_reader :environment, :eos, :foods # for debug
   
   def initialize environment
@@ -24,22 +22,55 @@ class Pond
     #    @packets.extend(Sprites::DepthSortGroup)
     @packets.extend(Sprites::UpdateGroup)
     
+    @zone_count = determine_zone_count
+    @total_zones = @zone_count*@zone_count
+    
+    $LOGGER.debug "Pond zoning grid set to #{@zone_count}x#{@zone_count}"
+    
     make_zones
     
   end
   
+  def determine_zone_count eo_count=$POND_INIT_EO
+    ## Point when z is worse than z+1 = z^2(1+z^2)
+    ## This is because, for z zones and t eos, there are
+    ##  z^2 t + (t/z)^2 rect checks (approximately)
+    ## Surprisingly, if you add a variable accounting
+    ## for food collision checks, z^2 f + (f t)/z^2,
+    ## the boundary points stay exactly the same
+    return 1 if eo_count < 4
+    return 2 if eo_count < 36
+    return 3 if eo_count < 144
+    return 4 if eo_count < 400
+    return 5 if eo_count < 900
+    return 6 if eo_count < 1764
+    return 7 if eo_count < 3038
+    return 8 if eo_count < 5184
+    return 9 if eo_count < 8100
+    return 10 if eo_count < 12100       # Hey, I can dream, can't I?
+    return 11
+  end
+  
+  def set_zone_count
+    unless @zone_count == determine_zone_count(@eos.size)
+      @zone_count = determine_zone_count(@eos.size)
+      @total_zones = @zone_count*@zone_count
+      
+      make_zones
+      
+      $LOGGER.debug "Pond zoning grid changed to #{@zone_count}x#{@zone_count}"
+    end
+  end
+  
   def make_zones
-    @zone_width = @environment.width/$POND_ZONES
-    @zone_height = @environment.height/$POND_ZONES
+    @zone_width = @environment.width/@zone_count.to_f
+    @zone_height = @environment.height/@zone_count.to_f
     @zone_rects = Array.new()
-    for i in 0...$POND_ZONES
-      for j in 0...$POND_ZONES
+    for i in 0...@zone_count
+      for j in 0...@zone_count
         @zone_rects << Rect.new(@zone_width*j,@zone_height*i,@zone_width,@zone_height)
       end
     end
-    
-    $LOGGER.info @zone_width
-    $LOGGER.info @zone_height
     
     update_zones
   end
@@ -72,7 +103,7 @@ class Pond
       
       col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
       row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
-      @eo_zones[row*$POND_ZONES+col] << new_eo unless @eo_zones[row*$POND_ZONES+col].include? new_eo
+      @eo_zones[row*@zone_count+col] << new_eo unless @eo_zones[row*@zone_count+col].include? new_eo
       
     end
     
@@ -112,8 +143,8 @@ class Pond
   end
   
   def update_zones
-    @eo_zones = Array.new(@@total_zones) { |i| Array.new(eo_in_rect(@zone_rects[i])) }
-    @food_zones = Array.new(@@total_zones) { |i| Array.new(food_in_rect(@zone_rects[i])) }
+    @eo_zones = Array.new(@total_zones) { |i| Array.new(eo_in_rect(@zone_rects[i])) }
+    @food_zones = Array.new(@total_zones) { |i| Array.new(food_in_rect(@zone_rects[i])) }
   end
   
   def eo_in_rect rect, group=@eos
@@ -130,7 +161,7 @@ class Pond
       col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
       row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
       
-      checks |= @eo_zones[row*$POND_ZONES+col]
+      checks |= @eo_zones[row*@zone_count+col]
       
     end
     
@@ -146,19 +177,19 @@ class Pond
       col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
       row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
       
-      checks |= @food_zones[row*$POND_ZONES+col]
+      checks |= @food_zones[row*@zone_count+col]
       
     end
     
     return food_in_zone_rect(eo.rect,checks)
   end
   
-  def food_in_rect rect, group=@foods
+  def food_in_rect rect
     coll_indxs = rect.collide_array_all(@foods)
     foods = Array.new(coll_indxs.size) { |i| @foods[coll_indxs[i]] }
     if @packets.size > 1
       coll_indxs = rect.collide_array_all(@packets)
-      foods += Array.new(coll_indxs.size) { |i| @packets[coll_indxs[i]] }
+      foods |= Array.new(coll_indxs.size) { |i| @packets[coll_indxs[i]] }
     end
     return foods
   end
@@ -184,6 +215,7 @@ class Pond
       sprinkle_food
     end
     
+    set_zone_count
     update_zones
     
     @eos.update

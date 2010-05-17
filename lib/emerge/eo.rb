@@ -23,7 +23,7 @@ class Eo
     @dna = dna
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
-    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength,@dna.f_sensitivity)
+    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
     @brain = Brain.new(self,@dna.b_containers,@dna.b_programs)
     
     @mass = @feeler.mass + @body.mass
@@ -153,9 +153,9 @@ class Eo
           if feeler_dist <= 5
             
             if @angle_vect.dot(vec) <= 0
-              diff = Vector_Array.new(velocity).sub(other.velocity).magnitude
+              diff = Vector_Array.new(velocity).sub(other.velocity).magnitude+0.1
               unless @eo_triggered.include? other
-                @feeler.trigger other.mass*diff  ## maybe make directional somehow
+                feeler_triggered(other.mass*diff)
               end
               @feeler.poke other
               @eo_triggered << other
@@ -194,7 +194,7 @@ class Eo
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
-            @feeler.trigger(food.mass*@velo_magnitude+0.1)
+            feeler_triggered(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
           
@@ -390,9 +390,9 @@ end
 class Feeler
   include Sprites::Sprite
   
-  attr_reader :owner, :length, :strength, :sensitivity, :mass
+  attr_reader :owner, :length, :strength, :mass
   
-  def initialize owner, length, strength, sensitivity
+  def initialize owner, length, strength
     
     super()
     
@@ -402,7 +402,6 @@ class Feeler
     
     @length = length
     @strength = strength
-    @sensitivity = sensitivity
     @mass = length*strength*$F_MASS    # define this more later on
     
     @image = graphic
@@ -442,8 +441,6 @@ class Feeler
   end
   
   def trigger momentum
-    felt_momentum = Mutations.mutate(momentum,0,80,5.1-@sensitivity/2)
-    ## er...is this fuzzying really necessary?  I actually don't think so.
     @owner.feeler_triggered(felt_momentum)
   end
   
@@ -458,7 +455,7 @@ class Feeler
     to_s
   end
   def to_s
-    "Feeler of #{@owner.to_s}; #{@f_length.to_i}#{@f_strength.to_i}#{@f_sensitivity.to_i}"
+    "Feeler of #{@owner.to_s}; #{@f_length.to_i}#{@f_strength.to_i}"
   end
   
 end

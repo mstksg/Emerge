@@ -30,7 +30,6 @@ settings:
   pop_log_freq: 25
   food_mass: 0.2
   drag: 0.04
-  zones: 2					## optimal zone = eos^(1/4)...but to find a integer zone? z^2*t + (t/z)^2
  eo_constants:
   main:
    rep_threshold: 15
@@ -50,8 +49,9 @@ settings:
    forget_factor: 0.012
    initial_variance: 2
    mutation_curve: 3
+   color_var_factor: 1.5
  log:
-  console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
+  console_level: 1					## 1:debug,2:info,3:warn,4:error,5:fatal
   file_level: 1
   pop_freq: 25
   types:

@@ -3,17 +3,18 @@
 
 class Eo_DNA
   
-  attr_reader :shell,:efficiency,:f_length,:f_strength,:f_sensitivity,
+  @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
+  
+  attr_reader :shell,:efficiency,:f_length,:f_strength,
               :b_containers,:b_programs,:color
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
-                 f_sensitivity,b_containers,b_programs,color)
+                 b_containers,b_programs,color)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
     @f_length = f_length
     @f_strength = f_strength
-    @f_sensitivity = f_sensitivity
     @b_containers = Array.new(b_containers)
     @b_programs = Array.new(b_programs)
     @color = color
@@ -21,13 +22,12 @@ class Eo_DNA
   
   ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-                    f_strength=1,f_sensitivity=1,b_containers=[],b_programs=[Command_Block.fresh_block])
+                    f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block])
     return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
     Mutations.rand_norm_dist(0,10*max_speed),
     Mutations.rand_norm_dist(0,10*efficiency),
     Mutations.rand_norm_dist(0,10*f_length),
     Mutations.rand_norm_dist(0,10*f_strength),
-    Mutations.rand_norm_dist(0,10*f_sensitivity),
     b_containers,b_programs,[rand*255,rand*255,rand*255])
   end
   
@@ -35,28 +35,23 @@ class Eo_DNA
     @max_speed / 4
   end
   
-#  def dna_color
-#    return [(@shell+@max_speed)*12.8,(@efficiency+@f_length)*12.8,(@f_strength+@f_sensitivity)*12.8]
-#  end
-  
   def mutate!
     @shell = mutate_value @shell
     @max_speed = mutate_value @max_speed
     @efficiency = mutate_value @efficiency
     @f_length = mutate_value @f_length
     @f_strength = mutate_value @f_strength
-    @f_sensitivity = mutate_value @f_sensitivity
     mutate_b_containers
     mutate_b_programs
-    @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,7.5,5) }
+    @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,@@COLOR_VAR,5) }
     
     return self
   end
   
   def clone
     Eo_DNA.new(@shell,@max_speed,@efficiency,
-               @f_length,@f_strength,@f_sensitivity,
-               Array.new(@b_containers),clone_b_programs,Array.new(color))
+               @f_length,@f_strength,Array.new(@b_containers),
+               clone_b_programs,Array.new(color))
   end
   
   def clone_b_programs
@@ -126,14 +121,18 @@ class Eo_DNA
   end
   
   def inspect
-    "#{inspect_physical}/#{inspect_programs}"
+    "#{inspect_physical}/#{inspect_color}/#{inspect_programs}"
   end
   def to_s
     inspect
   end
   
+  def inspect_color
+    "#{@color[0].to_s(16).rjust(2,'0')}#{@color[1].to_s(16).rjust(2,'0')}#{@color[2].to_s(16).rjust(2,'0')}"
+  end
+  
   def inspect_physical
-    "#{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}#{@f_length.to_i}#{@f_strength.to_i}#{@f_sensitivity.to_i}"
+    "#{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}#{@f_length.to_i}#{@f_strength.to_i}"
   end
   
   
