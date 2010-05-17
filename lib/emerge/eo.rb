@@ -346,7 +346,7 @@ class Eo_Body
     return @body_graphic if @body_graphic
     
     @body_graphic = Surface.new([10,10],0)
-    @body_graphic.draw_circle_s([5,5],4.5,@owner.dna.dna_color)
+    @body_graphic.draw_circle_s([5,5],4.5,@owner.dna.color)
     
     new_thick = 4.5-(@shell*0.45)
     #    new_thick = 0 if new_thick < 0

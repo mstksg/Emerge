@@ -4,10 +4,10 @@
 class Eo_DNA
   
   attr_reader :shell,:efficiency,:f_length,:f_strength,:f_sensitivity,
-              :b_containers,:b_programs
+              :b_containers,:b_programs,:color
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
-                 f_sensitivity,b_containers,b_programs)
+                 f_sensitivity,b_containers,b_programs,color)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
@@ -16,6 +16,7 @@ class Eo_DNA
     @f_sensitivity = f_sensitivity
     @b_containers = Array.new(b_containers)
     @b_programs = Array.new(b_programs)
+    @color = color
   end
   
   ## Maybe the genes average method is not the best. too centrally normative.
@@ -27,16 +28,16 @@ class Eo_DNA
     Mutations.rand_norm_dist(0,10*f_length),
     Mutations.rand_norm_dist(0,10*f_strength),
     Mutations.rand_norm_dist(0,10*f_sensitivity),
-    b_containers,b_programs)
+    b_containers,b_programs,[rand*255,rand*255,rand*255])
   end
   
   def max_speed
     @max_speed / 4
   end
   
-  def dna_color
-    return [(@shell+@max_speed)*12.8,(@efficiency+@f_length)*12.8,(@f_strength+@f_sensitivity)*12.8]
-  end
+#  def dna_color
+#    return [(@shell+@max_speed)*12.8,(@efficiency+@f_length)*12.8,(@f_strength+@f_sensitivity)*12.8]
+#  end
   
   def mutate!
     @shell = mutate_value @shell
@@ -47,6 +48,7 @@ class Eo_DNA
     @f_sensitivity = mutate_value @f_sensitivity
     mutate_b_containers
     mutate_b_programs
+    @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,7.5,5) }
     
     return self
   end
@@ -54,7 +56,7 @@ class Eo_DNA
   def clone
     Eo_DNA.new(@shell,@max_speed,@efficiency,
                @f_length,@f_strength,@f_sensitivity,
-               Array.new(@b_containers),clone_b_programs)
+               Array.new(@b_containers),clone_b_programs,Array.new(color))
   end
   
   def clone_b_programs
