@@ -1,9 +1,10 @@
 ## TODO
 
 - Add detection for feeler-to-feeler collisions? (probably not)
-- Okay, wtf at eos not catching food packets. perhaps make packets push collisions
-	- I think I fixed this; not checking packets if there is only one packet on the pond
 - Also, what the heck at long streams of food packets?
 	- Probably to be resolved with new compiler
 - Write new tier-based compiler
-- New, more urgent (for higher-energy) reproduction decision algorithm
+- New, more urgent (for higher-energy) reproduction decision algorithm, to prevent
+	huge energy overload ruining the game
+	Possibility: Parabola, at (15,0), (20,1/150), (200,1)
+	or rather, 707/26137500 x^2 - 2141/5227500 x - 1/17425

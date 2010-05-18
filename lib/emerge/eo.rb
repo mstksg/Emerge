@@ -399,8 +399,8 @@ class Eo_Body
     @hp -= poke_force*$B_DAMAGE
     if @hp < 0
       poker.eat @owner
-      @owner.eaten
       $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+      @owner.eaten
     end
   end
   

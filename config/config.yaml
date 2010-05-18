@@ -54,8 +54,8 @@ settings:
   dna:
    mutation_factor: 0.12
    mutation_variance: 1.1
-   brain_mutate_factor: 0.04
-   forget_factor: 0.01
+   brain_mutate_factor: 0.067
+   forget_factor: 0.012
    initial_variance: 1.5
    mutation_curve: 3
    color_var_factor: 2

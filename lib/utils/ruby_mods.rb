@@ -39,11 +39,7 @@ module Math
     r2d( asin(x) )
   end
   def self.d_acos x
-    begin
-      r2d( acos(x) )
-    rescue Exception => err
-      raise "ArcCosine domain error; tried to acos #{x}"
-    end
+    r2d( acos(x) )
   end
   def self.d_atan x
     r2d( atan(x) )

@@ -3,6 +3,11 @@
 
 class Eo_DNA
   
+  ## TODO: Get a better list of colors one day
+#  @@DEFAULT_COLORS = [[229,0,0],[249,115,6],[6,71,12],
+#                      [2,147,134],[149,208,252],[55,62,2],
+#                      [169,3,8]]
+  
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
   attr_reader :shell,:efficiency,:f_length,:f_strength,
@@ -25,6 +30,22 @@ class Eo_DNA
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
                     f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
                     birth_program=Command_Block.blank_block)
+    
+#    if @@DEFAULT_COLORS.size > 0
+#      new_color = @@DEFAULT_COLORS.pick_rand
+#      @@DEFAULT_COLORS.delete new_color
+#    else
+#      new_color = [rand*255,rand*255,rand*255]
+#    end
+#    
+#    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
+#    Mutations.rand_norm_dist(0,10*max_speed),
+#    Mutations.rand_norm_dist(0,10*efficiency),
+#    Mutations.rand_norm_dist(0,10*f_length),
+#    Mutations.rand_norm_dist(0,10*f_strength),
+#    b_containers,b_programs,birth_program,
+#    new_color)
+    
     return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
     Mutations.rand_norm_dist(0,10*max_speed),
     Mutations.rand_norm_dist(0,10*efficiency),
