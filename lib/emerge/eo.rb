@@ -243,39 +243,37 @@ class Eo
       
       @energy -= (5-@body.efficiency/2)
       
-#      ortho = @velocity.ortho_2D.mult(0.5)
-#      
-#      left_disp = @velocity.sub(ortho).normalize.mult(10).add(@pos)
-#      right_disp = @velocity.add(ortho).normalize.mult(10).add(@pos)
-#      
-#      #      curr_dir = Math.d_atan(@velocity[1]/@velocity[0])
-#      #      angle_disp = curr_dir+@angle-270    # curr_dir - (270 - @angle)
-#      
-#      speed_frac = @velo_magnitude/@body.max_speed
-#      
-#      velo_unit = @velocity.unit_vector
-#      angle_disp = Math.d_acos(@angle_vect.dot(velo_unit))
-#      
-#      move_angle = 270 - (@angle+angle_disp)
-#      test_velo = Vector_Array.new([Math.d_cos(move_angle)*@velo_magnitude,
-#                                    Math.d_sin(move_angle)*@velo_magnitude])
-#      
-#      $LOGGER.info angle_disp
-#      $LOGGER.info test_velo
-#      $LOGGER.info velo_unit
-#      if test_velo != velo_unit
-#        angle_disp *= -1
-#      end
-#      
-#      @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
-#                   @angle+30,@generation+1,-angle_disp,speed_frac)
-#      @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
-#                   @angle-30,@generation+1,angle_disp,speed_frac)
-#      die
+      if @velo_magnitude == 0
+        
+        axis = rand*180
+        move(axis,1)
+        
+      end
       
-            @pond.add_eo(@dna.mutate,@energy/2,@pos[0]+5,@pos[1]+5,rand*360,@generation+1)
-            @pond.add_eo(@dna.mutate,@energy/2,@pos[0]-5,@pos[1]-5,rand*360,@generation+1)
-            die
+      ortho = @velocity.ortho_2D.mult(0.5)
+      
+      left_disp = @velocity.ortho_2D.normalize.mult(-5).add(@pos)
+      right_disp = @velocity.ortho_2D.normalize.mult(5).add(@pos)
+      
+      speed_frac = @velo_magnitude/@body.max_speed
+      
+      velo_unit = @velocity.unit_vector
+      angle_disp = Math.d_acos(@angle_vect.dot(velo_unit))
+      
+      move_angle = 270 - (@angle+angle_disp)
+      test_velo = Vector_Array.new([Math.d_cos(move_angle)*@velo_magnitude,
+      Math.d_sin(move_angle)*@velo_magnitude])
+      if test_velo != velo_unit
+        angle_disp *= -1
+      end
+      
+      ## Consider making this a bit simpler
+      
+      @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
+                   @angle+90,@generation+1,angle_disp,speed_frac)
+      @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
+                   @angle-90,@generation+1,angle_disp,speed_frac)
+      die
       
       return true
     end

@@ -1,6 +1,9 @@
 ## TODO
 
-- Replication creating a T-shape, predictable direction
 - Add detection for feeler-to-feeler collisions? (probably not)
 - Okay, wtf at eos not catching food packets. perhaps make packets push collisions
+	- I think I fixed this; not checking packets if there is only one packet on the pond
 - Also, what the heck at long streams of food packets?
+	- Probably to be resolved with new compiler
+- Write new tier-based compiler
+- New, more urgent (for higher-energy) reproduction decision algorithm

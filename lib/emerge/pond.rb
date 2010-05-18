@@ -11,15 +11,12 @@ class Pond
     @environment = environment
     
     @eos = Sprites::Group.new
-    #    @eos.extend(Sprites::DepthSortGroup)
     @eos.extend(Sprites::UpdateGroup)
     
     @foods = Sprites::Group.new
-    #    @foods.extend(Sprites::DepthSortGroup)
     @foods.extend(Sprites::UpdateGroup)
     
     @packets = Sprites::Group.new
-    #    @packets.extend(Sprites::DepthSortGroup)
     @packets.extend(Sprites::UpdateGroup)
     
     @zone_count = determine_zone_count
@@ -189,7 +186,7 @@ class Pond
   def food_in_rect rect
     coll_indxs = rect.collide_array_all(@foods)
     foods = Array.new(coll_indxs.size) { |i| @foods[coll_indxs[i]] }
-    if @packets.size > 1
+    if @packets.size > 0
       coll_indxs = rect.collide_array_all(@packets)
       foods |= Array.new(coll_indxs.size) { |i| @packets[coll_indxs[i]] }
     end
@@ -209,19 +206,19 @@ class Pond
   
   def update
     @fr = @environment.clock.framerate
-    if @fr != 0 and @fr < 0.05
+    if @fr != 0 and @fr < $FRAMERATE_LIMIT
       raise "Computational overload; Framerate = #{@fr}"
     end
     
     if rand*$POND_FOOD_RATE < 1
       sprinkle_food
     end
+    @packets.update
     
     set_zone_count
     update_zones
     
     @eos.update
-    @packets.update
     
     #    for eo in @eos
     #      if eo.pos[0].nan?

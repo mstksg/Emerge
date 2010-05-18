@@ -10,6 +10,7 @@ settings = config["settings"]
 
 ##### Environment Settings #####
 $ENV_FRAMERATE = settings["environment"]["framerate"]
+$FRAMERATE_LIMIT = settings["environment"]["framerate_limit"]
 
 env_settings = settings["environment"][env_choice]
 $ENV_WIDTH = env_settings["w"]

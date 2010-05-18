@@ -47,7 +47,7 @@ class Eo_DNA
     mutate_b_containers
     mutate_b_programs
     @birth_program.mutate!
-    @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,@@COLOR_VAR,5) }
+    @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,@@COLOR_VAR,2) }
     
     return self
   end
@@ -95,8 +95,8 @@ class Eo_DNA
       new_wall_spot = rand*80
       
       insert_spot = 0
-      unless @container_walls.size() == 0
-        while insert_spot < @container_walls.size and @container_walls[insert_spot] < new_wall_spot
+      unless @b_containers.size() == 0
+        while insert_spot < @b_containers.size and @b_containers[insert_spot] < new_wall_spot
           insert_spot += 1
         end
       end
@@ -291,7 +291,7 @@ class Command_Block < Array
   
   def self.fresh_block iterations=$DNA_INITIAL_VARIANCE
     new_block = Command_Block.new([Eo_Command.new_command])
-     (iterations/$MUTATION_FACTOR).to_i.times do
+     (iterations/$BRAIN_MUTATE_FACTOR).to_i.times do
       new_block.mutate!
     end
     return new_block
