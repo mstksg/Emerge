@@ -71,3 +71,5 @@ override:
   eo_constants:
    dna:
     initial_variance: 5
+resource:
+ font_file: FreeSans.ttf

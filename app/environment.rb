@@ -5,7 +5,7 @@ include Rubygame
 
 class Environment
   
-  attr_reader :screen, :background, :width, :height, :size, :clock, :pond
+  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
   
   def initialize
     
@@ -17,7 +17,7 @@ class Environment
     @height = size[1]
     
     @screen = Rubygame::Screen.new @size, 0,
-                [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
+    [Rubygame::HWSURFACE, Rubygame::DOUBLEBUF]
     @screen.title = "Emerge"
     
     @queue = Rubygame::EventQueue.new
@@ -26,8 +26,9 @@ class Environment
     
     @background = Surface.new( @screen.size )
     @background.fill( Color::ColorRGB.new([0.1, 0.2, 0.35]) )
-    
     @background.blit(@screen,[0,0])
+    
+    @dialog_layer = Dialog_Layer.new(self)
     
     @pond = Pond.new(self)
     
@@ -37,6 +38,7 @@ class Environment
     @pond.sprinkle_food($POND_INIT_FOOD)
     
     @pond.draw
+    @dialog_layer.draw
     
     @screen.flip()
     
@@ -57,6 +59,8 @@ class Environment
       when Rubygame::QuitEvent
         Rubygame.quit
         exit
+      when Rubygame::MouseUpEvent
+        @pond.clicked(ev.pos,ev.button)
       end
     end
     @pond.update
@@ -67,15 +71,19 @@ class Environment
       end
     end
     
+    #    @dialog.upate
+    
     screen.title = @clock.framerate.to_s
   end
   
   def undraw
     @pond.undraw
+    @dialog_layer.undraw
   end
   
   def draw
     @pond.draw
+    @dialog_layer.draw
     @screen.flip()
   end
 end

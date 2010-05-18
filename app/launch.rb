@@ -1,9 +1,17 @@
+$LOGGER.debug "Initializing..."
+
+require "rubygems"
+require "rubygame"
+Rubygame::TTF.setup()
+
 Dir.require_all("lib/emerge/")
+require File.dirname(__FILE__)+"/dialog.rb"
 require File.dirname(__FILE__)+"/environment.rb"
 
-$LOGGER.debug "Reproduction Rate:\t1/#{$REP_RATE}"
-$LOGGER.debug "Mutation Rate:\t\t#{$MUTATION_FACTOR}"
-$LOGGER.debug "Mutation Variance:\t#{$MUTATION_VARIANCE}"
+$LOGGER.debug "Settings:\tReproduction Rate:\t1/#{$REP_RATE}"
+$LOGGER.debug "Settings:\tMutation Rate:\t\t#{$MUTATION_FACTOR}"
+$LOGGER.debug "Settings:\tBrain Mutation Rate:\t\t#{$BRAIN_MUTATE_FACTOR}/#{$FORGET_FACTOR}"
+$LOGGER.debug "Settings:\tMutation Variance:\t#{$MUTATION_VARIANCE}"
 
 environment = Environment.new
 

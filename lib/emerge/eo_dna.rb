@@ -259,6 +259,10 @@ class Eo_Command
     inspect
   end
   
+  def command_length
+    return 1
+  end
+  
 end
 
 class Command_Block < Array
@@ -324,6 +328,14 @@ class Command_Block < Array
   end
   def to_s
     inspect
+  end
+  
+  def command_length
+    count = 0
+    for b in self
+      count += b.command_length
+    end
+    return count
   end
   
 end

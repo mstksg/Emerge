@@ -4,6 +4,7 @@ config = YAML::load(File.open(File.dirname(__FILE__)+"/../../config/config.yaml"
 env_choice = config["choice"]
 
 settings = config["settings"]
+resources = config["resource"]
 
 
 # perhaps implement way to override temporarily
@@ -62,3 +63,6 @@ $LOG_ACT = settings["log"]["types"]["activity"]
 $LOG_POP_FREQ = settings["log"]["pop_freq"]
 $LOG_CONSOLE_LEVEL = settings["log"]["console_level"].to_i
 $LOG_FILE_LEVEL = settings["log"]["file_level"].to_i
+
+##### Resource settings #####
+$FONT_FILE = resources["font_file"]

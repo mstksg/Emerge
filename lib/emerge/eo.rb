@@ -335,7 +335,10 @@ class Eo
     die
   end
   
-  def die
+  def die log=false
+    if log
+      $LOGGER.info "Eo_#{@id}\tDies;\t\ta#{@age}, e#{@energy.to_i}\t(Unknown cause)"
+    end
     @pond.remove_eo(self)
     kill
   end
@@ -344,7 +347,7 @@ class Eo
     to_s
   end
   def to_s
-    "Eo_#{@id}"
+    "Eo_#{@id} (g#{@generation})"
   end
   
 end

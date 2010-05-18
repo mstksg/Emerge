@@ -9,6 +9,8 @@ class Pond
   
   def initialize environment
     @environment = environment
+    @curr_dialog = nil
+    @clicked_eo = nil
     
     @eos = Sprites::Group.new
     @eos.extend(Sprites::UpdateGroup)
@@ -127,7 +129,7 @@ class Pond
   
   def sprinkle_food(amount=1,max_energy=20,min_energy=5)
     for i in 0...amount
-      add_food(rand*(max_energy-min_energy)+min_energy,rand*@environment.width,rand*@environment.height)
+      add_food(Mutations.rand_norm_dist(min_energy,max_energy,2),rand*@environment.width,rand*@environment.height)
     end
   end
   
@@ -230,9 +232,13 @@ class Pond
     #      end
     #    end
     
+    if @curr_dialog
+      update_dialog
+    end
+    
     if @eos.size == 0
+      $LOGGER.warn "Repopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
-      @logger.warn "Repopulating empty pool..."
     end
     
   end
@@ -241,6 +247,36 @@ class Pond
     @foods.draw(@environment.screen)
     @packets.draw(@environment.screen)
     @eos.draw(@environment.screen)
+  end
+  
+  def update_dialog
+    if @eos.include? @clicked_eo
+      @curr_dialog.change_message("#{@clicked_eo}; #{@clicked_eo.dna.inspect_physical} e:#{@clicked_eo.energy.to_i},h:#{@clicked_eo.body.hp.to_i}/#{@clicked_eo.body.shell.to_i}",
+                                  @clicked_eo.pos)
+    else
+      @curr_dialog.kill
+      @curr_dialog = nil
+    end
+  end
+  
+  def clicked pos, button
+    if button == 1
+      
+      @curr_dialog.kill if @curr_dialog
+      
+      col = (pos[0]/@zone_width).to_i
+      row = (pos[1]/@zone_height).to_i
+      checks = @eo_zones[row*@zone_count+col]
+      click_rect = Rect.new(pos[0]-1,pos[1]-1,3,3)
+      collisions = eo_in_rect click_rect,checks
+      if collisions.size > 0
+        @clicked_eo = collisions[0]
+        @curr_dialog = Bubble_Dialog.new(@clicked_eo.pos,"#{@clicked_eo}; #{@clicked_eo.dna.inspect_physical}; e:#{@clicked_eo.energy.to_i},h:#{@clicked_eo.body.hp.to_i}/#{@clicked_eo.body.shell.to_i}")
+        @environment.dialog_layer.add_dialog @curr_dialog
+      else
+        @curr_dialog = nil
+      end
+    end
   end
   
 end
