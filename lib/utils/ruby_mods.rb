@@ -39,7 +39,11 @@ module Math
     r2d( asin(x) )
   end
   def self.d_acos x
-    r2d( acos(x) )
+    begin
+      r2d( acos(x) )
+    rescue Exception
+      raise "Improper acosine; attempted to arccos #{x}"
+    end
   end
   def self.d_atan x
     r2d( atan(x) )

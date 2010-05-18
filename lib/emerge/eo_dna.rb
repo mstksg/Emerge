@@ -1,6 +1,9 @@
 ## This class handles all the genetic information for an eo, and handles mutation
 ## procedures as well.
 
+require File.dirname(__FILE__)+"/../../lib/emerge/command_data.rb"
+require File.dirname(__FILE__)+"/../../lib/utils/mutations.rb"
+
 class Eo_DNA
   
   ## TODO: Get a better list of colors one day
@@ -109,26 +112,20 @@ class Eo_DNA
       end
     end
     
+    @b_containers.sort!
+    
     if rand < $BRAIN_MUTATE_FACTOR/3
-      
-      
       
       new_wall_spot = rand*80
       
-      insert_spot = 0
-      unless @b_containers.size() == 0
-        while insert_spot < @b_containers.size and @b_containers[insert_spot] < new_wall_spot
-          insert_spot += 1
-        end
-      end
-      
       @b_containers << new_wall_spot
+      @b_containers.sort!
+      
+      insert_spot = @b_containers.index(new_wall_spot)
       
       @b_programs.insert insert_spot+1, @b_programs[insert_spot].clone
       
     end
-    
-    @b_containers.sort!
     
     
   end

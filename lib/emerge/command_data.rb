@@ -48,8 +48,8 @@ module Command_Data
                           :turn           => "t" ,
                           :stop           => "s" ,
                           :emit_energy    => "e" ,
-                          :multiply_speed => "m" ,
-                          :set_speed      => "s" ,
+                          :multiply_speed => "x" ,
+                          :set_speed      => "v" ,
                           :if             => "f" ,
                           
                           :energy         => "E" ,
