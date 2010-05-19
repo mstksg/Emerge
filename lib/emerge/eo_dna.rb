@@ -275,8 +275,20 @@ class Command_Block < Array
     
     total_size = command_length unless total_size
     
+    mutate_scale = 1
+    forget_scale = 1
+    
+    if total_size
+      if total_size < 3
+        mutate_scale = 50/(total_size+1)
+      elsif total_size > 12
+        mutate_scale = 6/(total_size)
+        forget_scale = total_size
+      end
+    end
+    
     for b in self
-      if rand < $FORGET_FACTOR
+      if rand < $FORGET_FACTOR*forget_scale
         self.delete b
         next
       end
@@ -288,13 +300,7 @@ class Command_Block < Array
       end
     end
     
-    if total_size and total_size < 3
-      scale_factor = 50/(total_size+1)
-    else
-      scale_factor = 1
-    end
-    
-    if rand < $BRAIN_MUTATE_FACTOR*scale_factor
+    if rand < $BRAIN_MUTATE_FACTOR*mutate_scale
       insert_spot = rand(self.size+1)
       if rand < 0.4
         self.insert insert_spot, Command_Block.new_block
@@ -322,7 +328,7 @@ class Command_Block < Array
   def self.fresh_block iterations=$DNA_INITIAL_VARIANCE
     new_block = Command_Block.new([Eo_Command.new_command])
      (iterations/$BRAIN_MUTATE_FACTOR).to_i.times do
-      new_block.mutate! 100
+      new_block.mutate! 10
     end
     return new_block
   end

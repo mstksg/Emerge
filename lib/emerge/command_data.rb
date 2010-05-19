@@ -3,8 +3,8 @@ module Command_Data
   @@COMMAND_WEIGHTS   = { :move           => 1.5 ,
                           :wait           => 1.0 ,
                           :turn           => 1.0 ,
-                          :stop           => 0.2 ,
-                          :emit_energy    => 0.2,
+                          :stop           => 0.1 ,
+                          :emit_energy    => 0.2 ,
                           :multiply_speed => 0.5 ,
                           :set_speed      => 0.5 ,
                           :if             => 1.0  }

@@ -3,6 +3,9 @@ settings:
  environment:
   framerate: 10
   framerate_limit: 0.075
+  huge:
+   w: 1000
+   h: 750
   large:
    w: 800
    h: 600
@@ -16,6 +19,11 @@ settings:
    w: 640
    h: 480
  pond:
+  huge:
+   food_start: 367
+   food_rate: 50
+   eo_start: 24
+   repop: 12
   large:
    food_start: 234
    food_rate: 35
@@ -47,7 +55,7 @@ settings:
    healing_drain: 0.98
   body:
    mass: 10
-   recovery: 0.01
+   recovery: 0.0125
    damage: 0.2
   feeler:
    poke_force_factor: 0.5

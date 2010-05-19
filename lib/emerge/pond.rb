@@ -234,6 +234,7 @@ class Pond
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
+      select_random
     end
     
   end
