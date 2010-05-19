@@ -9,10 +9,8 @@ class Pond
   
   def initialize environment
     @environment = environment
-    @curr_dialog = nil
-    @tracked_eos = []
-    @original_tracked = nil
-    @dna_dialog = nil
+    
+    @eo_follower = Follower.new(@environment)
     
     @eos = Sprites::Group.new
     @eos.extend(Sprites::UpdateGroup)
@@ -231,9 +229,7 @@ class Pond
     #      end
     #    end
     
-    if @curr_dialog
-      update_dialog
-    end
+    @eo_follower.update_follow
     
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."
@@ -248,13 +244,62 @@ class Pond
     @eos.draw(@environment.screen)
   end
   
-  def update_dialog
+  
+  
+  def clicked pos, button
+    if button == 1 or button == 3
+      
+      col = (pos[0]/@zone_width).to_i
+      row = (pos[1]/@zone_height).to_i
+      checks = @eo_zones[row*@zone_count+col]
+      click_rect = Rect.new(pos[0]-1,pos[1]-1,3,3)
+      collisions = eo_in_rect click_rect,checks
+      
+      if button == 1
+        
+        if collisions.size > 0
+          @eo_follower.start_following collisions[0]
+        else
+          @eo_follower.stop_following
+        end
+        
+      else
+        
+        if collisions.size > 0
+          clicked = collisions[0]
+          clicked.die :divine,true
+        end
+        
+      end
+    end
+  end
+  
+  def select_random
+    @eo_follower.start_following @eos.pick_rand
+  end
+  
+end
+
+class Follower
+  
+  attr_accessor :environment
+  
+  def initialize environment
+    @environment = environment
+    
+    @curr_dialog = nil
+    @tracked_eos = []
+    @original_tracked = nil
+    @dna_dialog = nil
+  end
+  
+  def update_follow
     
     if @tracked_eos.size == 0
-      @curr_dialog.kill
+      @curr_dialog.kill if @curr_dialog
       @curr_dialog = nil
       @original_tracked = nil
-      @dna_dialog.kill
+      @dna_dialog.kill if @dna_dialog
       @dna_dialog = nil
     else
       
@@ -265,7 +310,7 @@ class Pond
         if curr_follow.descendants
           @tracked_eos.insert 1,curr_follow.descendants[0]
           @tracked_eos.insert 1,curr_follow.descendants[1]
-          $LOGGER.info "TRACK\tNow tracking #{@tracked_eos[1]} (child of #{curr_follow}), of #{@original_tracked} family line"
+          $LOGGER.info "TRACK\tNow tracking #{@tracked_eos[1]} (child of Eo_#{curr_follow.id}), of #{@original_tracked} family line"
         else
           find_next = true
         end
@@ -276,26 +321,30 @@ class Pond
         if eo.groups.size == 0
           index = @tracked_eos.index(eo)+1
           if eo.descendants
-            @tracked_eos.insert index,eo.descendants[0]
-            @tracked_eos.insert index,eo.descendants[1]
+            if rand(2) == 0
+              @tracked_eos.insert index,eo.descendants[0]
+              @tracked_eos.insert index,eo.descendants[1]
+            else
+              @tracked_eos.insert index,eo.descendants[1]
+              @tracked_eos.insert index,eo.descendants[0]
+            end
           end
           @tracked_eos.delete(eo)
           eo.followed = nil
         end
       end
       
-      
       if @tracked_eos.size == 0
-        $LOGGER.info "TRACK\tFamily line (followed) of #{@original_tracked} ended with death of #{curr_follow} (#{curr_follow.death_cause}) (a#{curr_follow.age})"
-        update_dialog
+        $LOGGER.info "TRACK\tFamily line (followed) of #{@original_tracked} ended with death of #{curr_follow} (#{curr_follow.death_cause}, a#{curr_follow.age})"
+        update_follow
       else
         
-        until @tracked_eos.size <= 10
+        until @tracked_eos.size <= $POND_TRACK_CAP
           @tracked_eos.pop
         end
         
         if find_next
-          $LOGGER.info "TRACK\t#{curr_follow} has died (#{curr_follow.death_cause}) (a#{curr_follow.age}); now following closest relative (#{@tracked_eos[0]}), of #{@original_tracked} family line"
+          $LOGGER.info "TRACK\t#{curr_follow} has died (#{curr_follow.death_cause}, a#{curr_follow.age}); now following closest relative (#{@tracked_eos[0]}), of #{@original_tracked} family line"
         end
         
         @tracked_eos[0].followed = true
@@ -307,56 +356,35 @@ class Pond
     end
   end
   
-  def clicked pos, button
-    if button == 1 or button == 3
+  def start_following eo
+    
+    if @tracked_eos.size > 0
+      stop_following
+    end
+    @original_tracked = eo
+    @original_tracked.followed = true
+    @tracked_eos = [@original_tracked]
+    $LOGGER.info "TRACK\tNow tracking #{@tracked_eos[0]} and its family line"
+    @curr_dialog = Bubble_Dialog.new(@tracked_eos[0].pos,info_text)
+    @dna_dialog = Bubble_Dialog.new([0,@environment.height],dna_text,[0,255,255],127)
+    @environment.dialog_layer.add_dialog @curr_dialog
+    @environment.dialog_layer.add_dialog @dna_dialog
+  end
+  
+  def stop_following
+    
+    if @tracked_eos.size > 0
       
-      if @curr_dialog
-        @curr_dialog.kill
-        @dna_dialog.kill
-      end
+      @curr_dialog.kill
+      @dna_dialog.kill
+      @original_tracked = nil
+      @curr_dialog = nil
+      @dna_dialog = nil
       
-      col = (pos[0]/@zone_width).to_i
-      row = (pos[1]/@zone_height).to_i
-      checks = @eo_zones[row*@zone_count+col]
-      click_rect = Rect.new(pos[0]-1,pos[1]-1,3,3)
-      collisions = eo_in_rect click_rect,checks
+      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eos[0]}, of #{@original_tracked} family line."
       
-      if button == 1
-        
-        stop_message = "Stopped tracking #{@tracked_eos[0]}, of #{@original_tracked} family line."
-        
-        if collisions.size > 0
-          if @tracked_eos.size > 0
-            @tracked_eos[0].followed = nil
-            $LOGGER.info stop_message
-          end
-          @original_tracked = collisions[0]
-          @original_tracked.followed = true
-          @tracked_eos = [@original_tracked]
-          $LOGGER.info "Now tracking #{@tracked_eos[0]} and its family line"
-          @curr_dialog = Bubble_Dialog.new(@tracked_eos[0].pos,info_text)
-          @dna_dialog = Bubble_Dialog.new([0,@environment.height],dna_text,[0,255,255],127)
-          @environment.dialog_layer.add_dialog @curr_dialog
-          @environment.dialog_layer.add_dialog @dna_dialog
-        else
-          if @tracked_eos.size > 0
-            @tracked_eos[0].followed = nil
-            $LOGGER.info stop_message
-            @tracked_eos = []
-          end
-          @original_tracked
-          @curr_dialog = nil
-          @dna_dialog = nil
-        end
-        
-      else
-        
-        if collisions.size > 0
-          clicked = collisions[0]
-          clicked.die :divine,true
-        end
-        
-      end
+      @tracked_eos[0].followed = nil if @tracked_eos.size > 0
+      @tracked_eos = []
     end
   end
   

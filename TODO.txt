@@ -19,4 +19,5 @@
 - Use parent tracking to find closest relatives. Wait, er...maybe this is dangerous,
 	because of memory leakage/garbage collection.  Should do this at end, then
 - Try to catch some programs mutating within one organism, after trigger?
+- watch out for possible Eo moving over food and not eating?
 - mutation "limit", for length of DNA program string (maybe?)

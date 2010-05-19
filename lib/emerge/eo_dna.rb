@@ -7,9 +7,9 @@ require File.dirname(__FILE__)+"/../../lib/utils/mutations.rb"
 class Eo_DNA
   
   ## TODO: Get a better list of colors one day
-#  @@DEFAULT_COLORS = [[229,0,0],[249,115,6],[6,71,12],
-#                      [2,147,134],[149,208,252],[55,62,2],
-#                      [169,3,8]]
+  #  @@DEFAULT_COLORS = [[229,0,0],[249,115,6],[6,71,12],
+  #                      [2,147,134],[149,208,252],[55,62,2],
+  #                      [169,3,8]]
   
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
@@ -34,20 +34,20 @@ class Eo_DNA
                     f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
                     birth_program=Command_Block.blank_block)
     
-#    if @@DEFAULT_COLORS.size > 0
-#      new_color = @@DEFAULT_COLORS.pick_rand
-#      @@DEFAULT_COLORS.delete new_color
-#    else
-#      new_color = [rand*255,rand*255,rand*255]
-#    end
-#    
-#    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
-#    Mutations.rand_norm_dist(0,10*max_speed),
-#    Mutations.rand_norm_dist(0,10*efficiency),
-#    Mutations.rand_norm_dist(0,10*f_length),
-#    Mutations.rand_norm_dist(0,10*f_strength),
-#    b_containers,b_programs,birth_program,
-#    new_color)
+    #    if @@DEFAULT_COLORS.size > 0
+    #      new_color = @@DEFAULT_COLORS.pick_rand
+    #      @@DEFAULT_COLORS.delete new_color
+    #    else
+    #      new_color = [rand*255,rand*255,rand*255]
+    #    end
+    #    
+    #    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
+    #    Mutations.rand_norm_dist(0,10*max_speed),
+    #    Mutations.rand_norm_dist(0,10*efficiency),
+    #    Mutations.rand_norm_dist(0,10*f_length),
+    #    Mutations.rand_norm_dist(0,10*f_strength),
+    #    b_containers,b_programs,birth_program,
+    #    new_color)
     
     return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
     Mutations.rand_norm_dist(0,10*max_speed),
@@ -189,7 +189,7 @@ class Eo_Command
     end
   end
   
-  def mutate!
+  def mutate! total_size=nil
     if rand < $BRAIN_MUTATE_FACTOR
       unless @command == :if
         @args = Array.new(args.size) { |i|
@@ -271,22 +271,30 @@ class Command_Block < Array
     @top = true
   end
   
-  def mutate!
+  def mutate! total_size=nil
+    
+    total_size = command_length unless total_size
+    
     for b in self
       if rand < $FORGET_FACTOR
         self.delete b
         next
       end
       
-      b.mutate!
+      b.mutate! total_size
       
       if b.class == Command_Block and b.size == 0
         self.delete b
       end
     end
     
+    if total_size and total_size < 3
+      scale_factor = 50/(total_size+1)
+    else
+      scale_factor = 1
+    end
     
-    if rand < $BRAIN_MUTATE_FACTOR
+    if rand < $BRAIN_MUTATE_FACTOR*scale_factor
       insert_spot = rand(self.size+1)
       if rand < 0.4
         self.insert insert_spot, Command_Block.new_block
@@ -314,7 +322,7 @@ class Command_Block < Array
   def self.fresh_block iterations=$DNA_INITIAL_VARIANCE
     new_block = Command_Block.new([Eo_Command.new_command])
      (iterations/$BRAIN_MUTATE_FACTOR).to_i.times do
-      new_block.mutate!
+      new_block.mutate! 100
     end
     return new_block
   end

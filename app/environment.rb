@@ -36,6 +36,7 @@ class Environment
     
     @pond.sprinkle_eo($POND_INIT_EO)
     @pond.sprinkle_food($POND_INIT_FOOD)
+    @pond.select_random
     
     @pond.draw
     @dialog_layer.draw

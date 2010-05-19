@@ -21,6 +21,7 @@ $ENV_HEIGHT = env_settings["h"]
 ##### Pond Settings #####
 $POND_FOOD_MASS = settings["pond"]["food_mass"]
 $POND_DRAG = settings["pond"]["drag"]
+$POND_TRACK_CAP = settings["pond"]["track_cap"]
 
 pond_settings = settings["pond"][env_choice]
 
