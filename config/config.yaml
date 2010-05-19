@@ -36,13 +36,13 @@ settings:
    food_rate: 20
    eo_start: 40
    repop: 5
-  pop_log_freq: 25
   food_mass: 0.2
   drag: 0.04
  eo_constants:
   main:
    rep_threshold: 15
    rep_rate: 3300
+   energy_cap: 200
    healing_drain: 0.98
   body:
    mass: 10
@@ -52,20 +52,22 @@ settings:
    poke_force_factor: 0.5
    mass_factor: 0.1
   dna:
-   mutation_factor: 0.12
-   mutation_variance: 1.1
-   brain_mutate_factor: 0.067
-   forget_factor: 0.012
-   initial_variance: 1.5
+   mutation_factor: 0.13
+   mutation_variance: 1.2
+   brain_mutate_factor: 0.08
+   forget_factor: 0.0125
+   initial_variance: 4
    mutation_curve: 3
    color_var_factor: 2
  log:
   console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
   file_level: 1
   pop_freq: 25
+  fr_freq: 25
   types:
    activity: true
-   population: true
+   population: false
+   framerate: true
 override:
  profile:
   eo_constants:

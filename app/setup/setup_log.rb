@@ -37,9 +37,19 @@ def setup_log dir, name
     $POP_LOG = pop_log
   end
   
+  fr_log_file = logfile.sub(".txt","[f].csv")
+  
+  if $LOG_FR
+    fr_log = Logger.new "framerate_log"
+    format = PatternFormatter.new(:pattern => "%m")
+    fr_log.add FileOutputter.new("fr_output", :filename => fr_log_file, :formatter => format)
+    $FR_LOG = fr_log
+  end
+  
   $LOGGER = log
   
   $LOGGER.info "Logger loaded"
-  $LOGGER.info "Logging in activity in #{logfile}" if $LOG_ACT
-  $LOGGER.info "Logging in population in #{pop_log_file}" if $LOG_POP
+  $LOGGER.info "Logging activity in #{logfile}" if $LOG_ACT
+  $LOGGER.info "Logging population in #{pop_log_file}" if $LOG_POP
+  $LOGGER.info "Logging framerate in #{fr_log_file}" if $LOG_FR
 end

@@ -39,7 +39,7 @@ class Brain
   end
   
   def run_program program
-    @program_queue = [Array.new(program)]
+    @program_queue = [program.clone]
     @waiting = 0
   end
   

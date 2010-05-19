@@ -20,7 +20,6 @@ $ENV_HEIGHT = env_settings["h"]
 
 ##### Pond Settings #####
 $POND_FOOD_MASS = settings["pond"]["food_mass"]
-$POND_POP_LOG_FREQ = settings["pond"]["pop_log_freq"]
 $POND_DRAG = settings["pond"]["drag"]
 
 pond_settings = settings["pond"][env_choice]
@@ -36,6 +35,7 @@ eo_consts = settings["eo_constants"]
 # Main #
 $REP_THRESHOLD = eo_consts["main"]["rep_threshold"]
 $REP_RATE = eo_consts["main"]["rep_rate"]
+$ENERGY_CAP = eo_consts["main"]["energy_cap"]
 $HEAL_DRAIN = eo_consts["main"]["healing_drain"]
 
 # Body #
@@ -59,8 +59,10 @@ $DNA_COLOR_VAR = eo_consts["dna"]["color_var_factor"]
 ##### Log settings #####
 $LOG_POP = settings["log"]["types"]["population"]
 $LOG_ACT = settings["log"]["types"]["activity"]
+$LOG_FR = settings["log"]["types"]["framerate"]
 
 $LOG_POP_FREQ = settings["log"]["pop_freq"]
+$LOG_FR_FREQ = settings["log"]["fr_freq"]
 $LOG_CONSOLE_LEVEL = settings["log"]["console_level"].to_i
 $LOG_FILE_LEVEL = settings["log"]["file_level"].to_i
 

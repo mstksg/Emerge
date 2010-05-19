@@ -46,6 +46,12 @@ class Environment
   
   def run
     loop do
+      
+      @fr = @clock.framerate
+      if @fr != 0 and @fr < $FRAMERATE_LIMIT
+        raise "Computational overload; Framerate = #{@fr}"
+      end
+      
       undraw
       update
       draw
@@ -65,8 +71,13 @@ class Environment
     end
     @pond.update
     
+    if $LOG_FR
+      if @clock.ticks % $LOG_FR_FREQ == 0
+        $FR_LOG.info "#{@clock.ticks},#{@fr}"
+      end
+    end
     if $LOG_POP
-      if @clock.ticks % $POND_POP_LOG_FREQ == 0
+      if @clock.ticks % $LOG_POP_FREQ == 0
         $POP_LOG.info "#{@clock.ticks},#{@pond.eos.size},#{@pond.foods.size}"
       end
     end

@@ -9,8 +9,9 @@ class Eo
   @@count = 0
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
-              :velocity,:velo_magnitude,:mass,:id,:generation
-  attr_accessor :pos
+              :velocity,:velo_magnitude,:mass,:id,:generation,
+              :descendants,:death_cause
+  attr_accessor :pos,:followed
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
     
@@ -45,7 +46,7 @@ class Eo
     set_angle @angle
     set_rects
     
-    $LOGGER.info "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
+    log_message "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
     
     @brain.run_birth_program
   end
@@ -207,8 +208,8 @@ class Eo
     @energy *= $HEAL_DRAIN if @body.hp < @body.shell
     @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
-      $LOGGER.info "Eo_#{@id}\tStarved;\ta#{@age}"
-      die
+      log_message "Eo_#{@id}\tStarved;\ta#{@age}"
+      die :starvation
     end
   end
   
@@ -237,9 +238,16 @@ class Eo
   
   def replicate
     
-    if (@energy > $REP_THRESHOLD) & (rand*$REP_RATE < @energy)
+    if @energy >= $ENERGY_CAP
+      reproduce_now = true
+      $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
+    end
+    
+    if reproduce_now or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
       
-      $LOGGER.info "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
+      log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
+      
+      die :reproduction
       
       @energy -= (5-@body.efficiency/2)
       
@@ -258,7 +266,12 @@ class Eo
       speed_frac = @velo_magnitude/@body.max_speed
       
       velo_unit = @velocity.unit_vector
-      angle_disp = Math.d_acos(@angle_vect.dot(velo_unit))
+      
+      dotted = @angle_vect.dot(velo_unit)
+      dotted = 1 if dotted >= 1
+      dotted = -1 if dotted <= -1
+      
+      angle_disp = Math.d_acos(dotted)
       
       move_angle = 270 - (@angle+angle_disp)
       test_velo = Vector_Array.new([Math.d_cos(move_angle)*@velo_magnitude,
@@ -269,11 +282,12 @@ class Eo
       
       ## Consider making this a bit simpler
       
-      @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
-                   @angle+90,@generation+1,angle_disp,speed_frac)
-      @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
-                   @angle-90,@generation+1,angle_disp,speed_frac)
-      die
+      descendant1 = @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
+                                 @angle+90,@generation+1,angle_disp,speed_frac)
+      descendant2 = @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
+                                 @angle-90,@generation+1,angle_disp,speed_frac)
+      
+      @descendants = [descendant1,descendant2]
       
       return true
     end
@@ -332,12 +346,18 @@ class Eo
   
   def eaten
     @energy = 0
-    die
+    die :eaten
   end
   
-  def die log=false
+  def die reason=:unknown,log=false
+    @death_cause = reason
     if log
-      $LOGGER.info "Eo_#{@id}\tDies;\t\ta#{@age}, e#{@energy.to_i}\t(Unknown cause)"
+      case reason
+      when :divine
+        log_message "Eo_#{@id}\tDies by divine hand\ta#{@age}, e#{@energy.to_i}"
+      else
+        log_message "Eo_#{@id}\tDies;\t\ta#{@age}, e#{@energy.to_i}\t(Cause: #{reason})"
+      end
     end
     @pond.remove_eo(self)
     kill
@@ -348,6 +368,16 @@ class Eo
   end
   def to_s
     "Eo_#{@id} (g#{@generation})"
+  end
+  
+  def log_message message,post_anyway=true
+    if @followed
+      $LOGGER.info message
+      return true
+    else
+      $LOGGER.debug message if post_anyway
+      return false
+    end
   end
   
 end
@@ -402,7 +432,10 @@ class Eo_Body
     @hp -= poke_force*$B_DAMAGE
     if @hp < 0
       poker.eat @owner
-      $LOGGER.info "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+      message = "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+      unless @owner.log_message message
+        poker.log_message message,false
+      end
       @owner.eaten
     end
   end
