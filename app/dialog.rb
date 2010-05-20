@@ -74,8 +74,6 @@ class Bubble_Dialog < Dialog
   
   def graphic redraw = false
     
-    ## TODO account for string truncation
-    
     return @dialog_image if @dialog_image and not redraw
     
     text = @@DIALOG_FONT.render(@message, true, [0,0,0])

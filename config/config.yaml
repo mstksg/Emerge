@@ -79,7 +79,7 @@ settings:
   types:
    activity: true
    population: false
-   framerate: true
+   framerate: false
 override:
  profile:
   eo_constants:

@@ -4,12 +4,16 @@
 require File.dirname(__FILE__)+"/../../lib/emerge/command_data.rb"
 require File.dirname(__FILE__)+"/../../lib/utils/mutations.rb"
 
+include Rubygame
+
 class Eo_DNA
   
-  ## TODO: Get a better list of colors one day
-  #  @@DEFAULT_COLORS = [[229,0,0],[249,115,6],[6,71,12],
-  #                      [2,147,134],[149,208,252],[55,62,2],
-  #                      [169,3,8]]
+  @@_DEFAULT_COLORS = ["B22222","228B22","FFA500","87CEFA","0000CD",
+                       "FFFF00","800080","00FF7F","D87093","32CD32",
+                       "FA8072","FFC0CB","D2691E","A9A9A9","00FFFF",
+                       "A52A2A"]
+  
+  @@DEFAULT_COLORS = @@_DEFAULT_COLORS.collect { |c| Array.new(3) { |n| c[n*2,2].to_i(16) } }
   
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
@@ -29,33 +33,32 @@ class Eo_DNA
     @color = color
   end
   
-  ## Maybe the genes average method is not the best. too centrally normative.
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
                     f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
                     birth_program=Command_Block.blank_block)
     
-    #    if @@DEFAULT_COLORS.size > 0
-    #      new_color = @@DEFAULT_COLORS.pick_rand
-    #      @@DEFAULT_COLORS.delete new_color
-    #    else
-    #      new_color = [rand*255,rand*255,rand*255]
-    #    end
-    #    
-    #    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
-    #    Mutations.rand_norm_dist(0,10*max_speed),
-    #    Mutations.rand_norm_dist(0,10*efficiency),
-    #    Mutations.rand_norm_dist(0,10*f_length),
-    #    Mutations.rand_norm_dist(0,10*f_strength),
-    #    b_containers,b_programs,birth_program,
-    #    new_color)
+        if @@DEFAULT_COLORS.size > 0
+          new_color = @@DEFAULT_COLORS.pick_rand
+          @@DEFAULT_COLORS.delete new_color
+        else
+          new_color = [rand*255,rand*255,rand*255]
+        end
+        
+        return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
+        Mutations.rand_norm_dist(0,10*max_speed),
+        Mutations.rand_norm_dist(0,10*efficiency),
+        Mutations.rand_norm_dist(0,10*f_length),
+        Mutations.rand_norm_dist(0,10*f_strength),
+        b_containers,b_programs,birth_program,
+        new_color)
     
-    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
-    Mutations.rand_norm_dist(0,10*max_speed),
-    Mutations.rand_norm_dist(0,10*efficiency),
-    Mutations.rand_norm_dist(0,10*f_length),
-    Mutations.rand_norm_dist(0,10*f_strength),
-    b_containers,b_programs,birth_program,
-    [rand*255,rand*255,rand*255])
+#    return Eo_DNA.new(Mutations.rand_norm_dist(0,10*shell),
+#    Mutations.rand_norm_dist(0,10*max_speed),
+#    Mutations.rand_norm_dist(0,10*efficiency),
+#    Mutations.rand_norm_dist(0,10*f_length),
+#    Mutations.rand_norm_dist(0,10*f_strength),
+#    b_containers,b_programs,birth_program,
+#    [rand*255,rand*255,rand*255])
   end
   
   def max_speed
@@ -260,6 +263,7 @@ class Eo_Command
   end
   
   def command_length
+    return 0.5 if @command == :if
     return 1
   end
   
