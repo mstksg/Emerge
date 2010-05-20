@@ -21,3 +21,6 @@
 - Try to catch some programs mutating within one organism, after trigger?
 - watch out for possible Eo moving over food and not eating?
 - mutation "limit", for length of DNA program string (maybe?)
+- perhaps exponential decay is not the best choice for healing?  or maybe it is,
+	because it implies that if you have more energy, you need to give more of it
+	up to heal.  actually that makes no sense. shut up.

@@ -373,7 +373,7 @@ class Eo
     to_s
   end
   def to_s
-    "Eo_#{@id} (g#{@generation})"
+    "Eo_#{@id} [g#{@generation}]"
   end
   
   def log_message message,post_anyway=true
@@ -384,6 +384,38 @@ class Eo
       $LOGGER.debug message if post_anyway
       return false
     end
+  end
+  
+  def find_first_living_descendant
+    return self if @groups.size > 0
+    return nil unless @descendants
+    count = 0
+    
+    2.times do |n|
+      branch = @descendants[n].find_first_living_descendant
+      return branch if branch
+    end
+    
+    #####  THIS IS TO CLEAR UP MEMORY FOR GARGABE COLLECTOR  #####
+    #####      AND TO SPEED UP FIRST DESCENDANT FINDING      #####
+    @descendants = nil
+    ##### CAN BE REMOVED IF NEED TO TRACK DESCENDANTS ARISES #####
+    
+    return nil
+  end
+  
+  ##### WILL NOT WORK AS LONG AS THE PRECEDING #####
+  #####        FUNCTION IS EVER CALLED         #####
+#  def find_all_descendants
+#    if @descendants
+#      return find_all_descendants[@descendants[0]] | find_all_descendants[@descendants[1]]
+#    else
+#      return []
+#    end
+#  end
+  
+  def is_dead
+    return @groups.size > 0
   end
   
 end

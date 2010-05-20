@@ -229,7 +229,7 @@ class Pond
     #      end
     #    end
     
-    @eo_follower.update_follow
+    @eo_follower.update_follow true
     
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."
@@ -289,14 +289,19 @@ class Follower
     @environment = environment
     
     @curr_dialog = nil
-    @tracked_eos = []
+    @tracked_eo = nil
     @original_tracked = nil
     @dna_dialog = nil
   end
   
-  def update_follow
+  ## This new follow tracker method is faster than the last,
+  ## and more elegant, and also never misses a possible descendant.
+  ## However, it has potential for high memory leakage the
+  ## longer the tracked family survives (which is, potentially,
+  ## forever)
+  def update_follow pick_new=false
     
-    if @tracked_eos.size == 0
+    if @tracked_eo == nil
       if @curr_dialog
         @curr_dialog.kill
         @curr_dialog = nil
@@ -307,56 +312,33 @@ class Follower
     else
       
       find_next = false
-      curr_follow = @tracked_eos[0]
       
-      if curr_follow.groups.size == 0
-        if curr_follow.descendants
-          @tracked_eos.insert 1,curr_follow.descendants[0]
-          @tracked_eos.insert 1,curr_follow.descendants[1]
-          $LOGGER.info "TRACK\tNow tracking #{@tracked_eos[1]} (child of Eo_#{curr_follow.id}), of #{@original_tracked} family line"
+      if @tracked_eo.groups.size == 0
+        if @tracked_eo.descendants
+          $LOGGER.info "TRACK\tNow tracking #{@tracked_eo.descendants[0]} (child of Eo_#{@tracked_eo.id}), of #{@original_tracked} family line"
+          @tracked_eo.followed = nil
+          @tracked_eo = @tracked_eo.descendants[0]
+          @tracked_eo.followed = true
         else
-          find_next = true
-        end
-        @tracked_eos.shift
-      end
-      
-      for eo in @tracked_eos
-        if eo.groups.size == 0
-          index = @tracked_eos.index(eo)+1
-          if eo.descendants
-            if rand(2) == 0
-              @tracked_eos.insert index,eo.descendants[0]
-              @tracked_eos.insert index,eo.descendants[1]
-            else
-              @tracked_eos.insert index,eo.descendants[1]
-              @tracked_eos.insert index,eo.descendants[0]
-            end
+          next_track = @original_tracked.find_first_living_descendant
+          if next_track
+            $LOGGER.info "TRACK\t#{@tracked_eo} has died (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
+            $LOGGER.info "TRACK\tNow tracking closest relative (#{next_track}), of #{@original_tracked} family line"
+            @tracked_eo = next_track
+            @tracked_eo.followed = true
+          else
+            $LOGGER.info "TRACK\tFamily line of #{@original_tracked} ended with death of #{@tracked_eo} (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
+            @tracked_eo.followed = nil
+            @tracked_eo = nil
+            update_follow
+            
+            @environment.pond.select_random if pick_new
           end
-          @tracked_eos.delete(eo)
-          eo.followed = nil
         end
       end
       
-      if @tracked_eos.size == 0
-        $LOGGER.info "TRACK\tFollowed family line of #{@original_tracked} ended with death of #{curr_follow} (#{curr_follow.death_cause}, a#{curr_follow.age})"
-        update_follow
-        
-        ## To pick a new eo to track
-        @environment.pond.select_random
-        
-      else
-        
-        until @tracked_eos.size <= $POND_TRACK_CAP
-          @tracked_eos.pop
-        end
-        
-        if find_next
-          $LOGGER.info "TRACK\t#{curr_follow} has died (#{curr_follow.death_cause}, a#{curr_follow.age}); now following closest relative (#{@tracked_eos[0]}), of #{@original_tracked} family line"
-        end
-        
-        @tracked_eos[0].followed = true
-        
-        @curr_dialog.change_message(info_text,@tracked_eos[0].pos)
+      if @tracked_eo
+        @curr_dialog.change_message(info_text,@tracked_eo.pos)
         @dna_dialog.change_message(dna_text)
       end
       
@@ -365,14 +347,15 @@ class Follower
   
   def start_following eo
     
-    if @tracked_eos.size > 0
-      stop_following
-    end
+    stop_following if @tracked_eo
+    
     @original_tracked = eo
     @original_tracked.followed = true
-    @tracked_eos = [@original_tracked]
-    $LOGGER.info "TRACK\tNow tracking #{@tracked_eos[0]} and its family line"
-    @curr_dialog = Bubble_Dialog.new(@tracked_eos[0].pos,info_text)
+    @tracked_eo = @original_tracked
+    
+    $LOGGER.info "TRACK\tNow tracking #{@tracked_eo} and its family line"
+    
+    @curr_dialog = Bubble_Dialog.new(@tracked_eo.pos,info_text)
     @dna_dialog = Bubble_Dialog.new([0,@environment.height],dna_text,[0,255,255],127)
     @environment.dialog_layer.add_dialog @curr_dialog
     @environment.dialog_layer.add_dialog @dna_dialog
@@ -380,7 +363,7 @@ class Follower
   
   def stop_following
     
-    if @tracked_eos.size > 0
+    if @tracked_eo
       
       @curr_dialog.kill
       @dna_dialog.kill
@@ -388,18 +371,19 @@ class Follower
       @curr_dialog = nil
       @dna_dialog = nil
       
-      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eos[0]}, of #{@original_tracked} family line."
+      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of #{@original_tracked} family line."
       
-      @tracked_eos[0].followed = nil if @tracked_eos.size > 0
-      @tracked_eos = []
+      @tracked_eo.followed = nil if @tracked_eo
+      @tracked_eo = nil
+      
     end
   end
   
   def info_text
-    "#{@tracked_eos[0]}; #{@tracked_eos[0].dna.inspect_physical}; e:#{@tracked_eos[0].energy.to_i},h:#{(@tracked_eos[0].body.hp*10).to_i}/#{(@tracked_eos[0].body.shell*10).to_i}"
+    "#{@tracked_eo}; #{@tracked_eo.dna.inspect_physical}; e:#{@tracked_eo.energy.to_i},h:#{(@tracked_eo.body.hp*10).to_i}/#{(@tracked_eo.body.shell*10).to_i}"
   end
   def dna_text
-    "#{@tracked_eos[0]}: #{@tracked_eos[0].dna.inspect_programs}"
+    "#{@tracked_eo}: #{@tracked_eo.dna.inspect_programs}"
   end
   
 end
