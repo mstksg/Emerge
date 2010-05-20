@@ -297,11 +297,13 @@ class Follower
   def update_follow
     
     if @tracked_eos.size == 0
-      @curr_dialog.kill if @curr_dialog
-      @curr_dialog = nil
-      @original_tracked = nil
-      @dna_dialog.kill if @dna_dialog
-      @dna_dialog = nil
+      if @curr_dialog
+        @curr_dialog.kill
+        @curr_dialog = nil
+        @original_tracked = nil
+        @dna_dialog.kill
+        @dna_dialog = nil
+      end
     else
       
       find_next = false
@@ -336,8 +338,12 @@ class Follower
       end
       
       if @tracked_eos.size == 0
-        $LOGGER.info "TRACK\tFamily line (followed) of #{@original_tracked} ended with death of #{curr_follow} (#{curr_follow.death_cause}, a#{curr_follow.age})"
+        $LOGGER.info "TRACK\tFollowed family line of #{@original_tracked} ended with death of #{curr_follow} (#{curr_follow.death_cause}, a#{curr_follow.age})"
         update_follow
+        
+        ## To pick a new eo to track
+        @environment.pond.select_random
+        
       else
         
         until @tracked_eos.size <= $POND_TRACK_CAP

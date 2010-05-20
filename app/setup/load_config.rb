@@ -56,6 +56,8 @@ $FORGET_FACTOR = eo_consts["dna"]["forget_factor"]
 $DNA_INITIAL_VARIANCE = eo_consts["dna"]["initial_variance"]
 $DNA_MUTATION_CURVE = eo_consts["dna"]["mutation_curve"]
 $DNA_COLOR_VAR = eo_consts["dna"]["color_var_factor"]
+$PROGRAM_SIZE_LIMIT = eo_consts["dna"]["program_size_limit"]
+$CONTAINER_SIZE_LIMIT = eo_consts["dna"]["container_size_limit"]
 
 ##### Log settings #####
 $LOG_POP = settings["log"]["types"]["population"]

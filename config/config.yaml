@@ -52,7 +52,7 @@ settings:
    rep_threshold: 15
    rep_rate: 3300
    energy_cap: 200
-   healing_drain: 0.98
+   healing_drain: 0.96
   body:
    mass: 10
    recovery: 0.0125
@@ -68,6 +68,8 @@ settings:
    initial_variance: 4
    mutation_curve: 3
    color_var_factor: 2
+   program_size_limit: 12
+   container_size_limit: 10
  log:
   console_level: 2					## 1:debug,2:info,3:warn,4:error,5:fatal
   file_level: 1

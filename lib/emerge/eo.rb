@@ -6,6 +6,8 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
+  @@HEAL_DRAIN_OFFSET = (1-$HEAL_DRAIN)/10
+  
   @@count = 0
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
@@ -34,6 +36,8 @@ class Eo
     
     @food_triggered = []
     @eo_triggered = []
+    
+    @total_heal_drain = $HEAL_DRAIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     
     
     @pond = pond
@@ -205,7 +209,9 @@ class Eo
   end
   
   def energy_decay
-    @energy *= $HEAL_DRAIN if @body.hp < @body.shell
+    if @body.hp < @body.shell
+      @energy *= (@total_heal_drain) if @body.hp < @body.shell
+    end
     @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
     if @energy < 0
       log_message "Eo_#{@id}\tStarved;\ta#{@age}"

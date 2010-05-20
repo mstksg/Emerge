@@ -114,7 +114,7 @@ class Eo_DNA
     
     @b_containers.sort!
     
-    if rand < $BRAIN_MUTATE_FACTOR/3
+    if @b_containers.size < $CONTAINERS_SIZE_LIMIT and rand < $BRAIN_MUTATE_FACTOR/3
       
       new_wall_spot = rand*80
       
@@ -281,8 +281,8 @@ class Command_Block < Array
     if total_size
       if total_size < 3
         mutate_scale = 50/(total_size+1)
-      elsif total_size > 12
-        mutate_scale = 6/(total_size)
+      elsif total_size > $PROGRAM_SIZE_LIMIT
+        mutate_scale = $PROGRAM_SIZE_LIMIT/(total_size*2)
         forget_scale = total_size
       end
     end
