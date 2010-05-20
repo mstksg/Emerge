@@ -229,7 +229,7 @@ class Pond
     #      end
     #    end
     
-    @eo_follower.update_follow true
+    @eo_follower.update_follow $AUTO_TRACKING
     
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."

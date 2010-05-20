@@ -52,4 +52,13 @@ def setup_log dir, name
   $LOGGER.info "Logging activity in #{logfile}" if $LOG_ACT
   $LOGGER.info "Logging population in #{pop_log_file}" if $LOG_POP
   $LOGGER.info "Logging framerate in #{fr_log_file}" if $LOG_FR
+  
+  case $LOG_CONSOLE_LEVEL
+  when 0..1
+    $LOGGER.info "Outputting to console in Debug Mode"
+  when 2
+    $LOGGER.info "Outputting to console in Info Mode"
+  when 3..6
+    $LOGGER.info "Outputting to console in Silent Mode"
+  end
 end

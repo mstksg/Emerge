@@ -1,4 +1,4 @@
-choice: regular
+default_choice: regular
 settings:
  environment:
   framerate: 10
@@ -46,6 +46,7 @@ settings:
    repop: 5
   food_mass: 0.2
   drag: 0.04
+  auto_track: true
  eo_constants:
   main:
    rep_threshold: 15
