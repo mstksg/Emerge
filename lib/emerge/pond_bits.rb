@@ -66,7 +66,7 @@ module Pond_Bits
     
     def update_velo
       if @velocity.magnitude < $POND_DRAG
-        @velocity = [0,0]
+        @velocity = Vector_Array.new([0,0])
       else
         @velocity = @velocity.sub(@velocity.unit_vector.mult($POND_DRAG))
       end
@@ -97,6 +97,8 @@ module Pond_Bits
     def initialize pond,mass,owner=nil,x=0,y=0,speed=0,angle=0
       super()
       
+      @energy_content = mass*2
+      
       @owner = owner
       @mass = mass
       @drag_factor = $POND_DRAG*@mass/2
@@ -111,14 +113,15 @@ module Pond_Bits
       
       move_angle = 270-angle
       @velocity = Vector_Array.new([Math.d_cos(move_angle)*speed,Math.d_sin(move_angle)*speed])
+      @velo_magnitude = @velocity.magnitude
       
-      @decaying = false
+      @stopped = false
     end
     
     def graphic
       return @s_graphic if @s_graphic
       
-      shade = 100-@mass*15
+      shade = 80-@mass*10
       shade = 0 if shade < 0
       size = (2+@mass/2).to_i
       
@@ -131,33 +134,47 @@ module Pond_Bits
     def update
       
       unless handle_collisions
+          
+        @mass *= $POND_SPIKE_DECAY
+        @mass -= 0.1
         
-        if @decaying
-          if rand*$POND_SPIKE_DECAY < 1
-            turn_into_food
-          end
+        turn_into_food if @mass <= 0
+        
+        if @stopped
+          @mass *= $POND_SPIKE_DECAY*$POND_SPIKE_DECAY
         else
           update_velo
           update_pos
           
           if @velocity == [0,0]
-            @decaying = true
+            @stopped = true
           else
             @rect.center = @pos
           end
         end
+        
       end
     end
     
     def handle_collisions
       possibles = @pond.eo_in_rect(@pond.zone_rects[@pond.point_in_zone(@pos)])
       for eo in possibles
-        vec = Vector_Array.from_points(eo.pos,@pos)
+        vec = Vector_Array.from_points(@pos,eo.pos)
         dist = vec.magnitude
         if dist <= 5
           eo.body.spiked(self)
           kill
           return true
+        elsif dist < 7+eo.feeler.length
+          
+          feeler_dist = eo.angle_vect.distance_to_point(eo.pos,@pos)
+          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and eo.angle_vect.dot(vec) <= 0
+            eo.body.spiked(self,false)
+            kill
+            eo.feeler_triggered(@mass*@velo_magnitude+0.1)
+            return true
+          end
+          
         end
       end
       return false
@@ -165,10 +182,11 @@ module Pond_Bits
     
     def update_velo
       if @velocity.magnitude < @drag_factor
-        @velocity = [0,0]
+        @velocity = Vector_Array.new([0,0])
       else
         @velocity = @velocity.sub(@velocity.unit_vector.mult(@drag_factor))
       end
+      @velo_magnitude = @velocity.magnitude if @velo_magnitude > 0
     end
     
     def update_pos
@@ -183,7 +201,7 @@ module Pond_Bits
     
     def turn_into_food
       kill
-      @pond.add_food(@mass*2,@pos[0],@pos[1])
+      @pond.add_food(@energy_content*2,@pos[0],@pos[1])
     end
     
   end

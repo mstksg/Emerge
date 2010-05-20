@@ -46,7 +46,7 @@ settings:
    repop: 5
   food_mass: 0.2
   drag: 0.04
-  spike_decay: 50
+  spike_decay: 0.995
   auto_track: true
  eo_constants:
   main:

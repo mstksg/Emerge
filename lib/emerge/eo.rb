@@ -12,7 +12,7 @@ class Eo
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
               :velocity,:velo_magnitude,:mass,:id,:generation,
-              :descendants,:death_cause
+              :descendants,:death_cause,:angle_vect
   attr_accessor :pos,:followed
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
@@ -487,9 +487,13 @@ class Eo_Body
     end
   end
   
-  def spiked spiker
+  def spiked spiker, direct=true
     diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
-    @hp -= spiker.mass*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+    if direct
+      @hp -= spiker.mass*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+    else
+      @hp -= (spiker.mass/2)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+    end
     if @hp < 0
       if spiker.owner
         message = "Eo_#{@owner.id}\tKilled by spike from Eo_#{spiker.owner.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
