@@ -51,7 +51,8 @@ settings:
    rep_threshold: 15
    rep_rate: 3300
    energy_cap: 200
-   healing_drain: 0.96
+   healing_drain_min: 0.93
+   healing_drain_max: 0.98
   body:
    mass: 10
    recovery: 0.0125

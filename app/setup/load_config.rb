@@ -36,7 +36,8 @@ eo_consts = settings["eo_constants"]
 $REP_THRESHOLD = eo_consts["main"]["rep_threshold"]
 $REP_RATE = eo_consts["main"]["rep_rate"]
 $ENERGY_CAP = eo_consts["main"]["energy_cap"]
-$HEAL_DRAIN = eo_consts["main"]["healing_drain"]
+$HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]
+$HEAL_DRAIN_MAX = eo_consts["main"]["healing_drain_max"]
 
 # Body #
 $B_MASS = eo_consts["body"]["mass"]

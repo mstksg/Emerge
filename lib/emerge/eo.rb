@@ -6,7 +6,7 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
-  @@HEAL_DRAIN_OFFSET = (1-$HEAL_DRAIN)/10
+  @@HEAL_DRAIN_OFFSET = ($HEAL_DRAIN_MAX-$HEAL_DRAIN_MIN)/10
   
   @@count = 0
   
@@ -37,7 +37,7 @@ class Eo
     @food_triggered = []
     @eo_triggered = []
     
-    @total_heal_drain = $HEAL_DRAIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
+    @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     
     
     @pond = pond
