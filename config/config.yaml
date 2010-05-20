@@ -52,7 +52,7 @@ settings:
    rep_threshold: 15
    rep_rate: 3300
    energy_cap: 200
-   healing_drain_min: 0.93
+   healing_drain_min: 0.94
    healing_drain_max: 0.98
   body:
    mass: 10
@@ -78,8 +78,8 @@ settings:
   fr_freq: 25
   types:
    activity: true
-   population: false
-   framerate: false
+   population: true
+   framerate: true
 override:
  profile:
   eo_constants:

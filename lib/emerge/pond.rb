@@ -269,6 +269,7 @@ class Pond
         if collisions.size > 0
           clicked = collisions[0]
           clicked.die :divine,true
+          $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}}"
         end
         
       end
