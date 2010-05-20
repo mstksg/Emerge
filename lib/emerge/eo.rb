@@ -233,10 +233,6 @@ class Eo
     @energy += amount
   end
   
-  def poked poke_force, poker
-    @body.poked poke_force, poker
-  end
-  
   def mutate new_energy=0
     new_dna = @dna.mutate
     return Eo.new(new_dna, new_energy)
@@ -350,6 +346,19 @@ class Eo
     @energy -= amount
   end
   
+  def shoot_spike mass, angle, speed
+    velo_vect = Vector_Array.new(@velocity)
+    spike_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
+    spike_final_vect = spike_angle_vect.mult(speed).add(velo_vect)
+    
+    new_x = @pos[0] + spike_angle_vect[0]*7
+    new_y = @pos[1] + spike_angle_vect[1]*7
+    
+    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle 
+    
+    @energy -= (mass*speed)/(@body.efficiency+3)
+  end
+  
   def eaten
     @energy = 0
     die :eaten
@@ -406,13 +415,13 @@ class Eo
   
   ##### WILL NOT WORK AS LONG AS THE PRECEDING #####
   #####        FUNCTION IS EVER CALLED         #####
-#  def find_all_descendants
-#    if @descendants
-#      return find_all_descendants[@descendants[0]] | find_all_descendants[@descendants[1]]
-#    else
-#      return []
-#    end
-#  end
+  #  def find_all_descendants
+  #    if @descendants
+  #      return find_all_descendants[@descendants[0]] | find_all_descendants[@descendants[1]]
+  #    else
+  #      return []
+  #    end
+  #  end
   
   def is_dead
     return @groups.size > 0
@@ -475,6 +484,25 @@ class Eo_Body
         poker.log_message message,false
       end
       @owner.eaten
+    end
+  end
+  
+  def spiked spiker
+    diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
+    @hp -= spiker.mass*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+    if @hp < 0
+      if spiker.owner
+        message = "Eo_#{@owner.id}\tKilled by spike from Eo_#{spiker.owner.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+        unless @owner.log_message message
+          spiker.owner.log_message message,false
+        end
+      else
+        
+        message = "Eo_#{@owner.id}\tKilled by spike from unknown Eo;\ta#{@owner.age}, e#{@owner.energy.to_i}"
+        @owner.log_message message
+        
+      end
+      @owner.die :spiked
     end
   end
   
@@ -548,7 +576,7 @@ class Feeler
     # should be poking an Eo
     diff = Vector_Array.new(@owner.velocity).sub(target.velocity).magnitude
     poke_force = @strength*(diff+0.2)*$F_POKE
-    target.poked(poke_force,@owner)
+    target.body.poked(poke_force,@owner)
   end
   
   def inspect
