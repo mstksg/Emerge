@@ -11,7 +11,6 @@ module Command_Data
                           :shoot_spike    => 0.2 ,
                           :if             => 1.0  }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
-  
   @@COMMAND_RANGES    = { :move           => [[-180,180],[0.05,1]]   ,
                           :wait           => [[0,40]]                ,
                           :turn           => [[-180,180]]            ,
