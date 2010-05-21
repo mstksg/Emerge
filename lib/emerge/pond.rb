@@ -5,7 +5,7 @@ include Rubygame
 
 class Pond
   
-  attr_reader :environment, :eos, :foods # for debug
+  attr_reader :environment, :eos, :foods, :zone_rects # for debug
   
   def initialize environment
     @environment = environment
@@ -21,6 +21,9 @@ class Pond
     @packets = Sprites::Group.new
     @packets.extend(Sprites::UpdateGroup)
     
+    @spikes = Sprites::Group.new
+    @spikes.extend(Sprites::UpdateGroup)
+    
     @zone_count = determine_zone_count
     @total_zones = @zone_count*@zone_count
     
@@ -31,7 +34,7 @@ class Pond
   end
   
   def determine_zone_count eo_count=$POND_INIT_EO
-    ## Point when z is worse than z+1 = z^2(1+z^2)
+    ## Point when z is worse than z+1 => z^2(1+z^2)
     ## This is because, for z zones and t eos, there are
     ##  z^2 t + (t/z)^2 rect checks (approximately)
     ## Surprisingly, if you add a variable accounting
@@ -111,12 +114,17 @@ class Pond
     
   end
   
+  def point_in_zone point
+    col = (point[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
+    row = (point[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+    return row*@zone_count+col
+  end
+  
   def add_food(energy=10,x=0,y=0)
     x = x.boundarize(0,@environment.width,false,true)
     y = y.boundarize(0,@environment.height,false,true)
     
-    new_food = Food.new(energy,x,y)
-    @foods << new_food
+    @foods << Pond_Bits::Food.new(energy,x,y)
   end
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
@@ -124,8 +132,15 @@ class Pond
     x = x.boundarize(0,@environment.width,false,true)
     y = y.boundarize(0,@environment.height,false,true)
     
-    new_packet = Packet.new(self,energy,x,y,speed,angle)
-    @packets << new_packet
+    @packets << Pond_Bits::Packet.new(self,energy,x,y,speed,angle)
+  end
+  
+  def add_spike(mass,owner=nil,x=0,y=0,speed=0,angle=0)
+    
+    x = x.boundarize(0,@environment.width,false,true)
+    y = y.boundarize(0,@environment.height,false,true)
+    
+    @spikes << Pond_Bits::Spike.new(self,mass,owner,x,y,speed,angle)
   end
   
   def sprinkle_food(amount=1,max_energy=20,min_energy=5)
@@ -205,6 +220,7 @@ class Pond
     @foods.undraw(@environment.screen,@environment.background)
     @packets.undraw(@environment.screen,@environment.background)
     @eos.undraw(@environment.screen,@environment.background)
+    @spikes.undraw(@environment.screen,@environment.background)
   end
   
   def update
@@ -217,6 +233,7 @@ class Pond
     set_zone_count
     update_zones
     
+    @spikes.update
     @eos.update
     
     #    for eo in @eos
@@ -243,6 +260,7 @@ class Pond
     @foods.draw(@environment.screen)
     @packets.draw(@environment.screen)
     @eos.draw(@environment.screen)
+    @spikes.draw(@environment.screen)
   end
   
   

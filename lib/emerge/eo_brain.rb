@@ -139,6 +139,8 @@ class Brain
             raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
           end
           @owner.set_speed(curr_command.args[0])
+        when :shoot_spike
+          @owner.shoot_spike(curr_command.args[0],curr_command.args[1],curr_command.args[2])
         else
           raise "Bad command #{curr_command.command}"
         end

@@ -46,6 +46,7 @@ settings:
    repop: 5
   food_mass: 0.2
   drag: 0.04
+  spike_decay: 0.996
   auto_track: true
  eo_constants:
   main:
@@ -54,6 +55,7 @@ settings:
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98
+   spike_damage: 1
   body:
    mass: 10
    recovery: 0.0125

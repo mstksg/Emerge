@@ -1,12 +1,14 @@
 module Command_Data
-  @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,:set_speed,:if]
+  @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,
+                          :set_speed,:shoot_spike,:if]
   @@COMMAND_WEIGHTS   = { :move           => 1.5 ,
                           :wait           => 1.0 ,
                           :turn           => 1.0 ,
-                          :stop           => 0.1 ,
+                          :stop           => 0.15,
                           :emit_energy    => 0.2 ,
                           :multiply_speed => 0.5 ,
                           :set_speed      => 0.5 ,
+                          :shoot_spike    => 0.2 ,
                           :if             => 1.0  }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   
@@ -16,7 +18,8 @@ module Command_Data
                           :stop           => []                      ,
                           :emit_energy    => [[0,7.5],[15,345],[1,6]],
                           :multiply_speed => [[0,2.5]]               ,
-                          :set_speed      => [[0,1]]                  }
+                          :set_speed      => [[0,1]]                 ,
+                          :shoot_spike    => [[0,5],[-180,180],[1,6]] }
   
   
   
@@ -50,6 +53,7 @@ module Command_Data
                           :emit_energy    => "e" ,
                           :multiply_speed => "x" ,
                           :set_speed      => "v" ,
+                          :shoot_spike    => "p" ,
                           :if             => "f" ,
                           
                           :energy         => "E" ,
