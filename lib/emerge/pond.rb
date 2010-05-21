@@ -266,7 +266,7 @@ class Pond
   
   
   def clicked pos, button
-    if button == 1 or button == 3
+    if button > 0 or button < 4
       
       col = (pos[0]/@zone_width).to_i
       row = (pos[1]/@zone_height).to_i
@@ -286,8 +286,19 @@ class Pond
         
         if collisions.size > 0
           clicked = collisions[0]
-          clicked.die :divine,true
-          $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}}"
+          if button == 3
+            clicked.die :divine,true
+            $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}}"
+          else
+            clicked.replicate true
+            $LOGGER.info "REPRODUCE\tManually forced Eo_#{clicked.id}} to reproduce"
+          end
+        else
+          if button == 3
+            add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
+          else
+            add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
+          end
         end
         
       end
@@ -295,7 +306,7 @@ class Pond
   end
   
   def select_random
-    @eo_follower.start_following @eos.pick_rand
+    @eo_follower.start_following @eos.pick_rand if @eos.size > 0
   end
   
 end

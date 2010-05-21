@@ -196,7 +196,7 @@ class Eo
         elsif dist < 7+@feeler.length and not @food_triggered.include? food
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
-          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
+          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0
             feeler_triggered(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
@@ -238,11 +238,14 @@ class Eo
     return Eo.new(new_dna, new_energy)
   end
   
-  def replicate
+  def replicate force=false
     
     if @energy >= $ENERGY_CAP
       reproduce_now = true
       $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
+    end
+    if force
+      reproduce_now = true
     end
     
     if reproduce_now or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
@@ -364,6 +367,22 @@ class Eo
     die :eaten
   end
   
+  def turn_into_food
+  @energy *= 0.9
+    while @energy > 0
+      drop = rand*15+5
+      x = @pos[0]+rand*10-5
+      y = @pos[1]+rand*10-5
+      if @energy > drop
+        @pond.add_food(drop,x,y)
+        @energy -= drop
+      else
+        @pond.add_food(@energy,x,y)
+        @energy = 0
+      end
+    end
+  end
+  
   def die reason=:unknown,log=false
     @death_cause = reason
     if log
@@ -376,6 +395,9 @@ class Eo
     end
     @pond.remove_eo(self)
     kill
+    if reason != :reproduction and reason != :eaten and @energy > 0
+      turn_into_food
+    end
   end
   
   def inspect
@@ -489,10 +511,11 @@ class Eo_Body
   
   def spiked spiker, direct=true
     diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
+    damage = (spiker.mass+spiker.energy_content)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE/2
     if direct
-      @hp -= spiker.mass*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+      @hp -= damage
     else
-      @hp -= (spiker.mass/2)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+      @hp -= damage/2
     end
     if @hp < 0
       if spiker.owner
@@ -501,11 +524,10 @@ class Eo_Body
           spiker.owner.log_message message,false
         end
       else
-        
         message = "Eo_#{@owner.id}\tKilled by spike from unknown Eo;\ta#{@owner.age}, e#{@owner.energy.to_i}"
         @owner.log_message message
-        
       end
+      
       @owner.die :spiked
     end
   end

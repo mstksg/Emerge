@@ -92,16 +92,16 @@ module Pond_Bits
   class Spike
     include Sprites::Sprite
     
-    attr_reader :mass, :owner, :velocity
+    attr_reader :mass, :owner, :velocity, :energy_content
     
     def initialize pond,mass,owner=nil,x=0,y=0,speed=0,angle=0
       super()
       
-      @energy_content = mass*2
+      @energy_content = mass
       
       @owner = owner
       @mass = mass
-      @drag_factor = $POND_DRAG*@mass/2
+      @drag_factor = $POND_DRAG*(@mass/3)
       
       @pos = [x,y]
       
@@ -171,7 +171,7 @@ module Pond_Bits
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and eo.angle_vect.dot(vec) <= 0
             eo.body.spiked(self,false)
             kill
-            eo.feeler_triggered(@mass*@velo_magnitude+0.1)
+            eo.feeler_triggered(@energy_content*@velo_magnitude+0.1)
             return true
           end
           
@@ -201,7 +201,7 @@ module Pond_Bits
     
     def turn_into_food
       kill
-      @pond.add_food(@energy_content*2,@pos[0],@pos[1])
+      @pond.add_food(@energy_content/3,@pos[0],@pos[1])
     end
     
   end
