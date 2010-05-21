@@ -1,8 +1,26 @@
 ## TODO
 
+- Add detection for feeler-to-feeler collisions? (probably not)
+- Also, what the heck at long streams of food packets?
+	- Probably to be resolved with new compiler
+	- Resolved, but still happening...perhaps packets are triggering their
+		own release?
+	  Confirmed: streams are due to packets triggering their feelers.
+	  	Really, this is inevitable; peraps this can just serve to select against
+	  	emitters emitting in the wrong direction?  Perhaps tweak settings to disallow
+	  	it in the first place.  Okay, done.
+- Write new tier-based compiler
+- New, more urgent (for higher-energy) reproduction decision algorithm, to prevent
+	huge energy overload ruining the game
+	Possibility: Parabola, at (15,0), (20,1/150), (200,1)
+	or rather, 707/26137500 x^2 - 2141/5227500 x - 1/17425
+	- Temporarily implemented as an energy cap
 - Track kills? heh
-- Try to catch some programs mutating within same organism, after a trigger?
+- Use parent tracking to find closest relatives. Wait, er...maybe this is dangerous,
+	because of memory leakage/garbage collection.  Should do this at end, then
+- Try to catch some programs mutating within one organism, after trigger?
 - watch out for possible Eo moving over food and not eating?
+- mutation "limit", for length of DNA program string (maybe?)
 - perhaps exponential decay is not the best choice for healing?  or maybe it is,
 	because it implies that if you have more energy, you need to give more of it
 	up to heal.  actually that makes no sense. shut up.

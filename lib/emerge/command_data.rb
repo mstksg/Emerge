@@ -10,13 +10,13 @@ module Command_Data
                           :if             => 1.0  }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   
-  @@COMMAND_RANGES    = { :move           => [[-180,180],[0.05,1]]   ,
-                          :wait           => [[0,40]]                ,
-                          :turn           => [[-180,180]]            ,
-                          :stop           => []                      ,
-                          :emit_energy    => [[0,7.5],[15,345],[1,6]],
-                          :multiply_speed => [[0,2.5]]               ,
-                          :set_speed      => [[0,1]]                  }
+  @@COMMAND_RANGES    = { :move           => [[-180,180],[0.05,1]]  ,
+                          :wait           => [[0,40]]               ,
+                          :turn           => [[-180,180]]           ,
+                          :stop           => []                     ,
+                          :emit_energy    => [[0,10],[15,345],[1,6]],
+                          :multiply_speed => [[0,2.5]]              ,
+                          :set_speed      => [[0,1]]                 }
   
   
   
