@@ -26,6 +26,9 @@ unless $*.size == 0 or $*.find_all { |a| a =~ /-D/ }.size > 0
       when /-d/
         $LOG_CONSOLE_LEVEL = 1
       when /-l/
+        $LOG_POP = false if $LOG_POP == nil
+        $LOG_ACT = false if $LOG_ACT == nil
+        $LOG_FR = false if $LOG_FR == nil
         check_log = true
       else
         $env_choice = a
