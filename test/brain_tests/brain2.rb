@@ -1,4 +1,4 @@
-class Brain
+class Brain_2
   
   attr_reader :owner
   
@@ -16,6 +16,10 @@ class Brain
     @program_queue = []
     @momentum_trigger = 0
     @waiting = 0
+  end
+  
+  def has_commands? 
+    return @program_queue.size > 0
   end
   
   def process momentum
@@ -39,14 +43,11 @@ class Brain
   end
   
   def run_program program
-    @program_queue = [program.clone]
+    @program_queue = [Array.new(program)]
     @waiting = 0
   end
   
   def pull_next_command
-    
-    ## Turns out that the old one was more or less completely
-    ## broken; this one is accurate, but much slower(?) about 2x as slow
     
     if @program_queue.size > 0
       
@@ -91,6 +92,7 @@ class Brain
     else
       return false
     end
+    
   end
   
   def eval_if if_command
@@ -104,8 +106,10 @@ class Brain
     end   ## maybe add more conditions later
     
     if if_command.args[1] == :lt
+      puts "#{cond}<#{if_command.args[2]}?" if $VERBOSE
       return cond < if_command.args[2]
     else
+      puts "#{cond}>#{if_command.args[2]}?" if $VERBOSE
       return cond > if_command.args[2]
     end
   end
@@ -139,8 +143,6 @@ class Brain
             raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
           end
           @owner.set_speed(curr_command.args[0])
-        when :shoot_spike
-          @owner.shoot_spike(curr_command.args[0],curr_command.args[1],curr_command.args[2])
         else
           raise "Bad command #{curr_command.command}"
         end

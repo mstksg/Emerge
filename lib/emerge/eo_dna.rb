@@ -280,10 +280,10 @@ class Command_Block < Array
     
     if total_size
       if total_size < 3
-        mutate_scale = 20/(total_size+1)
+        mutate_scale = 10/(total_size+1)
       elsif total_size > $PROGRAM_SIZE_LIMIT
         mutate_scale = $PROGRAM_SIZE_LIMIT/(total_size*2)
-        forget_scale = total_size
+        forget_scale = total_size*3
       end
     end
     

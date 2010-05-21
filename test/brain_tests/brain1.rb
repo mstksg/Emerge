@@ -1,4 +1,4 @@
-class Brain
+class Brain_1
   
   attr_reader :owner
   
@@ -39,55 +39,59 @@ class Brain
   end
   
   def run_program program
-    @program_queue = [program.clone]
+    @program_queue = program.clone
     @waiting = 0
+  end
+  
+  def has_commands?
+    return @program_queue.size > 0
   end
   
   def pull_next_command
     
-    ## Turns out that the old one was more or less completely
-    ## broken; this one is accurate, but much slower(?) about 2x as slow
-    
     if @program_queue.size > 0
+      curr_command = @program_queue.shift
       
-      if @program_queue[0].size == 0
-        @program_queue.shift
+      if curr_command.class == String
         return pull_next_command
-      else
-        
-        curr_command = @program_queue[0].shift
-        
-        if curr_command.class == Command_Block
-          @program_queue.unshift curr_command
-          return pull_next_command
-        else # curr_command.class == Eo_Command
-          
-          if curr_command.command == :if
-            if @program_queue[0].size == 0
+      elsif curr_command.class == Command_Block
+        @program_queue.unshift("]")        
+        while curr_command.size < 0
+          @program_queue.unshift(curr_command.pop)
+        end
+        return pull_next_command
+      elsif curr_command.class == Eo_Command
+        if curr_command.command == :if
+          if @program_queue.first == "]"
+            @program_queue.shift  ## optimization
+            return pull_next_command
+          else
+            
+            eval_true = eval_if curr_command
+            
+            if eval_true
               return pull_next_command
             else
-              eval_true = eval_if curr_command
+              return false if @program_queue.size == 0
               
-              if eval_true
-                return pull_next_command
-              else
-                while curr_command.class == Eo_Command and curr_command.command == :if
-                  if @program_queue[0].size == 0
-                    return pull_next_command
-                  end
-                  curr_command = @program_queue[0].shift
-                end
-                
-                return pull_next_command
-                
+              if @program_queue.first.class == Command_Block
+                @program_queue.shift
+              elsif @program_queue.first.command == :if
+                @program_queue.shift
+                @program_queue.shift
               end
+              
+              return pull_next_command
             end
             
-          else
-            return curr_command
+            
           end
+        else
+          return curr_command
         end
       end
+      
+      
     else
       return false
     end
@@ -139,8 +143,6 @@ class Brain
             raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
           end
           @owner.set_speed(curr_command.args[0])
-        when :shoot_spike
-          @owner.shoot_spike(curr_command.args[0],curr_command.args[1],curr_command.args[2])
         else
           raise "Bad command #{curr_command.command}"
         end

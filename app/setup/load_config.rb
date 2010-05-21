@@ -22,6 +22,7 @@ $ENV_HEIGHT = env_settings["h"]
 ##### Pond Settings #####
 $POND_FOOD_MASS = settings["pond"]["food_mass"]
 $POND_DRAG = settings["pond"]["drag"]
+$POND_SPIKE_DECAY = settings["pond"]["spike_decay"]
 $AUTO_TRACKING = settings["pond"]["auto_track"] if $AUTO_TRACKING == nil
 
 pond_settings = settings["pond"][$env_choice]
@@ -40,6 +41,7 @@ $REP_RATE = eo_consts["main"]["rep_rate"]
 $ENERGY_CAP = eo_consts["main"]["energy_cap"]
 $HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]
 $HEAL_DRAIN_MAX = eo_consts["main"]["healing_drain_max"]
+$SPIKE_DAMAGE = eo_consts["main"]["spike_damage"]
 
 # Body #
 $B_MASS = eo_consts["body"]["mass"]

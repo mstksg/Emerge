@@ -1,4 +1,6 @@
-class Brain
+## Same as Brain_2, but pre-compiles everything ahead of time
+
+class Brain_3
   
   attr_reader :owner
   
@@ -13,9 +15,14 @@ class Brain
     @programs = programs
     @birth_program = birth_program
     
+    @program_bank = []
     @program_queue = []
     @momentum_trigger = 0
     @waiting = 0
+  end
+  
+  def has_commands? 
+    return @program_queue.size > 0
   end
   
   def process momentum
@@ -39,31 +46,37 @@ class Brain
   end
   
   def run_program program
-    @program_queue = [program.clone]
+    prog_compile program
     @waiting = 0
+  end
+  
+  def prog_compile program
+    @program_queue = Array.new()
+    @program_bank = [program.clone]
+    while @program_bank.size > 0
+      next_command = pull_next_command
+      @program_queue << next_command if next_command
+    end
   end
   
   def pull_next_command
     
-    ## Turns out that the old one was more or less completely
-    ## broken; this one is accurate, but much slower(?) about 2x as slow
-    
-    if @program_queue.size > 0
+    if @program_bank.size > 0
       
-      if @program_queue[0].size == 0
-        @program_queue.shift
+      if @program_bank[0].size == 0
+        @program_bank.shift
         return pull_next_command
       else
         
-        curr_command = @program_queue[0].shift
+        curr_command = @program_bank[0].shift
         
         if curr_command.class == Command_Block
-          @program_queue.unshift curr_command
+          @program_bank.unshift curr_command
           return pull_next_command
         else # curr_command.class == Eo_Command
           
           if curr_command.command == :if
-            if @program_queue[0].size == 0
+            if @program_bank[0].size == 0
               return pull_next_command
             else
               eval_true = eval_if curr_command
@@ -72,10 +85,10 @@ class Brain
                 return pull_next_command
               else
                 while curr_command.class == Eo_Command and curr_command.command == :if
-                  if @program_queue[0].size == 0
+                  if @program_bank[0].size == 0
                     return pull_next_command
                   end
-                  curr_command = @program_queue[0].shift
+                  curr_command = @program_bank[0].shift
                 end
                 
                 return pull_next_command
@@ -91,6 +104,7 @@ class Brain
     else
       return false
     end
+    
   end
   
   def eval_if if_command
@@ -104,8 +118,10 @@ class Brain
     end   ## maybe add more conditions later
     
     if if_command.args[1] == :lt
+      puts "#{cond}<#{if_command.args[2]}?" if $VERBOSE
       return cond < if_command.args[2]
     else
+      puts "#{cond}>#{if_command.args[2]}?" if $VERBOSE
       return cond > if_command.args[2]
     end
   end
@@ -114,9 +130,9 @@ class Brain
     
     if @waiting <= 0
       
-      curr_command = pull_next_command
-      
-      if curr_command
+      if @program_queue.size > 0
+        
+        curr_command = @program_queue.shift
         
         case curr_command.command
         when :move
@@ -139,8 +155,6 @@ class Brain
             raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
           end
           @owner.set_speed(curr_command.args[0])
-        when :shoot_spike
-          @owner.shoot_spike(curr_command.args[0],curr_command.args[1],curr_command.args[2])
         else
           raise "Bad command #{curr_command.command}"
         end
