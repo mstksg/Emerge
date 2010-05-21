@@ -244,11 +244,8 @@ class Eo
       reproduce_now = true
       $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
     end
-    if force
-      reproduce_now = true
-    end
     
-    if reproduce_now or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
+    if reproduce_now or force or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
       
       log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
       

@@ -6,3 +6,5 @@
 - perhaps exponential decay is not the best choice for healing?  or maybe it is,
 	because it implies that if you have more energy, you need to give more of it
 	up to heal.  actually that makes no sense. shut up.
+    Actually, it's probably a good idea because it gives low-energy creatures
+    a second chance, as well as normalizing abnormally high energy creatures

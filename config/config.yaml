@@ -55,7 +55,7 @@ settings:
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98
-   spike_damage: 1
+   spike_damage: 1.5
   body:
    mass: 10
    recovery: 0.0125

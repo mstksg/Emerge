@@ -121,9 +121,9 @@ module Pond_Bits
     def graphic
       return @s_graphic if @s_graphic
       
-      shade = 80-@mass*10
+      shade = 70-@mass*10
       shade = 0 if shade < 0
-      size = (2+@mass/2).to_i
+      size = (1+@mass/2).to_i
       
       @s_graphic = Surface.new([size,size],0)
       @s_graphic.fill([shade,shade,shade])
@@ -201,7 +201,7 @@ module Pond_Bits
     
     def turn_into_food
       kill
-      @pond.add_food(@energy_content/3,@pos[0],@pos[1])
+      @pond.add_food(@energy_content/4,@pos[0],@pos[1])
     end
     
   end
