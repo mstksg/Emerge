@@ -6,6 +6,3 @@
 - perhaps exponential decay is not the best choice for healing?  or maybe it is,
 	because it implies that if you have more energy, you need to give more of it
 	up to heal.  actually that makes no sense. shut up.
-- SHOOT SPIKES.  weapon.  heck yeah.  but...what benefit?  should it automatically eat?
-		Maybe only for self defense.
-		add feeler detection?

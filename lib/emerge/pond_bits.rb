@@ -136,7 +136,7 @@ module Pond_Bits
       unless handle_collisions
           
         @mass *= $POND_SPIKE_DECAY
-        @mass -= 0.1
+        @mass -= 0.01
         
         turn_into_food if @mass <= 0
         

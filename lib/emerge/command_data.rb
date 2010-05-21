@@ -8,7 +8,7 @@ module Command_Data
                           :emit_energy    => 0.2 ,
                           :multiply_speed => 0.5 ,
                           :set_speed      => 0.5 ,
-                          :shoot_spike    => 0.2 ,
+                          :shoot_spike    => 150 ,
                           :if             => 1.0  }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   
