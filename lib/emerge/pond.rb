@@ -10,7 +10,7 @@ class Pond
   def initialize environment
     @environment = environment
     
-    @eo_follower = Follower.new(@environment)
+    @eo_follower = Follower.new(@environment,$AUTO_TRACKING)
     
     @eos = Sprites::Group.new
     @eos.extend(Sprites::UpdateGroup)
@@ -246,12 +246,12 @@ class Pond
     #      end
     #    end
     
-    @eo_follower.update_follow $AUTO_TRACKING
+    @eo_follower.update_follow
     
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
-      select_random
+      select_random if $AUTO_TRACKING
     end
     
   end
@@ -288,14 +288,15 @@ class Pond
           clicked = collisions[0]
           if button == 3
             clicked.die :divine,true
-            $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}}"
+            $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}"
           else
             clicked.replicate true
-            $LOGGER.info "REPRODUCE\tManually forced Eo_#{clicked.id}} to reproduce"
+            $LOGGER.info "REPRODUCE\tManually forced Eo_#{clicked.id} to reproduce"
           end
         else
           if button == 3
-            add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
+            spawned = add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
+            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (dna:#{spawned.dna.inspect}})"
           else
             add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
           end
@@ -315,13 +316,15 @@ class Follower
   
   attr_accessor :environment
   
-  def initialize environment
+  def initialize environment, auto_track=false
     @environment = environment
+    @auto_track = auto_track
     
     @curr_dialog = nil
     @tracked_eo = nil
     @original_tracked = nil
     @dna_dialog = nil
+    
   end
   
   ## This new follow tracker method is faster than the last,
@@ -329,7 +332,7 @@ class Follower
   ## However, it has potential for high memory leakage the
   ## longer the tracked family survives (which is, potentially,
   ## forever)
-  def update_follow pick_new=false
+  def update_follow
     
     if @tracked_eo == nil
       if @curr_dialog
@@ -362,7 +365,7 @@ class Follower
             @tracked_eo = nil
             update_follow
             
-            @environment.pond.select_random if pick_new
+            @environment.pond.select_random if @auto_track
           end
         end
       end
