@@ -51,7 +51,7 @@ settings:
  eo_constants:
   main:
    rep_threshold: 17.5
-   rep_rate: 3500
+   rep_rate: 3667
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98

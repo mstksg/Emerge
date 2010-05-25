@@ -12,7 +12,7 @@ class Eo
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
               :velocity,:velo_magnitude,:mass,:id,:generation,
-              :descendants,:death_cause,:angle_vect
+              :death_cause,:angle_vect
   attr_accessor :pos,:followed
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
@@ -289,7 +289,7 @@ class Eo
       descendant2 = @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
                                  @angle-90,@generation+1,angle_disp,speed_frac)
       
-      @descendants = [descendant1,descendant2]
+      @pond.archive.store_eo(id,descendant1.id,descendant2.id)
       
       return true
     end
@@ -413,34 +413,6 @@ class Eo
       return false
     end
   end
-  
-  def find_first_living_descendant
-    return self if @groups.size > 0
-    return nil unless @descendants
-    count = 0
-    
-    2.times do |n|
-      branch = @descendants[n].find_first_living_descendant
-      return branch if branch
-    end
-    
-    #####  THIS IS TO CLEAR UP MEMORY FOR GARGABE COLLECTOR  #####
-    #####      AND TO SPEED UP FIRST DESCENDANT FINDING      #####
-    @descendants = nil
-    ##### CAN BE REMOVED IF NEED TO TRACK DESCENDANTS ARISES #####
-    
-    return nil
-  end
-  
-  ##### WILL NOT WORK AS LONG AS THE PRECEDING #####
-  #####        FUNCTION IS EVER CALLED         #####
-  #  def find_all_descendants
-  #    if @descendants
-  #      return find_all_descendants[@descendants[0]] | find_all_descendants[@descendants[1]]
-  #    else
-  #      return []
-  #    end
-  #  end
   
   def is_dead
     return @groups.size > 0
