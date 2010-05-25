@@ -5,8 +5,8 @@ require "rubygame"
 Rubygame::TTF.setup()
 
 Dir.require_all("lib/emerge/")
-require File.dirname(__FILE__)+"/dialog.rb"
-require File.dirname(__FILE__)+"/environment.rb"
+require $EMERGE_DIRECTORY+"/app/dialog.rb"
+require $EMERGE_DIRECTORY+"/app/environment.rb"
 
 $LOGGER.debug "Settings:\tReproduction Rate:\t1/#{$REP_RATE}"
 $LOGGER.debug "Settings:\tMutation Rate:\t\t#{$MUTATION_FACTOR}"

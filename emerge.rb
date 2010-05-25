@@ -16,13 +16,15 @@
 
 require "rubygems"
 
-require "lib/utils/ruby_mods.rb"
+$EMERGE_DIRECTORY = File.dirname(__FILE__)
+
+require "lib/utils/ruby_mods"
 Dir.require_all("lib/utils/")
 
-require "app/setup/load_args.rb"
-require "app/setup/load_config.rb"
-require "app/setup/setup_log.rb"
+require "app/setup/load_args"
+require "app/setup/load_config"
+require "app/setup/setup_log"
 
 setup_log "logs", "log"
 
-require "app/launch.rb"
+require "app/launch"
