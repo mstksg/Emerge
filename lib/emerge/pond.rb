@@ -5,15 +5,15 @@ include Rubygame
 
 class Pond
   
-  attr_reader :environment, :eos, :foods, :zone_rects # for debug
+  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
   
   def initialize environment
     @environment = environment
     
-    @eo_follower = Follower.new(@environment)
-    
     @eos = Sprites::Group.new
     @eos.extend(Sprites::UpdateGroup)
+    @archive = Eo_Archive.new(@eos)
+    @eo_follower = Follower.new(@environment,@archive,$AUTO_TRACKING)
     
     @foods = Sprites::Group.new
     @foods.extend(Sprites::UpdateGroup)
@@ -83,8 +83,8 @@ class Pond
   
   def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
     
@@ -106,8 +106,8 @@ class Pond
     
     for corner in new_eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       @eo_zones[row*@zone_count+col] << new_eo unless @eo_zones[row*@zone_count+col].include? new_eo
       
     end
@@ -115,30 +115,30 @@ class Pond
   end
   
   def point_in_zone point
-    col = (point[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-    row = (point[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+    col = ((point[0] % @environment.width)/@zone_width).to_i
+    row = ((point[1] % @environment.height)/@zone_height).to_i
     return row*@zone_count+col
   end
   
   def add_food(energy=10,x=0,y=0)
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @foods << Pond_Bits::Food.new(energy,x,y)
   end
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @packets << Pond_Bits::Packet.new(self,energy,x,y,speed,angle)
   end
   
   def add_spike(mass,owner=nil,x=0,y=0,speed=0,angle=0)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @spikes << Pond_Bits::Spike.new(self,mass,owner,x,y,speed,angle)
   end
@@ -175,8 +175,8 @@ class Pond
     
     for corner in eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       
       checks |= @eo_zones[row*@zone_count+col]
       
@@ -191,8 +191,8 @@ class Pond
     
     for corner in eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       
       checks |= @food_zones[row*@zone_count+col]
       
@@ -246,12 +246,12 @@ class Pond
     #      end
     #    end
     
-    @eo_follower.update_follow $AUTO_TRACKING
+    @eo_follower.update_follow
     
     if @eos.size == 0
       $LOGGER.warn "Repopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
-      select_random
+      select_random if $AUTO_TRACKING
     end
     
   end
@@ -266,7 +266,7 @@ class Pond
   
   
   def clicked pos, button
-    if button == 1 or button == 3
+    if button > 0 or button < 4
       
       col = (pos[0]/@zone_width).to_i
       row = (pos[1]/@zone_height).to_i
@@ -286,8 +286,20 @@ class Pond
         
         if collisions.size > 0
           clicked = collisions[0]
-          clicked.die :divine,true
-          $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}}"
+          if button == 3
+            clicked.die :divine,true
+            $LOGGER.info "KILL\tManually killed Eo_#{clicked.id}"
+          else
+            clicked.replicate true
+            $LOGGER.info "REPRODUCE\tManually forced Eo_#{clicked.id} to reproduce"
+          end
+        else
+          if button == 3
+            spawned = add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
+            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (dna:#{spawned.dna.inspect}})"
+          else
+            add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
+          end
         end
         
       end
@@ -295,7 +307,7 @@ class Pond
   end
   
   def select_random
-    @eo_follower.start_following @eos.pick_rand
+    @eo_follower.start_following @eos.pick_rand if @eos.size > 0
   end
   
 end
@@ -304,27 +316,28 @@ class Follower
   
   attr_accessor :environment
   
-  def initialize environment
+  def initialize environment, archive, auto_track=false
     @environment = environment
+    @auto_track = auto_track
+    @archive = archive
     
     @curr_dialog = nil
     @tracked_eo = nil
     @original_tracked = nil
+    @original_generation = nil
     @dna_dialog = nil
+    
   end
   
-  ## This new follow tracker method is faster than the last,
-  ## and more elegant, and also never misses a possible descendant.
-  ## However, it has potential for high memory leakage the
-  ## longer the tracked family survives (which is, potentially,
-  ## forever)
-  def update_follow pick_new=false
+  
+  def update_follow
     
     if @tracked_eo == nil
       if @curr_dialog
         @curr_dialog.kill
         @curr_dialog = nil
         @original_tracked = nil
+        @original_generation = nil
         @dna_dialog.kill
         @dna_dialog = nil
       end
@@ -333,25 +346,26 @@ class Follower
       find_next = false
       
       if @tracked_eo.groups.size == 0
-        if @tracked_eo.descendants
-          $LOGGER.info "TRACK\tNow tracking #{@tracked_eo.descendants[0]} (child of Eo_#{@tracked_eo.id}), of #{@original_tracked} family line"
+        next_track_id = @archive.find_first_living_descendant(@original_tracked)
+        next_track = @environment.pond.eos.find { |eo| eo.id == next_track_id }
+        if @archive.has_descendants @tracked_eo.id
+          $LOGGER.info "TRACK\tNow tracking #{next_track} (child of Eo_#{@tracked_eo.id}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
           @tracked_eo.followed = nil
-          @tracked_eo = @tracked_eo.descendants[0]
+          @tracked_eo = next_track
           @tracked_eo.followed = true
         else
-          next_track = @original_tracked.find_first_living_descendant
           if next_track
             $LOGGER.info "TRACK\t#{@tracked_eo} has died (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
-            $LOGGER.info "TRACK\tNow tracking closest relative (#{next_track}), of #{@original_tracked} family line"
+            $LOGGER.info "TRACK\tNow tracking closest relative (#{next_track}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
             @tracked_eo = next_track
             @tracked_eo.followed = true
           else
-            $LOGGER.info "TRACK\tFamily line of #{@original_tracked} ended with death of #{@tracked_eo} (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
+            $LOGGER.info "TRACK\tFamily line of Eo_#{@original_tracked} [g#{@original_generation}] ended with death of #{@tracked_eo} (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
             @tracked_eo.followed = nil
             @tracked_eo = nil
             update_follow
             
-            @environment.pond.select_random if pick_new
+            @environment.pond.select_random if @auto_track
           end
         end
       end
@@ -368,9 +382,10 @@ class Follower
     
     stop_following if @tracked_eo
     
-    @original_tracked = eo
-    @original_tracked.followed = true
-    @tracked_eo = @original_tracked
+    @original_tracked = eo.id
+    @original_generation = eo.generation
+    @tracked_eo = eo
+    @tracked_eo.followed = true
     
     $LOGGER.info "TRACK\tNow tracking #{@tracked_eo} and its family line"
     
@@ -387,10 +402,11 @@ class Follower
       @curr_dialog.kill
       @dna_dialog.kill
       @original_tracked = nil
+      @original_generation = nil
       @curr_dialog = nil
       @dna_dialog = nil
       
-      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of #{@original_tracked} family line."
+      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of Eo_#{@original_tracked} [g#{@original_generation}] family line."
       
       @tracked_eo.followed = nil if @tracked_eo
       @tracked_eo = nil

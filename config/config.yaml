@@ -50,12 +50,12 @@ settings:
   auto_track: true
  eo_constants:
   main:
-   rep_threshold: 15
-   rep_rate: 3300
+   rep_threshold: 17.5
+   rep_rate: 3667
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98
-   spike_damage: 1
+   spike_damage: 1.5
   body:
    mass: 10
    recovery: 0.0125
@@ -81,7 +81,7 @@ settings:
   types:
    activity: true
    population: true
-   framerate: true
+   framerate: false
 override:
  profile:
   eo_constants:

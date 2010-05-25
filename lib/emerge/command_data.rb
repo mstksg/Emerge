@@ -4,11 +4,11 @@ module Command_Data
   @@COMMAND_WEIGHTS   = { :move           => 1.5 ,
                           :wait           => 1.0 ,
                           :turn           => 1.0 ,
-                          :stop           => 0.15,
-                          :emit_energy    => 0.2 ,
+                          :stop           => 0.1 ,
+                          :emit_energy    => 0.15,
                           :multiply_speed => 0.5 ,
                           :set_speed      => 0.5 ,
-                          :shoot_spike    => 0.2 ,
+                          :shoot_spike    => 0.24,
                           :if             => 1.0  }
   @@COMMAND_WEIGHT_SUM= @@COMMAND_WEIGHTS.values.inject { |sum,n| sum+n }
   @@COMMAND_RANGES    = { :move           => [[-180,180],[0.05,1]]   ,
@@ -18,7 +18,7 @@ module Command_Data
                           :emit_energy    => [[0,7.5],[15,345],[1,6]],
                           :multiply_speed => [[0,2.5]]               ,
                           :set_speed      => [[0,1]]                 ,
-                          :shoot_spike    => [[0,5],[-180,180],[1,6]] }
+                          :shoot_spike    => [[1,6],[-180,180],[1,6]] }
   
   
   
