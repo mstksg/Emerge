@@ -83,8 +83,8 @@ class Pond
   
   def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
     
@@ -106,8 +106,8 @@ class Pond
     
     for corner in new_eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       @eo_zones[row*@zone_count+col] << new_eo unless @eo_zones[row*@zone_count+col].include? new_eo
       
     end
@@ -115,30 +115,30 @@ class Pond
   end
   
   def point_in_zone point
-    col = (point[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-    row = (point[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+    col = ((point[0] % @environment.width)/@zone_width).to_i
+    row = ((point[1] % @environment.height)/@zone_height).to_i
     return row*@zone_count+col
   end
   
   def add_food(energy=10,x=0,y=0)
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @foods << Pond_Bits::Food.new(energy,x,y)
   end
   
   def add_packet(energy,x=0,y=0,speed=0,angle=0)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @packets << Pond_Bits::Packet.new(self,energy,x,y,speed,angle)
   end
   
   def add_spike(mass,owner=nil,x=0,y=0,speed=0,angle=0)
     
-    x = x.boundarize(0,@environment.width,false,true)
-    y = y.boundarize(0,@environment.height,false,true)
+    x %= @environment.width
+    y %= @environment.height
     
     @spikes << Pond_Bits::Spike.new(self,mass,owner,x,y,speed,angle)
   end
@@ -175,8 +175,8 @@ class Pond
     
     for corner in eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       
       checks |= @eo_zones[row*@zone_count+col]
       
@@ -191,8 +191,8 @@ class Pond
     
     for corner in eo.rect.corners
       
-      col = (corner[0].boundarize(0,@environment.width,true,false)/@zone_width).to_i
-      row = (corner[1].boundarize(0,@environment.height,true,false)/@zone_height).to_i
+      col = ((corner[0] % @environment.width)/@zone_width).to_i
+      row = ((corner[1] % @environment.height)/@zone_height).to_i
       
       checks |= @food_zones[row*@zone_count+col]
       

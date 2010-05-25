@@ -94,13 +94,7 @@ class Eo
   end
   
   def update_pos
-    @pos = Array.new(2) { |i| @pos[i] + @velocity[i] }
-    
-    for i in 0..1
-      
-      @pos[i] = @pos[i].boundarize(0,@pond.environment.size[i],false,true)
-      
-    end
+    @pos = Array.new(2) { |i| (@pos[i] + @velocity[i])%@pond.environment.size[i] }
   end
   
   def set_velocity velo
