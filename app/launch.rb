@@ -8,24 +8,32 @@ Dir.require_all("lib/emerge/")
 require $EMERGE_DIRECTORY+"/app/dialog.rb"
 require $EMERGE_DIRECTORY+"/app/environment.rb"
 
-$LOGGER.debug "Settings:\tReproduction Rate:\t1/#{$REP_RATE}"
-$LOGGER.debug "Settings:\tMutation Rate:\t\t#{$MUTATION_FACTOR}"
-$LOGGER.debug "Settings:\tBrain Mutation Rate:\t\t#{$BRAIN_MUTATE_FACTOR}/#{$FORGET_FACTOR}"
-$LOGGER.debug "Settings:\tMutation Variance:\t#{$MUTATION_VARIANCE}"
+unless defined?(Ocra)             ## if being compiled
 
-environment = Environment.new
+  $LOGGER.debug "Settings:\tReproduction Rate:\t1/#{$REP_RATE}"
+  $LOGGER.debug "Settings:\tMutation Rate:\t\t#{$MUTATION_FACTOR}"
+  $LOGGER.debug "Settings:\tBrain Mutation Rate:\t\t#{$BRAIN_MUTATE_FACTOR}/#{$FORGET_FACTOR}"
+  $LOGGER.debug "Settings:\tMutation Variance:\t#{$MUTATION_VARIANCE}"
 
-begin
-  environment.run
-rescue SystemExit
+  environment = Environment.new
   
-rescue Exception => err
-  $LOGGER.fatal err.class.name+": "+err.message
-  for i in err.backtrace
-    $LOGGER.error i
+  begin
+    environment.run
+  rescue SystemExit
+    
+  rescue Exception => err
+    $LOGGER.fatal err.class.name+": "+err.message
+    for i in err.backtrace
+      $LOGGER.error i
+    end
   end
+  
+  $LOGGER.info "Quitting..."
+  Rubygame.quit
+  $LOGGER.info "Closed."
+else
+  
+  $LOGGER.info "Quitting..."
+  $LOGGER.info "Closed."
+  
 end
-
-$LOGGER.info "Quitting..."
-Rubygame.quit
-$LOGGER.info "Closed."

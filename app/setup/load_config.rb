@@ -1,6 +1,6 @@
 require "yaml"
 
-config = YAML::load(File.open($EMERGE_DIRECTORY+"/config/config.yaml"))
+config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 
 $env_choice = config["default_choice"] if $env_choice == nil
 

@@ -16,15 +16,26 @@
 
 require "rubygems"
 
-$EMERGE_DIRECTORY = File.dirname(__FILE__)
+$EMERGE_DIRECTORY = File.dirname(File.expand_path($0))
+$LOAD_PATH.unshift File.dirname($EMERGE_DIRECTORY)
 
-require "lib/utils/ruby_mods"
+if ENV['OCRA_EXECUTABLE']                               # if being run as an OCRA executable
+  $LOADING_PATH = File.dirname(ENV['OCRA_EXECUTABLE'])
+else
+  $LOADING_PATH = $EMERGE_DIRECTORY
+end
+
+require $EMERGE_DIRECTORY+"/lib/utils/ruby_mods"
 Dir.require_all("lib/utils/")
 
-require "app/setup/load_args"
-require "app/setup/load_config"
-require "app/setup/setup_log"
+require $EMERGE_DIRECTORY+"/app/setup/load_args"
+require $EMERGE_DIRECTORY+"/app/setup/load_config"
+require $EMERGE_DIRECTORY+"/app/setup/setup_log"
 
-setup_log "logs", "log"
+if defined?(Ocra)
+  setup_log $EMERGE_DIRECTORY+"/logs", "log"
+else
+  setup_log "logs", "log"
+end
 
-require "app/launch"
+require $EMERGE_DIRECTORY+"/app/launch"

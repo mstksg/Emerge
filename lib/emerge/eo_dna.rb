@@ -1,8 +1,8 @@
 ## This class handles all the genetic information for an eo, and handles mutation
 ## procedures as well.
 
-require $EMERGE_DIRECTORY+"/lib/emerge/command_data.rb"
-require $EMERGE_DIRECTORY+"/lib/utils/mutations.rb"
+require $EMERGE_DIRECTORY+"/lib/emerge/command_data"
+require $EMERGE_DIRECTORY+"/lib/utils/mutations"
 
 class Eo_DNA
   
