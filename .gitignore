@@ -1,0 +1,6 @@
+/logs
+/script
+/test
+.loadpath
+.project
+profiler.rb

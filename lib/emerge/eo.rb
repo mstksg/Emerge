@@ -12,7 +12,7 @@ class Eo
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
               :velocity,:velo_magnitude,:mass,:id,:generation,
-              :descendants,:death_cause,:angle_vect
+              :death_cause,:angle_vect
   attr_accessor :pos,:followed
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
@@ -94,13 +94,7 @@ class Eo
   end
   
   def update_pos
-    @pos = Array.new(2) { |i| @pos[i] + @velocity[i] }
-    
-    for i in 0..1
-      
-      @pos[i] = @pos[i].boundarize(0,@pond.environment.size[i],false,true)
-      
-    end
+    @pos = Array.new(2) { |i| (@pos[i] + @velocity[i])%@pond.environment.size[i] }
   end
   
   def set_velocity velo
@@ -196,7 +190,7 @@ class Eo
         elsif dist < 7+@feeler.length and not @food_triggered.include? food
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
-          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0 
+          if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0
             feeler_triggered(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
@@ -238,14 +232,14 @@ class Eo
     return Eo.new(new_dna, new_energy)
   end
   
-  def replicate
+  def replicate force=false
     
     if @energy >= $ENERGY_CAP
       reproduce_now = true
       $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
     end
     
-    if reproduce_now or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
+    if reproduce_now or force or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
       
       log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
       
@@ -289,7 +283,7 @@ class Eo
       descendant2 = @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
                                  @angle-90,@generation+1,angle_disp,speed_frac)
       
-      @descendants = [descendant1,descendant2]
+      @pond.archive.store_eo(id,descendant1.id,descendant2.id)
       
       return true
     end
@@ -364,6 +358,22 @@ class Eo
     die :eaten
   end
   
+  def turn_into_food
+  @energy *= 0.9
+    while @energy > 0
+      drop = rand*15+5
+      x = @pos[0]+rand*10-5
+      y = @pos[1]+rand*10-5
+      if @energy > drop
+        @pond.add_food(drop,x,y)
+        @energy -= drop
+      else
+        @pond.add_food(@energy,x,y)
+        @energy = 0
+      end
+    end
+  end
+  
   def die reason=:unknown,log=false
     @death_cause = reason
     if log
@@ -376,6 +386,9 @@ class Eo
     end
     @pond.remove_eo(self)
     kill
+    if reason != :reproduction and reason != :eaten and @energy > 0
+      turn_into_food
+    end
   end
   
   def inspect
@@ -394,34 +407,6 @@ class Eo
       return false
     end
   end
-  
-  def find_first_living_descendant
-    return self if @groups.size > 0
-    return nil unless @descendants
-    count = 0
-    
-    2.times do |n|
-      branch = @descendants[n].find_first_living_descendant
-      return branch if branch
-    end
-    
-    #####  THIS IS TO CLEAR UP MEMORY FOR GARGABE COLLECTOR  #####
-    #####      AND TO SPEED UP FIRST DESCENDANT FINDING      #####
-    @descendants = nil
-    ##### CAN BE REMOVED IF NEED TO TRACK DESCENDANTS ARISES #####
-    
-    return nil
-  end
-  
-  ##### WILL NOT WORK AS LONG AS THE PRECEDING #####
-  #####        FUNCTION IS EVER CALLED         #####
-  #  def find_all_descendants
-  #    if @descendants
-  #      return find_all_descendants[@descendants[0]] | find_all_descendants[@descendants[1]]
-  #    else
-  #      return []
-  #    end
-  #  end
   
   def is_dead
     return @groups.size > 0
@@ -489,10 +474,11 @@ class Eo_Body
   
   def spiked spiker, direct=true
     diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
+    damage = (spiker.mass+spiker.energy_content)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE/2
     if direct
-      @hp -= spiker.mass*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+      @hp -= damage
     else
-      @hp -= (spiker.mass/2)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE
+      @hp -= damage/2
     end
     if @hp < 0
       if spiker.owner
@@ -501,11 +487,10 @@ class Eo_Body
           spiker.owner.log_message message,false
         end
       else
-        
         message = "Eo_#{@owner.id}\tKilled by spike from unknown Eo;\ta#{@owner.age}, e#{@owner.energy.to_i}"
         @owner.log_message message
-        
       end
+      
       @owner.die :spiked
     end
   end
