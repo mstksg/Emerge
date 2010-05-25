@@ -329,11 +329,7 @@ class Follower
     
   end
   
-  ## This new follow tracker method is faster than the last,
-  ## and more elegant, and also never misses a possible descendant.
-  ## However, it has potential for high memory leakage the
-  ## longer the tracked family survives (which is, potentially,
-  ## forever)
+  
   def update_follow
     
     if @tracked_eo == nil
@@ -352,8 +348,6 @@ class Follower
       if @tracked_eo.groups.size == 0
         next_track_id = @archive.find_first_living_descendant(@original_tracked)
         next_track = @environment.pond.eos.find { |eo| eo.id == next_track_id }
-        puts next_track_id
-        puts next_track
         if @archive.has_descendants @tracked_eo.id
           $LOGGER.info "TRACK\tNow tracking #{next_track} (child of Eo_#{@tracked_eo.id}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
           @tracked_eo.followed = nil

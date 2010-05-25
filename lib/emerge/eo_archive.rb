@@ -35,12 +35,17 @@ class Eo_Archive
       id_num = id.to_i(36)
     else
       id_num = id
+      id = id.to_s(36)
     end
     
     curr_check = @database[id_num]
     
     if curr_check == nil
-      return @eo_group.any? { |eo| eo.id == id }
+      if @eo_group.any? { |eo| eo.id == id }
+        return id
+      else
+        return nil
+      end
     end
     
     2.times do |n|
