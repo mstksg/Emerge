@@ -39,7 +39,7 @@ class Eo
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     @total_rep_rate = $REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10)
-    @total_rep_threshold = @dna.repro_rate*2.5+2.5
+    @total_rep_threshold = $REP_MINIMUM+@dna.repro_rate*2.5
     
     
     @pond = pond
