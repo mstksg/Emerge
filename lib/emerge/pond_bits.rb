@@ -95,7 +95,7 @@ module Pond_Bits
       
       @owner = owner
       @mass = mass
-      @drag_factor = $POND_DRAG*(@mass/3)
+      @drag_factor = $POND_DRAG*(@mass/3)/4
       
       @pos = [x,y]
       
