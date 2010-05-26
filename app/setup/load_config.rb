@@ -36,7 +36,7 @@ $POND_REPOP_COUNT = pond_settings["repop"]
 eo_consts = settings["eo_constants"]
 
 # Main #
-$REP_THRESHOLD = eo_consts["main"]["rep_threshold"]
+$REP_VARIANCE = eo_consts["main"]["rep_variance"]
 $REP_RATE = eo_consts["main"]["rep_rate"]
 $ENERGY_CAP = eo_consts["main"]["energy_cap"]
 $HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]

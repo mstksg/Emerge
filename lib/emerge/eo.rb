@@ -38,6 +38,8 @@ class Eo
     @eo_triggered = []
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
+    @total_rep_rate = $REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate)
+    @total_rep_threshold = @dna.repro_rate*3+2.5
     
     
     @pond = pond
@@ -239,7 +241,7 @@ class Eo
       $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
     end
     
-    if reproduce_now or force or ((@energy > $REP_THRESHOLD) and (rand*$REP_RATE < @energy))
+    if reproduce_now or force or ((@energy > @total_rep_threshold) and (rand*@total_rep_rate < @energy))
       
       log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
       
