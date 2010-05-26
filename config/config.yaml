@@ -50,8 +50,8 @@ settings:
   auto_track: true
  eo_constants:
   main:
-   rep_threshold: 17.5
-   rep_rate: 3667
+   rep_variance: 0.2
+   rep_rate: 3750
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98
