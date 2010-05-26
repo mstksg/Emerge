@@ -18,9 +18,12 @@ require "rubygems"
 
 $EMERGE_DIRECTORY = File.dirname(File.expand_path($0))
 $LOAD_PATH.unshift File.dirname($EMERGE_DIRECTORY)
+SDL_PATHS = [ $EMERGE_DIRECTORY+"/lib/SDL",$EMERGE_DIRECTORY+"/lib/SDL/" ]
 
 if ENV['OCRA_EXECUTABLE']                               # if being run as an OCRA executable
   $LOADING_PATH = File.dirname(ENV['OCRA_EXECUTABLE'])
+  SDL_PATHS << $LOADING_PATH+"/lib/SDL"
+  SDL_PATHS << $LOADING_PATH+"/lib/SDL/"
 else
   $LOADING_PATH = $EMERGE_DIRECTORY
 end
