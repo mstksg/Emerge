@@ -38,7 +38,7 @@ end
 
 class Dialog
   include Sprites::Sprite
-  @@DIALOG_FONT = TTF.new("#{File.dirname(__FILE__)}/../data/fonts/#{$FONT_FILE}",12)
+  @@DIALOG_FONT = TTF.new($LOADING_PATH+"/data/fonts/#{$FONT_FILE}",12)
   
   #  def draw(destination)
   #    self.image.blit(destination, self.rect)

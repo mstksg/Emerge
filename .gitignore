@@ -1,6 +1,7 @@
 /logs
-/script
 /test
+/bin
+/dll
 .loadpath
 .project
 profiler.rb

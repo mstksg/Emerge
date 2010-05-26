@@ -1,6 +1,6 @@
 require "yaml"
 
-config = YAML::load(File.open(File.dirname(__FILE__)+"/../../config/config.yaml"))
+config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 
 $env_choice = config["default_choice"] if $env_choice == nil
 
@@ -36,7 +36,7 @@ $POND_REPOP_COUNT = pond_settings["repop"]
 eo_consts = settings["eo_constants"]
 
 # Main #
-$REP_THRESHOLD = eo_consts["main"]["rep_threshold"]
+$REP_VARIANCE = eo_consts["main"]["rep_variance"]
 $REP_RATE = eo_consts["main"]["rep_rate"]
 $ENERGY_CAP = eo_consts["main"]["energy_cap"]
 $HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]

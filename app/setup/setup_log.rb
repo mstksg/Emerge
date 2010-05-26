@@ -22,7 +22,7 @@ def setup_log dir, name
   log.add Log4r::StdoutOutputter.new("console", :formatter => console_format,
                                       :level => $LOG_CONSOLE_LEVEL)
   
-  if $LOG_ACT
+  if $LOG_ACT and not defined?(Ocra)
     file_format = PatternFormatter.new(:pattern => "[ %d ] %l\t %m")
     log.add FileOutputter.new("file", :filename => logfile, :trunc => false,
                                 :formatter=>file_format, :level => $LOG_FILE_LEVEL)
@@ -30,20 +30,31 @@ def setup_log dir, name
   
   pop_log_file = logfile.sub(".txt","[p].csv")
   
-  if $LOG_POP
+  if $LOG_POP and not defined?(Ocra)
     pop_log = Logger.new "population_log"
     format = PatternFormatter.new(:pattern => "%m")
-    pop_log.add FileOutputter.new("pop_output", :filename => pop_log_file, :formatter => format)
+    pop_log.add FileOutputter.new("pop_output", :filename => pop_log_file, :formatter => format,
+                                    :trunc => false)
     $POP_LOG = pop_log
   end
   
   fr_log_file = logfile.sub(".txt","[f].csv")
   
-  if $LOG_FR
+  if $LOG_FR and not defined?(Ocra)
     fr_log = Logger.new "framerate_log"
     format = PatternFormatter.new(:pattern => "%m")
-    fr_log.add FileOutputter.new("fr_output", :filename => fr_log_file, :formatter => format)
+    fr_log.add FileOutputter.new("fr_output", :filename => fr_log_file, :formatter => format,
+                                  :trunc => false)
     $FR_LOG = fr_log
+  end
+  
+  error_log_file = logfile.sub(".txt","[e].txt")
+  
+  if ENV['OCRA_EXECUTABLE']                                                 ## if being ran as an executable
+    format = PatternFormatter.new(:pattern => "[ %d ] %l\t %m")
+    log.add FileOutputter.new("error_output", :filename => error_log_file, :formatter => format,
+                                :trunc => false, :level => 3)
+    $LOG_ERROR = true
   end
   
   $LOGGER = log
@@ -52,6 +63,7 @@ def setup_log dir, name
   $LOGGER.info "Logging activity in #{logfile}" if $LOG_ACT
   $LOGGER.info "Logging population in #{pop_log_file}" if $LOG_POP
   $LOGGER.info "Logging framerate in #{fr_log_file}" if $LOG_FR
+  $LOGGER.info "Logging errors in #{error_log_file}" if $LOG_ERROR
   
   case $LOG_CONSOLE_LEVEL
   when 0..1

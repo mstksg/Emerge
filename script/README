@@ -1,0 +1,6 @@
+First, acquire all required SDL dll's and place them in /dll
+
+0) clear /bin/ directory if already exists
+1) run "ocra emerge.rb" on main directory (for some reason, can't run it as ..\emerge.rb)
+2) run "generate_bin.bat" on /script/
+3) Zip up or distribute bin however you'd like
