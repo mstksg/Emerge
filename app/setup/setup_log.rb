@@ -48,7 +48,7 @@ def setup_log dir, name
     $FR_LOG = fr_log
   end
   
-  error_log_file = logfile.sub(".txt","[f].txt")
+  error_log_file = logfile.sub(".txt","[e].txt")
   
   if ENV['OCRA_EXECUTABLE']                                                 ## if being ran as an executable
     format = PatternFormatter.new(:pattern => "[ %d ] %l\t %m")
