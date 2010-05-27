@@ -361,11 +361,14 @@ class Eo
   end
   
   def turn_into_food
-  @energy *= 0.9
+  @energy *= $B_DECAY
     while @energy > 0
       drop = rand*15+5
-      x = @pos[0]+rand*10-5
-      y = @pos[1]+rand*10-5
+      max_dist = Math.log(@energy+1)*2.5
+      dist = rand*max_dist*2-max_dist
+      displace = Vector_Array.from_angle(rand*360).mult(dist)
+      x = @pos[0]+displace[0]
+      y = @pos[1]+displace[1]
       if @energy > drop
         @pond.add_food(drop,x,y)
         @energy -= drop
