@@ -39,7 +39,7 @@ class Eo
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     @total_rep_rate = $REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10)
-    @total_rep_threshold = $REP_MINIMUM+@dna.repro_rate*2.5
+    @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.repro_rate/10 + $REP_MINIMUM
     
     
     @pond = pond
@@ -148,7 +148,8 @@ class Eo
         ##    Later on, arrange these in order of least intense to most intense
         
         vec = Vector_Array.from_points(other.pos,@pos)
-        if vec.magnitude <= @feeler.max_dist
+        dist = vec.magnitude
+        if dist <= @feeler.max_dist
           
           feeler_dist = @angle_vect.distance_to_point(other.pos,@pos)
           if feeler_dist <= 5
@@ -166,6 +167,10 @@ class Eo
           
         end
         
+        if dist <= 7.5
+          newtonian_collision other
+          other.newtonian_collision self
+        end
         
       end
     end
@@ -201,6 +206,20 @@ class Eo
         end
         
       end
+    end
+  end
+  
+  def newtonian_collision other
+    unless @velo_magnitude == 0
+      normal = Vector_Array.from_points(other.pos,@pos).ortho_2D.unit_vector
+      new_velo = normal.mult(2*(@velocity.dot normal)).sub(@velocity)
+      
+      displace = new_velo.unit_vector.mult(10-Vector_Array.from_points(other.pos,@pos).magnitude)
+      @pos = Array.new(2) { |i| (@pos[i] + displace[i])%@pond.environment.size[i] }
+      set_rects
+      
+      set_velocity(new_velo)
+      
     end
   end
   
@@ -361,11 +380,14 @@ class Eo
   end
   
   def turn_into_food
-  @energy *= 0.9
+  @energy *= $B_DECAY
     while @energy > 0
       drop = rand*15+5
-      x = @pos[0]+rand*10-5
-      y = @pos[1]+rand*10-5
+      max_dist = Math.log(@energy+1)*2.5
+      dist = rand*max_dist*2-max_dist
+      displace = Vector_Array.from_angle(rand*360).mult(dist)
+      x = @pos[0]+displace[0]
+      y = @pos[1]+displace[1]
       if @energy > drop
         @pond.add_food(drop,x,y)
         @energy -= drop

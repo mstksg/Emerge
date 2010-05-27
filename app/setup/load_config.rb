@@ -38,7 +38,8 @@ eo_consts = settings["eo_constants"]
 # Main #
 $REP_VARIANCE = eo_consts["main"]["rep_variance"]
 $REP_RATE = eo_consts["main"]["rep_rate"]
-$REP_MINIMUM = eo_consts["main"]["rep_minimum"]
+$REP_MINIMUM = eo_consts["main"]["rep_t_minimum"]
+$REP_MAXIMUM = eo_consts["main"]["rep_t_maximum"]
 $ENERGY_CAP = eo_consts["main"]["energy_cap"]
 $HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]
 $HEAL_DRAIN_MAX = eo_consts["main"]["healing_drain_max"]
@@ -48,6 +49,7 @@ $SPIKE_DAMAGE = eo_consts["main"]["spike_damage"]
 $B_MASS = eo_consts["body"]["mass"]
 $B_RECOVERY = eo_consts["body"]["recovery"]
 $B_DAMAGE = eo_consts["body"]["damage"]
+$B_DECAY = eo_consts["body"]["decay"]
 
 # Feeler #
 $F_POKE = eo_consts["feeler"]["poke_force_factor"]
