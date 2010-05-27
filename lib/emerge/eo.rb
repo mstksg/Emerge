@@ -148,7 +148,8 @@ class Eo
         ##    Later on, arrange these in order of least intense to most intense
         
         vec = Vector_Array.from_points(other.pos,@pos)
-        if vec.magnitude <= @feeler.max_dist
+        dist = vec.magnitude
+        if dist <= @feeler.max_dist
           
           feeler_dist = @angle_vect.distance_to_point(other.pos,@pos)
           if feeler_dist <= 5
@@ -166,6 +167,10 @@ class Eo
           
         end
         
+        if dist <= 7.5
+          newtonian_collision other
+          other.newtonian_collision self
+        end
         
       end
     end
@@ -201,6 +206,20 @@ class Eo
         end
         
       end
+    end
+  end
+  
+  def newtonian_collision other
+    unless @velo_magnitude == 0
+      normal = Vector_Array.from_points(other.pos,@pos).ortho_2D.unit_vector
+      new_velo = normal.mult(2*(@velocity.dot normal)).sub(@velocity)
+      
+      displace = new_velo.unit_vector.mult(10-Vector_Array.from_points(other.pos,@pos).magnitude)
+      @pos = Array.new(2) { |i| (@pos[i] + displace[i])%@pond.environment.size[i] }
+      set_rects
+      
+      set_velocity(new_velo)
+      
     end
   end
   
