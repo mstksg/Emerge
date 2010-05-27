@@ -51,9 +51,9 @@ settings:
  eo_constants:
   main:
    rep_variance: 0.15
-   rep_rate: 3750
-   rep_t_minimum: 5
-   rep_t_maximum: 25
+   rep_rate: 4333
+   rep_t_minimum: 15
+   rep_t_maximum: 30
    energy_cap: 200
    healing_drain_min: 0.94
    healing_drain_max: 0.98
