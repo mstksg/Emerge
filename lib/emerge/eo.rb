@@ -360,9 +360,8 @@ class Eo
   end
   
   def emit_energy amount, angle, speed
-    velo_vect = Vector_Array.new(@velocity)
     packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
-    packet_final_vect = packet_angle_vect.mult(speed).add(velo_vect)
+    packet_final_vect = packet_angle_vect.mult(speed).add(@velocity)
     
     new_x = @pos[0] + packet_angle_vect[0]*7
     new_y = @pos[1] + packet_angle_vect[1]*7
@@ -373,9 +372,8 @@ class Eo
   end
   
   def shoot_spike mass, angle, speed
-    velo_vect = Vector_Array.new(@velocity)
     spike_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
-    spike_final_vect = spike_angle_vect.mult(speed).add(velo_vect)
+    spike_final_vect = spike_angle_vect.mult(speed).add(@velocity)
     
     new_x = @pos[0] + spike_angle_vect[0]*7
     new_y = @pos[1] + spike_angle_vect[1]*7

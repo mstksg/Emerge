@@ -9,3 +9,4 @@
     Actually, it's probably a good idea because it gives low-energy creatures
     a second chance, as well as normalizing abnormally high energy creatures
 - move all physics/collision handling into Chipmunk
+- watch out for possible bug with shooting spikes/packets in the wrong direction?
