@@ -10,3 +10,7 @@
     a second chance, as well as normalizing abnormally high energy creatures
 - move all physics/collision handling into Chipmunk
 - watch out for possible bug with shooting spikes/packets in the wrong direction?
+- generalize shooting spikes/packets into a generic "load buffer" "shoot buffer", to
+    make it more like emergent behavior
+    - actually, should go on a spree to generalize more of the program functions;
+      it's a bit too arbitrary right now.  hm...actually most of them aren't.

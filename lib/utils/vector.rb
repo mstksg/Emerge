@@ -1,5 +1,10 @@
 class Vector_Array < Array
   
+  def initialize array
+    super(array)
+    self.freeze
+  end
+  
   def self.from_array array
     Vector_Array.new(Array.new(array))
   end
@@ -58,10 +63,7 @@ class Vector_Array < Array
   end
   
   def ortho_2D    ## counter clockwise
-    ortho = Vector_Array.new(2)
-    ortho[0] = -self[1]
-    ortho[1] = self[0]
-    return ortho
+    Vector_Array.new([-self[1],self[0]])
   end
   
   def angle deg=true
