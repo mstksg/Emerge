@@ -167,9 +167,12 @@ class Eo
           
         end
         
-        if dist <= 7.5
-          newtonian_collision other
-          other.newtonian_collision self
+        if dist <= 8
+          self_displace = determine_newtonian_collision other
+          other_displace = other.determine_newtonian_collision self
+          
+          execute_newtonian_collision self_displace
+          other.execute_newtonian_collision other_displace
         end
         
       end
@@ -209,18 +212,26 @@ class Eo
     end
   end
   
-  def newtonian_collision other
+  def determine_newtonian_collision other
     unless @velo_magnitude == 0
-      normal = Vector_Array.from_points(other.pos,@pos).ortho_2D.unit_vector
-      new_velo = normal.mult(2*(@velocity.dot normal)).sub(@velocity)
+      diff = Vector_Array.from_points(other.pos,@pos)
+      normal = diff.unit_vector.ortho_2D
+      new_velo = normal.mult(2*(@velocity.dot(normal))).sub(@velocity)
       
-      displace = new_velo.unit_vector.mult(10-Vector_Array.from_points(other.pos,@pos).magnitude)
-      @pos = Array.new(2) { |i| (@pos[i] + displace[i])%@pond.environment.size[i] }
-      set_rects
+      new_velo = new_velo.mult(-1) if (new_velo.dot diff) < 0
       
       set_velocity(new_velo)
       
+      return new_velo.unit_vector.mult((10-diff.magnitude)/2) ## initial displacement
+                                                              ## only 1/2, because both are displaced equally
+    else
+      return Vector_Array.from_array([0,0])
     end
+  end
+  
+  def execute_newtonian_collision displace_vector
+    @pos = Array.new(2) { |i| (@pos[i] + displace_vector[i])%@pond.environment.size[i] }
+    set_rects
   end
   
   def energy_decay
@@ -349,9 +360,8 @@ class Eo
   end
   
   def emit_energy amount, angle, speed
-    velo_vect = Vector_Array.new(@velocity)
     packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
-    packet_final_vect = packet_angle_vect.mult(speed).add(velo_vect)
+    packet_final_vect = packet_angle_vect.mult(speed).add(@velocity)
     
     new_x = @pos[0] + packet_angle_vect[0]*7
     new_y = @pos[1] + packet_angle_vect[1]*7
@@ -362,9 +372,8 @@ class Eo
   end
   
   def shoot_spike mass, angle, speed
-    velo_vect = Vector_Array.new(@velocity)
     spike_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
-    spike_final_vect = spike_angle_vect.mult(speed).add(velo_vect)
+    spike_final_vect = spike_angle_vect.mult(speed).add(@velocity)
     
     new_x = @pos[0] + spike_angle_vect[0]*7
     new_y = @pos[1] + spike_angle_vect[1]*7
