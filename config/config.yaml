@@ -55,8 +55,8 @@ settings:
    rep_t_minimum: 15
    rep_t_maximum: 30
    energy_cap: 200
-   healing_drain_min: 0.94
-   healing_drain_max: 0.98
+   healing_drain_min: 0.942
+   healing_drain_max: 0.985
    spike_damage: 1.5
   body:
    mass: 10
