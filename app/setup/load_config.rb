@@ -1,8 +1,36 @@
 require "yaml"
 
-config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 
-$env_choice = config["default_choice"] if $env_choice == nil
+
+yaml_config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
+$env_choice = yaml_config["default_choice"] if $env_choice == nil
+
+def process_config yaml_hash
+  $env_choice = yaml_hash["default_choice"] if $env_choice == nil
+  
+end
+
+def fill_tree filler,override
+  out = {}
+  for i in filler.keys |k|
+    if filler[i].class == Hash
+      if override[i]
+        out[i] = fill_tree filler[i],override[i]
+      else
+        out[i] = filler[i]
+      end
+    else
+      if override[i]
+        out[i] = override[i]
+      else
+        out[i] = filler[i]
+      end
+    end
+  end
+end
+
+config = process_config YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
+
 
 settings = config["settings"]
 resources = config["resource"]
