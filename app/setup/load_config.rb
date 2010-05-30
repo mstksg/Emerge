@@ -6,31 +6,39 @@ yaml_config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 $env_choice = yaml_config["default_choice"] if $env_choice == nil
 
 def process_config yaml_hash
-  $env_choice = yaml_hash["default_choice"] if $env_choice == nil
+  default_override = yaml_hash["override"]
   
+  $env_choice = yaml_hash["default_choice"] if $env_choice == nil
+  profile_override = default_override[$env_choice]
+  
+  overrode_config = fill_tree yaml_hash["settings"],default_override
+  full_override = fill_tree overrode_config,profile_override
+  
+  yaml_hash["settings"] = full_override
+  
+  return yaml_hash
 end
 
 def fill_tree filler,override
-  out = {}
-  for i in filler.keys |k|
-    if filler[i].class == Hash
-      if override[i]
-        out[i] = fill_tree filler[i],override[i]
-      else
-        out[i] = filler[i]
-      end
+  
+  return filler unless override
+  return override if filler.class != Hash
+  
+  filled = {}
+  for i in filler.keys
+    if override[i]
+      filled[i] = fill_tree filler[i],override[i]
     else
-      if override[i]
-        out[i] = override[i]
-      else
-        out[i] = filler[i]
-      end
+      filled[i] = filler[i]
     end
   end
+  
+  return filled
 end
 
-config = process_config YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 
+yaml_config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
+config = process_config yaml_config
 
 settings = config["settings"]
 resources = config["resource"]
