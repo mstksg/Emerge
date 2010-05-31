@@ -1,6 +1,8 @@
 require "rubygems"
 require "rubygame"
 
+require "set"
+
 include Rubygame
 
 module Sprites
@@ -15,6 +17,10 @@ module Sprites
     def get_sprites
       Array.new(self)
     end
+    
+  end
+  
+  class Group_Set < Set
     
   end
   
