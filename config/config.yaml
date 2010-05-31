@@ -86,9 +86,10 @@ settings:
    population: false
    framerate: false
 override:
- profile:
-  eo_constants:
-   dna:
-    initial_variance: 5
+ default_overrides:
+  
+ setting_overrides:
+  profile:
+   initial_variance: 5
 resource:
  font_file: FreeSans.ttf

@@ -4,30 +4,36 @@ yaml_config = YAML::load(File.open($LOADING_PATH+"/config/config.yaml"))
 $env_choice = yaml_config["default_choice"] if $env_choice == nil
 
 def process_config yaml_hash
-  default_override = yaml_hash["override"]
+  total_override = yaml_hash["override"]
   
   $env_choice = yaml_hash["default_choice"] if $env_choice == nil
-  profile_override = default_override[$env_choice]
   
-  overrode_config = fill_tree yaml_hash["settings"],default_override
-  full_override = fill_tree overrode_config,profile_override
+  default_override = total_override["default_overrides"]
+  profile_override = total_override["setting_overrides"][$env_choice]
   
-  yaml_hash["settings"] = full_override
+  overrode_config = yaml_hash["settings"].clone
+  overrode_config = fill_tree overrode_config,default_override if default_override
+  overrode_config = fill_tree overrode_config,profile_override if profile_override
+  
+  yaml_hash["settings"] = overrode_config
   
   return yaml_hash
 end
 
-def fill_tree filler,override
+def fill_tree filler,override_bank
   
-  return filler unless override
-  return override if filler.class != Hash
+  override_bank = {} unless override_bank
   
   filled = {}
   for i in filler.keys
-    if override[i]
-      filled[i] = fill_tree filler[i],override[i]
+    if filler[i].class == Hash
+      filled[i] = fill_tree filler[i],override_bank
     else
-      filled[i] = filler[i]
+      if override_bank[i]
+        filled[i] = override_bank[i]
+      else
+        filled[i] = filler[i]
+      end
     end
   end
   
