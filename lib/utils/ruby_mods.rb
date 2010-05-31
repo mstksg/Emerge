@@ -14,6 +14,12 @@ class Array
   end
 end
 
+class Set
+  def pick_rand
+    self.to_a.pick_rand
+  end
+end
+
 module Math
   
   def self.d2r d
