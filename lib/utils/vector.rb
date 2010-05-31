@@ -1,5 +1,10 @@
 class Vector_Array < Array
   
+  def initialize array
+    super(array)
+    self.freeze
+  end
+  
   def self.from_array array
     Vector_Array.new(Array.new(array))
   end
@@ -14,9 +19,9 @@ class Vector_Array < Array
   end
   
   def dot other
-    if self.size != other.size
-      raise "Can only dot two similar-sized vectors"
-    end
+    # if self.size != other.size
+      # raise "Can only dot two similar-sized vectors"
+    # end
     
     Array.new(self.size) { |i| self[i]*other[i] }.inject { |sum,n| sum+n }
     
@@ -27,17 +32,17 @@ class Vector_Array < Array
   end
   
   def add other
-    if self.size != other.size
-      raise "Can only add two similar-sized vectors"
-    end
+    # if self.size != other.size
+      # raise "Can only add two similar-sized vectors"
+    # end
     
     Vector_Array.new(self.size) { |i| self[i] + other[i] }
   end
   
   def sub other
-    if self.size != other.size
-      raise "Can only subtract two similar-sized vectors"
-    end
+    # if self.size != other.size
+      # raise "Can only subtract two similar-sized vectors"
+    # end
     
     Vector_Array.new(self.size) { |i| self[i] - other[i] }
   end
@@ -58,10 +63,7 @@ class Vector_Array < Array
   end
   
   def ortho_2D    ## counter clockwise
-    ortho = Vector_Array.new(2)
-    ortho[0] = -self[1]
-    ortho[1] = self[0]
-    return ortho
+    Vector_Array.new([-self[1],self[0]])
   end
   
   def angle deg=true

@@ -119,6 +119,17 @@ class Eo
     @rect = @image.make_rect
   end
   
+  def movement_angle
+    angle_from = @angle_vect.angle_to(@velocity)
+    
+    possible_angle = Vector_Array.from_angle(270-(@angle+angle_from))
+    if possible_angle == @velocity.unit_vector
+      return angle_from
+    else
+      return -angle_from
+    end
+  end
+  
   def add_angle added_angle
     set_angle @angle+added_angle
   end

@@ -155,7 +155,7 @@ module Pond_Bits
       for eo in possibles
         vec = Vector_Array.from_points(@pos,eo.pos)
         dist = vec.magnitude
-        if dist <= 5
+        if dist <= 6
           eo.body.spiked(self)
           kill
           return true

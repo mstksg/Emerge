@@ -1,4 +1,5 @@
 mkdir ..\bin\logs
+git log --stat -1 > ..\bin\logs\version.txt
 xcopy ..\lib ..\bin\lib\ /e
 xcopy ..\app ..\bin\app\ /e
 xcopy ..\config ..\bin\config\ /e

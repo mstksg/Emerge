@@ -55,14 +55,14 @@ settings:
    rep_t_minimum: 15
    rep_t_maximum: 30
    energy_cap: 200
-   healing_drain_min: 0.94
-   healing_drain_max: 0.98
+   healing_drain_min: 0.942
+   healing_drain_max: 0.985
    spike_damage: 1.5
   body:
-   mass: 10
+   body_mass: 10
    recovery: 0.0125
-   damage: 0.2
-   decay: 0.95
+   body_damage: 0.2
+   body_decay: 0.95
   feeler:
    poke_force_factor: 0.5
    mass_factor: 0.1
@@ -86,9 +86,10 @@ settings:
    population: false
    framerate: false
 override:
- profile:
-  eo_constants:
-   dna:
-    initial_variance: 5
+ default_overrides:
+  
+ setting_overrides:
+  profile:
+   initial_variance: 5
 resource:
  font_file: FreeSans.ttf
