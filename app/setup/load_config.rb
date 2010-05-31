@@ -74,10 +74,10 @@ def setup_constants config_hash
   $SPIKE_DAMAGE = eo_consts["main"]["spike_damage"]
   
   # Body #
-  $B_MASS = eo_consts["body"]["mass"]
+  $B_MASS = eo_consts["body"]["body_mass"]
   $B_RECOVERY = eo_consts["body"]["recovery"]
-  $B_DAMAGE = eo_consts["body"]["damage"]
-  $B_DECAY = eo_consts["body"]["decay"]
+  $B_DAMAGE = eo_consts["body"]["body_damage"]
+  $B_DECAY = eo_consts["body"]["body_decay"]
   
   # Feeler #
   $F_POKE = eo_consts["feeler"]["poke_force_factor"]

@@ -59,10 +59,10 @@ settings:
    healing_drain_max: 0.985
    spike_damage: 1.5
   body:
-   mass: 10
+   body_mass: 10
    recovery: 0.0125
-   damage: 0.2
-   decay: 0.95
+   body_damage: 0.2
+   body_decay: 0.95
   feeler:
    poke_force_factor: 0.5
    mass_factor: 0.1
