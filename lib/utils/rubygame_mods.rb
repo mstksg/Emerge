@@ -1,8 +1,6 @@
 require "rubygems"
 require "rubygame"
 
-require "set"
-
 include Rubygame
 
 module Sprites

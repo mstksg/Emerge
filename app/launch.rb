@@ -1,5 +1,7 @@
 $LOGGER.debug "Initializing..."
 
+require "set"
+
 require "rubygems"
 require "rubygame"
 Rubygame::TTF.setup()
