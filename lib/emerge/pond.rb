@@ -171,7 +171,7 @@ class Pond
   
   def find_possible_eo_collisions eo
     
-    checks = Array.new
+    checks = Set.new
     
     for corner in eo.rect.corners
       
@@ -187,7 +187,7 @@ class Pond
   end
   
   def find_possible_food_collisions eo
-    checks = Array.new
+    checks = Set.new
     
     for corner in eo.rect.corners
       
