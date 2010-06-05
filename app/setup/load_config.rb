@@ -48,6 +48,8 @@ def setup_constants config_hash
   ##### Environment Settings #####
   $ENV_FRAMERATE = settings["environment"]["framerate"]
   $FRAMERATE_LIMIT = settings["environment"]["framerate_limit"]
+  $ARCHIVE_LIMIT = settings["environment"]["eo_archive_limit"]
+  $ARCHIVE_CLEANUP = settings["environment"]["eo_archive_cleanup"]
   
   env_settings = settings["environment"][$env_choice]
   $ENV_WIDTH = env_settings["w"]
