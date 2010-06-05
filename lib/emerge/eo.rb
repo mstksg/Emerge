@@ -328,6 +328,9 @@ class Eo
       
       @pond.archive.store_eo(id,descendant1.id,descendant2.id)
       
+      @rect = Rect.new([-10,-10,0,0])
+      @col_rect = @rect
+      
       return true
     end
     
