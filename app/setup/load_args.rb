@@ -7,6 +7,7 @@ unless $*.size == 0 or $*.find_all { |a| a =~ /-D/ }.size > 0
   $LOG_POP = false
   $LOG_ACT = false
   $LOG_FR = false
+  $LOG_ERR = false
   $AUTO_TRACKING = false
   
   $*.each do |a|
@@ -14,6 +15,7 @@ unless $*.size == 0 or $*.find_all { |a| a =~ /-D/ }.size > 0
       $LOG_POP = true if a =~ /p/
       $LOG_ACT = true if a =~ /a/
       $LOG_FR = true if a =~ /f/
+      $LOG_ERR = true if a =~ /e/
       check_log = false
     else
       case a
@@ -29,6 +31,7 @@ unless $*.size == 0 or $*.find_all { |a| a =~ /-D/ }.size > 0
         $LOG_POP = false if $LOG_POP == nil
         $LOG_ACT = false if $LOG_ACT == nil
         $LOG_FR = false if $LOG_FR == nil
+        $LOG_ERR = false if $LOG_ERR == nil
         check_log = true
       else
         $env_choice = a

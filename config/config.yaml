@@ -83,10 +83,12 @@ settings:
   file_level: 1
   pop_freq: 25
   fr_freq: 25
+  clean_err: true
   types:
    activity: true
    population: false
    framerate: false
+   error: true
 override:
  default_overrides:
   

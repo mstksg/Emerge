@@ -106,11 +106,13 @@ def setup_constants config_hash
   $LOG_POP = settings["log"]["types"]["population"] if $LOG_POP == nil
   $LOG_ACT = settings["log"]["types"]["activity"] if $LOG_ACT == nil
   $LOG_FR = settings["log"]["types"]["framerate"] if $LOG_FR == nil
+  $LOG_ERR = settings["log"]["types"]["error"] if $LOG_ERR == nil
   
   $LOG_POP_FREQ = settings["log"]["pop_freq"]
   $LOG_FR_FREQ = settings["log"]["fr_freq"]
   $LOG_CONSOLE_LEVEL = settings["log"]["console_level"].to_i if $LOG_CONSOLE_LEVEL == nil
   $LOG_FILE_LEVEL = settings["log"]["file_level"].to_i
+  $ERR_LOG_CLEAN = settings["log"]["clean_err"]
   
   ##### Resource settings #####
   $FONT_FILE = resources["font_file"]
