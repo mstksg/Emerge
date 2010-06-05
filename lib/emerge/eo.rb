@@ -433,6 +433,9 @@ class Eo
     if reason != :reproduction and reason != :eaten and @energy > 0
       turn_into_food
     end
+    
+    @rect = Rect.new([-10,-10,0,0])
+    @col_rect = @rect
   end
   
   def inspect
@@ -509,8 +512,8 @@ class Eo_Body
     if @hp < 0
       poker.eat @owner
       message = "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
-      unless @owner.log_message message
-        poker.log_message message,false
+      unless @owner.log_message message,false
+        poker.log_message message
       end
       @owner.eaten
     end
@@ -527,8 +530,8 @@ class Eo_Body
     if @hp < 0
       if spiker.owner
         message = "Eo_#{@owner.id}\tKilled by spike from Eo_#{spiker.owner.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
-        unless @owner.log_message message
-          spiker.owner.log_message message,false
+        unless @owner.log_message message,false
+          spiker.owner.log_message message
         end
       else
         message = "Eo_#{@owner.id}\tKilled by spike from unknown Eo;\ta#{@owner.age}, e#{@owner.energy.to_i}"
