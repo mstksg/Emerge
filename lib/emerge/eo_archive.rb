@@ -4,6 +4,11 @@ class Eo_Archive
     
     @database = Array.new()
     @eo_group = eo_group
+    @stored_count = 0
+    
+    @archive_limit = $ARCHIVE_LIMIT
+    @archive_limit = 1.0/0 if @archive_limit == 0
+    @reached_limit = false
     
   end
   
@@ -11,6 +16,16 @@ class Eo_Archive
     descendant_array = [descendant_1_id.to_i(36),descendant_2_id.to_i(36)]
     descendant_array.freeze
     @database[id.to_i(36)] = descendant_array
+    @stored_count += 1
+    if @stored_count > @archive_limit
+      clean_up $ARCHIVE_CLEANUP
+      
+      unless @reached_limit
+        $LOGGER.debug "Reached archive limit of #{$ARCHIVE_LIMIT}"
+        @reached_limit = true
+      end
+      
+    end
   end
   
   def find_descendants id
@@ -59,6 +74,17 @@ class Eo_Archive
   def has_descendants id
     id = id.to_i(36) if id.class == String
     return @database[id] != nil
+  end
+  
+  def clean_up count=1
+    c = 0
+    for n in @database
+      next if n == nil
+      @database.delete n
+      @stored_count -= 1
+      c += 1
+      break if c >= count
+    end
   end
   
 end

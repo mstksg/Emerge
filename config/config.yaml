@@ -3,6 +3,8 @@ settings:
  environment:
   framerate: 10
   framerate_limit: 0.075
+  eo_archive_limit: 1000000
+  eo_archive_cleanup: 100000
   huge:
    w: 1000
    h: 750
