@@ -80,6 +80,9 @@ class Vector_Array < Array
     
     return 0 if dotted.nan?         ## either return 0, or return dotted; not sure what to define here
     
+    dotted = 1 if dotted > 1
+    dotted = -1 if dotted < -1
+    
     return Math.d_acos(dotted) if deg
     Math.acos(dotted)
   end
