@@ -16,9 +16,17 @@ module Command_Data
                           :turn           => [[-180,180]]              ,
                           :stop           => []                        ,
                           :emit_energy    => [[1.5,7.5],[15,345],[1,6]],
-                          :multiply_speed => [[0,2.5]]                 ,
+                          :multiply_speed => [[0.01,2.5]]                 ,
                           :set_speed      => [[0,1]]                   ,
                           :shoot_spike    => [[1,6],[-180,180],[1,6]]   }
+  @@COMMAND_WRAPPABLE = { :move           => [true,false]       ,
+                          :wait           => [false]            ,
+                          :turn           => [true]             ,
+                          :stop           => []                 ,
+                          :emit_energy    => [false,true,false] ,
+                          :multiply_speed => [false]            ,
+                          :set_speed      => [false]            ,
+                          :shoot_spike    => [false,true,false]  }
   
   
   
@@ -37,6 +45,12 @@ module Command_Data
                           :momentum => [0,80]  ,
                           :m_angle  => [0,360] ,
                           :random   => [0,1]    }
+  @@IF_WRAPPABLE      = { :energy   => false ,
+                          :age      => false ,
+                          :velocity => false ,
+                          :momentum => false ,
+                          :m_angle  => true  ,
+                          :random   => false  }
   @@IF_COMPS          = [:lt,:gt]
   
   

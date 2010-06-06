@@ -23,7 +23,7 @@ class Vector_Array < Array
       # raise "Can only dot two similar-sized vectors"
     # end
     
-    Array.new(self.size) { |i| self[i]*other[i] }.inject { |sum,n| sum+n }
+    Array.new(self.size) { |i| self[i]*other[i] }.inject(0) { |sum,n| sum+n }
     
   end
   
@@ -76,8 +76,12 @@ class Vector_Array < Array
   end
   
   def angle_to other, deg=true
-    return Math.d_acos(self.unit_vector.dot(other.unit_vector)) if deg
-    Math.acos(self.unit_vector.dot(other.unit_vector))
+    dotted = self.unit_vector.dot(other.unit_vector)
+    
+    return 0 if dotted.nan?         ## either return 0, or return dotted; not sure what to define here
+    
+    return Math.d_acos(dotted) if deg
+    Math.acos(dotted)
   end
   
   alias :normalize :unit_vector
