@@ -34,13 +34,17 @@ module Math
   end
   
   def self.d_asin x
-    r2d( asin(x) )
+    begin
+      r2d( asin(x) )
+    rescue Exception
+      raise "Error while trying to find arcsin of #{x}"
+    end
   end
   def self.d_acos x
     begin
       r2d( acos(x) )
     rescue Exception
-      raise "Improper acosine; attempted to arccos #{x}"
+      raise "Error while trying to find arccos of #{x}"
     end
   end
   def self.d_atan x
