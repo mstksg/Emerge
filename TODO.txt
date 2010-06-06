@@ -16,3 +16,5 @@
       it's a bit too arbitrary right now.  hm...actually most of them aren't.
 - create environment to actually test out everything is working properly, especially
     movement_angle
+- possible conservation of energy mechanism?
+- "wrapping" mutations
