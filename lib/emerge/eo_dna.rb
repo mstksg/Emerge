@@ -190,15 +190,19 @@ class Eo_Command
         @args = Array.new(args.size) { |i|
           Mutations.mutate_percent(@args[i],
                                    @@COMMAND_RANGES[@command][i][0],
-                                   @@COMMAND_RANGES[@command][i][1]) }
+                                   @@COMMAND_RANGES[@command][i][1],
+                                   $MUTATION_VARIANCE/10, 3,
+                                   @@COMMAND_WRAPPABLE[@command][i]) }
       else
         if rand(2) == 1
           @args = [@args[0],@@IF_COMPS[rand(2)], @args[2]]
         else
           @args = [@args[0],@args[1],
           Mutations.mutate_percent(@args[2],
-                                   @@IF_RANGES[@args[0]][0]       ,
-                                   @@IF_RANGES[@args[0]][1])       ]
+                                   @@IF_RANGES[@args[0]][0],
+                                   @@IF_RANGES[@args[0]][1],
+                                   $MUTATION_VARIANCE/10, 3,
+                                   @@IF_WRAPPABLE[@args[0]] ) ]
         end
       end
     end
