@@ -28,11 +28,15 @@ else
   $LOADING_PATH = $EMERGE_DIRECTORY
 end
 
+puts "Loading Emerge library scripts ..."
 require $EMERGE_DIRECTORY+"/lib/utils/ruby_mods"
 Dir.require_all("lib/utils/")
 
 require $EMERGE_DIRECTORY+"/app/setup/load_args"
+
+puts "Loading config settings from /config/config.yaml ..."
 require $EMERGE_DIRECTORY+"/app/setup/load_config"
+
 require $EMERGE_DIRECTORY+"/app/setup/setup_log"
 
 if defined?(Ocra)

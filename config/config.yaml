@@ -69,6 +69,7 @@ settings:
    poke_force_factor: 0.5
    mass_factor: 0.1
   dna:
+   mutate_time_scale: 1
    mutation_factor: 0.13
    mutation_variance: 1.2
    brain_mutate_factor: 0.08

@@ -92,13 +92,14 @@ def setup_constants config_hash
   $F_MASS = eo_consts["feeler"]["mass_factor"]
   
   # DNA #
-  $MUTATION_FACTOR = eo_consts["dna"]["mutation_factor"]
-  $MUTATION_VARIANCE = eo_consts["dna"]["mutation_variance"]
-  $BRAIN_MUTATE_FACTOR = eo_consts["dna"]["brain_mutate_factor"]
-  $FORGET_FACTOR = eo_consts["dna"]["forget_factor"]
+  $MUTATE_TIME_SCALE = eo_consts["dna"]["mutate_time_scale"]
+  $MUTATION_FACTOR = eo_consts["dna"]["mutation_factor"] / $MUTATE_TIME_SCALE
+  $MUTATION_VARIANCE = eo_consts["dna"]["mutation_variance"] / $MUTATE_TIME_SCALE
+  $BRAIN_MUTATE_FACTOR = eo_consts["dna"]["brain_mutate_factor"] / $MUTATE_TIME_SCALE
+  $FORGET_FACTOR = eo_consts["dna"]["forget_factor"] / $MUTATE_TIME_SCALE
   $DNA_INITIAL_VARIANCE = eo_consts["dna"]["initial_variance"]
   $DNA_MUTATION_CURVE = eo_consts["dna"]["mutation_curve"]
-  $DNA_COLOR_VAR = eo_consts["dna"]["color_var_factor"]
+  $DNA_COLOR_VAR = eo_consts["dna"]["color_var_factor"] / $MUTATE_TIME_SCALE
   $PROGRAM_SIZE_LIMIT = eo_consts["dna"]["program_size_limit"]
   $CONTAINER_SIZE_LIMIT = eo_consts["dna"]["container_size_limit"]
   
