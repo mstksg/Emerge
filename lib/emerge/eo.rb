@@ -249,7 +249,7 @@ class Eo
     if @body.hp < @body.shell
       @energy *= (@total_heal_drain) if @body.hp < @body.shell
     end
-    @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
+    @energy -= ((@velo_magnitude+0.2)/(@body.efficiency*20+0.1))+(@mass/40)*$MASS_DRAG
     if @energy < 0
       log_message "Eo_#{@id}\tStarved;\ta#{@age}"
       die :starvation
@@ -472,7 +472,7 @@ class Eo_Body
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
-    @mass = $B_MASS
+    @mass = (@shell+0.5)*$B_MASS_FACTOR
     
     @hp = @shell
     

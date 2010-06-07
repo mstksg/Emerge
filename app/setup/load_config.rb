@@ -81,9 +81,10 @@ def setup_constants config_hash
   $HEAL_DRAIN_MIN = eo_consts["main"]["healing_drain_min"]
   $HEAL_DRAIN_MAX = eo_consts["main"]["healing_drain_max"]
   $SPIKE_DAMAGE = eo_consts["main"]["spike_damage"]
+  $MASS_DRAG = eo_consts["main"]["mass_drag"]
   
   # Body #
-  $B_MASS = eo_consts["body"]["body_mass"]
+  $B_MASS_FACTOR = eo_consts["body"]["body_mass_factor"]
   $B_RECOVERY = eo_consts["body"]["recovery"]
   $B_DAMAGE = eo_consts["body"]["body_damage"]
   $B_DECAY = eo_consts["body"]["body_decay"]
