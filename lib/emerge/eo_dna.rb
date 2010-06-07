@@ -14,17 +14,16 @@ class Eo_DNA
   
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
-  attr_reader :shell,:efficiency,:f_length,:f_strength,:repro_rate,
+  attr_reader :shell,:efficiency,:f_length,:f_strength,
               :b_containers,:b_programs,:birth_program,:color
   
-  def initialize(shell,max_speed,efficiency,f_length,f_strength,repro_rate,
+  def initialize(shell,max_speed,efficiency,f_length,f_strength,
                  b_containers,b_programs,birth_program,color)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
     @f_length = f_length
     @f_strength = f_strength
-    @repro_rate = repro_rate
     @b_containers = Array.new(b_containers)
     @b_programs = Array.new(b_programs)
     @birth_program = birth_program.clone
@@ -32,7 +31,7 @@ class Eo_DNA
   end
   
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
-                    f_strength=1,repro_rate=1,b_containers=[],b_programs=[Command_Block.fresh_block],
+                    f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
                     birth_program=Command_Block.blank_block)
     
     if @@DEFAULT_COLORS.size > 0
@@ -47,7 +46,6 @@ class Eo_DNA
     Mutations.rand_norm_dist(0,10*efficiency),
     Mutations.rand_norm_dist(0,10*f_length),
     Mutations.rand_norm_dist(0,10*f_strength),
-    Mutations.rand_norm_dist(0,10*repro_rate),
     b_containers,b_programs,birth_program,
     new_color)
   end
@@ -62,7 +60,6 @@ class Eo_DNA
     @efficiency = mutate_value @efficiency
     @f_length = mutate_value @f_length
     @f_strength = mutate_value @f_strength
-    @repro_rate = mutate_value @repro_rate
     mutate_b_containers
     mutate_b_programs
     @birth_program.mutate!
@@ -73,7 +70,7 @@ class Eo_DNA
   
   def clone
     Eo_DNA.new(@shell,@max_speed,@efficiency,
-               @f_length,@f_strength,@repro_rate,Array.new(@b_containers),
+               @f_length,@f_strength,Array.new(@b_containers),
                 clone_b_programs,@birth_program.clone,Array.new(color))
   end
   
@@ -146,7 +143,7 @@ class Eo_DNA
   end
   
   def inspect_physical
-    "#{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}#{@f_length.to_i}#{@f_strength.to_i}#{@repro_rate.to_i}"
+    "#{@shell.to_i}#{@max_speed.to_i}#{@efficiency.to_i}#{@f_length.to_i}#{@f_strength.to_i}"
   end
   
   

@@ -38,8 +38,8 @@ class Eo
     @eo_triggered = []
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
-    @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10))**$REP_RATE_DEGREE
-    @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.repro_rate/10 + $REP_MINIMUM
+    @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.efficiency/10))**$REP_RATE_DEGREE
+    @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.efficiency/10 + $REP_MINIMUM
     @total_mass_drag = @mass*$MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS)/(@body.efficiency*20+0.1)
     
     
