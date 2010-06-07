@@ -38,7 +38,7 @@ class Eo
     @eo_triggered = []
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
-    @total_rep_rate = $REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10)
+    @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10))**$REP_RATE_DEGREE
     @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.repro_rate/10 + $REP_MINIMUM
     
     
@@ -288,7 +288,7 @@ class Eo
       
       die :reproduction
       
-      @energy -= (5-@body.efficiency/2)
+      @energy -= (5-@body.efficiency/2)       # I really do hate to introduce more config constants, but should un-hardcode this
       
       if @velo_magnitude == 0
         

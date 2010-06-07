@@ -74,6 +74,7 @@ def setup_constants config_hash
   # Main #
   $REP_VARIANCE = eo_consts["main"]["rep_variance"]
   $REP_RATE = eo_consts["main"]["rep_rate"]
+  $REP_RATE_DEGREE = eo_consts["main"]["rep_rate_degree"]
   $REP_MINIMUM = eo_consts["main"]["rep_t_minimum"]
   $REP_MAXIMUM = eo_consts["main"]["rep_t_maximum"]
   $ENERGY_CAP = eo_consts["main"]["energy_cap"]

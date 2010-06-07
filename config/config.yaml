@@ -52,10 +52,11 @@ settings:
   auto_track: true
  eo_constants:
   main:
-   rep_variance: 0.15
-   rep_rate: 4333
-   rep_t_minimum: 15
-   rep_t_maximum: 30
+   rep_variance: 2
+   rep_rate: 72
+   rep_rate_degree: 2
+   rep_t_minimum: 1
+   rep_t_maximum: 50
    energy_cap: 200
    healing_drain_min: 0.942
    healing_drain_max: 0.985
@@ -86,7 +87,7 @@ settings:
   fr_freq: 25
   types:
    activity: true
-   population: false
+   population: true
    framerate: false
 override:
  default_overrides:
