@@ -30,6 +30,9 @@ class Environment
     
     @dialog_layer = Dialog_Layer.new(self)
     
+    @fr_dialog = Bubble_Dialog.new([0,0],"#{$ENV_FRAMERATE}/#{$ENV_FRAMERATE}",[2,255,255],63,3)
+    @dialog_layer.add_dialog @fr_dialog
+    
     @pond = Pond.new(self)
     
     $LOGGER.info "Populating pool..."
@@ -86,7 +89,7 @@ class Environment
     
     #    @dialog.upate
     
-    screen.title = @clock.framerate.to_s
+    @fr_dialog.change_message "#{@clock.framerate}/#{$ENV_FRAMERATE}" if @clock.ticks % $ENV_FRAMERATE == 0
   end
   
   def undraw
