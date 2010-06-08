@@ -32,8 +32,8 @@ settings:
    eo_start: 16
    repop: 10
   regular:
-   food_start: 150
-   food_rate: 20
+   food_start: 125
+   food_rate: 35
    eo_start: 10
    repop: 5
   small:

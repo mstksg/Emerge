@@ -21,3 +21,4 @@
     drawbacks as well as advantages (ie, mass = less efficient)
 - kamikaze spikes? eliminate?
 - allow "sticking"/hooking?
+- programs for collisions? or maybe rotate to it

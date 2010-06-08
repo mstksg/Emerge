@@ -236,16 +236,6 @@ class Pond
     @spikes.update
     @eos.update
     
-    #    for eo in @eos
-    #      if eo.pos[0].nan?
-    #        puts "#{eo}"
-    #        puts "#{eo.velocity},#{eo.energy}"
-    #        for prog in eo.dna.b_programs
-    #          puts "#{prog}"
-    #        end
-    #      end
-    #    end
-    
     @eo_follower.update_follow
     
     if @eos.size == 0
