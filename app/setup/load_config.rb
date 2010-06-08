@@ -88,6 +88,7 @@ def setup_constants config_hash
   $B_RECOVERY = eo_consts["body"]["recovery"]
   $B_DAMAGE = eo_consts["body"]["body_damage"]
   $B_DECAY = eo_consts["body"]["body_decay"]
+  $B_MAX_SPEED = eo_consts["body"]["max_speed"]
   
   # Feeler #
   $F_POKE = eo_consts["feeler"]["poke_force_factor"]

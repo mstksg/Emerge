@@ -40,7 +40,7 @@ class Eo
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.efficiency/10))**$REP_RATE_DEGREE
     @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.efficiency/10 + $REP_MINIMUM
-    @total_mass_drag = @mass*$MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS)/(@body.efficiency*20+0.1)
+    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*20+0.1)
     
     
     @pond = pond
@@ -375,8 +375,8 @@ class Eo
     packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
     packet_final_vect = packet_angle_vect.mult(speed).add(@velocity)
     
-    new_x = @pos[0] + packet_angle_vect[0]*7
-    new_y = @pos[1] + packet_angle_vect[1]*7
+    new_x = @pos[0] + packet_angle_vect[0]*(6+@velo_magnitude)
+    new_y = @pos[1] + packet_angle_vect[1]*(6+@velo_magnitude)
     
     @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
     
@@ -387,8 +387,8 @@ class Eo
     spike_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
     spike_final_vect = spike_angle_vect.mult(speed).add(@velocity)
     
-    new_x = @pos[0] + spike_angle_vect[0]*7
-    new_y = @pos[1] + spike_angle_vect[1]*7
+    new_x = @pos[0] + spike_angle_vect[0]*(6+@velo_magnitude)
+    new_y = @pos[1] + spike_angle_vect[1]*(6+@velo_magnitude)
     
     @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle 
     
@@ -567,7 +567,7 @@ class Feeler
     
     @length = length
     @strength = strength
-    @mass = length*strength*$F_MASS    # define this more later on
+    @mass = (length+strength)/2 * $F_MASS
     
     @image = graphic
     @rect = @image.make_rect
@@ -577,6 +577,7 @@ class Feeler
     return @f_graphic if @f_graphic
     
     pen_thickness = (@strength/2).to_i
+    pen_thickness = 1 if pen_thickness < 1
     pen = Surface.new([pen_thickness,pen_thickness],0)
     pen.fill([100,100,100])
     

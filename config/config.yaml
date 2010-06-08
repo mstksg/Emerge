@@ -57,19 +57,20 @@ settings:
    rep_rate_degree: 2
    rep_t_minimum: 1
    rep_t_maximum: 50
-   energy_cap: 200
+   energy_cap: 400
    healing_drain_min: 0.942
    healing_drain_max: 0.985
    spike_damage: 1.5
-   mass_drag: 1
+   mass_drag: 1.5
   body:
    body_mass_factor: 2.5
    recovery: 0.0125
    body_damage: 0.2
    body_decay: 0.95
+   max_speed: 2.5
   feeler:
    poke_force_factor: 0.5
-   mass_factor: 0.1
+   mass_factor: 1
   dna:
    mutate_time_scale: 1
    mutation_factor: 0.13

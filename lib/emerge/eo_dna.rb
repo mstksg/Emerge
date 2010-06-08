@@ -14,6 +14,8 @@ class Eo_DNA
   
   @@COLOR_VAR = $MUTATION_FACTOR*$DNA_COLOR_VAR*100
   
+  @@MAX_MOMENTUM = (10*$B_MASS_FACTOR+10*$F_MASS)*$B_MAX_SPEED
+  
   attr_reader :shell,:efficiency,:f_length,:f_strength,
               :b_containers,:b_programs,:birth_program,:color
   
@@ -51,7 +53,7 @@ class Eo_DNA
   end
   
   def max_speed
-    @max_speed / 4
+    @max_speed * $B_MAX_SPEED/10
   end
   
   def mutate!
@@ -97,7 +99,7 @@ class Eo_DNA
       if rand < $BRAIN_MUTATE_FACTOR/4
         @b_containers.delete c
         unless rand < $FORGET_FACTOR
-          @b_containers << Mutations.mutate(c,0,80,7.5,5)
+          @b_containers << Mutations.mutate_percent(c,0,@@MAX_MOMENTUM,$MUTATION_VARIANCE/15,5)
         else
           @b_programs.delete @b_programs.pick_rand
         end
@@ -108,7 +110,7 @@ class Eo_DNA
     
     if @b_containers.size < $CONTAINER_SIZE_LIMIT and rand < $BRAIN_MUTATE_FACTOR/3
       
-      new_wall_spot = rand*80
+      new_wall_spot = rand*@@MAX_MOMENTUM
       
       @b_containers << new_wall_spot
       @b_containers.sort!
