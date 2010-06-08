@@ -89,7 +89,7 @@ class Vector_Array < Array
     end
     
     if self[0] > 0
-      return base_angle
+      return (base_angle)%mod
     else
       return (base_angle+180)%mod
     end
@@ -99,7 +99,7 @@ class Vector_Array < Array
     "[#{self.join(",")}]"
   end
   
-  def angle_to other, deg=true
+  def angle_between other, deg=true
     dotted = self.unit_vector.dot(other.unit_vector)
     
     return 0 if dotted.nan?         ## either return 0, or return dotted; not sure what to define here
@@ -109,6 +109,11 @@ class Vector_Array < Array
     
     return Math.d_acos(dotted) if deg
     Math.acos(dotted)
+  end
+  
+  def angle_to other, deg=true
+    return (other.angle-angle)%360 if deg
+    return (other.angle(deg)-angle(deg))%@@rad_mod
   end
   
   alias :normalize :unit_vector
