@@ -296,6 +296,15 @@ class Pond
     end
   end
   
+  def keyed key,mods
+    
+    if key == K_SPACE
+      if @eo_follower.tracking_eo
+        @eo_follower.tracked_eo.report
+      end
+    end
+  end
+  
   def select_random
     @eo_follower.start_following @eos.pick_rand if @eos.size > 0
   end
@@ -304,7 +313,7 @@ end
 
 class Follower
   
-  attr_accessor :environment
+  attr_accessor :environment,:tracked_eo
   
   def initialize environment, archive, auto_track=false
     @environment = environment
@@ -319,6 +328,10 @@ class Follower
     
   end
   
+  def tracking_eo
+    return true if @tracked_eo
+    return false
+  end
   
   def update_follow
     

@@ -72,6 +72,8 @@ class Environment
         exit
       when Rubygame::MouseUpEvent
         @pond.clicked(ev.pos,ev.button)
+      when Rubygame::KeyUpEvent
+        @pond.keyed(ev.key,ev.mods)
       end
     end
     @pond.update
