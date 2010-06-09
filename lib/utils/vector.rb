@@ -1,5 +1,8 @@
 class Vector_Array < Array
   
+  @@deg_mod = 360
+  @@rad_mod = Math::PI*2
+  
   def initialize array
     super(array)
     self.freeze
@@ -67,15 +70,36 @@ class Vector_Array < Array
   end
   
   def angle deg=true
-    return Math.d_atan(self[1]/self[0]) if deg
-    Math.atan(self[1]/self[0])
+    if self[0] == 0
+      return 0 if self[1] == 0
+      if self[1] > 0
+        return 90 if deg
+        return Math::PI/2
+      else
+        return 270 if deg
+        return 3*Math::PI/2
+      end
+    end
+    if deg
+      base_angle = Math.d_atan(self[1].to_f/self[0])
+      mod = @@deg_mod
+    else
+      base_angle = Math.atan(self[1].to_f/self[0])
+      mod = @@rad_mod
+    end
+    
+    if self[0] > 0
+      return (base_angle)%mod
+    else
+      return (base_angle+180)%mod
+    end
   end
   
   def to_s
     "[#{self.join(",")}]"
   end
   
-  def angle_to other, deg=true
+  def angle_between other, deg=true
     dotted = self.unit_vector.dot(other.unit_vector)
     
     return 0 if dotted.nan?         ## either return 0, or return dotted; not sure what to define here
@@ -85,6 +109,11 @@ class Vector_Array < Array
     
     return Math.d_acos(dotted) if deg
     Math.acos(dotted)
+  end
+  
+  def angle_to other, deg=true
+    return (other.angle-angle)%360 if deg
+    return (other.angle(deg)-angle(deg))%@@rad_mod
   end
   
   alias :normalize :unit_vector

@@ -17,3 +17,7 @@
 - create environment to actually test out everything is working properly, especially
     movement_angle
 - possible conservation of energy mechanism?
+- make more parameters attempt to find the "medium" instead of the maximum...give maximums
+    drawbacks as well as advantages (ie, mass = less efficient)
+- kamikaze spikes? eliminate?
+- allow "sticking"/hooking?

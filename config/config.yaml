@@ -3,7 +3,7 @@ settings:
  environment:
   framerate: 10
   framerate_limit: 0.075
-  eo_archive_limit: 1000000
+  eo_archive_limit: 500000
   eo_archive_cleanup: 100000
   huge:
    w: 1000
@@ -32,8 +32,8 @@ settings:
    eo_start: 16
    repop: 10
   regular:
-   food_start: 150
-   food_rate: 20
+   food_start: 125
+   food_rate: 25
    eo_start: 10
    repop: 5
   small:
@@ -52,23 +52,27 @@ settings:
   auto_track: true
  eo_constants:
   main:
-   rep_variance: 0.15
-   rep_rate: 4333
-   rep_t_minimum: 15
-   rep_t_maximum: 30
-   energy_cap: 200
+   rep_variance: 2
+   rep_rate: 72
+   rep_rate_degree: 2
+   rep_t_minimum: 1
+   rep_t_maximum: 50
+   energy_cap: 400
    healing_drain_min: 0.942
    healing_drain_max: 0.985
    spike_damage: 1.5
+   mass_drag: 1.5
   body:
-   body_mass: 10
+   body_mass_factor: 2.5
    recovery: 0.0125
    body_damage: 0.2
    body_decay: 0.95
+   max_speed: 2.5
   feeler:
    poke_force_factor: 0.5
-   mass_factor: 0.1
+   mass_factor: 1
   dna:
+   mutate_time_scale: 1.25
    mutation_factor: 0.13
    mutation_variance: 1.2
    brain_mutate_factor: 0.08
@@ -85,7 +89,7 @@ settings:
   fr_freq: 25
   types:
    activity: true
-   population: false
+   population: true
    framerate: false
 override:
  default_overrides:

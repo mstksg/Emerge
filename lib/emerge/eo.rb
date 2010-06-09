@@ -27,7 +27,7 @@ class Eo
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
     @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
-    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
     
     @mass = @feeler.mass + @body.mass
     @energy = energy
@@ -38,8 +38,9 @@ class Eo
     @eo_triggered = []
     
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
-    @total_rep_rate = $REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.repro_rate/10)
-    @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.repro_rate/10 + $REP_MINIMUM
+    @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.efficiency/10))**$REP_RATE_DEGREE
+    @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.efficiency/10 + $REP_MINIMUM
+    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*20+0.1)
     
     
     @pond = pond
@@ -120,23 +121,16 @@ class Eo
   end
   
   def movement_angle
-    angle_from = @angle_vect.angle_to(@velocity)
-    
-    possible_angle = Vector_Array.from_angle(270-(@angle+angle_from))
-    if possible_angle == @velocity.unit_vector
-      return angle_from
-    else
-      return -angle_from
-    end
+    return (270-@velocity.angle-@angle)%360
   end
   
   def add_angle added_angle
     set_angle @angle+added_angle
   end
   
-  def feeler_triggered momentum
-    @brain.process(momentum)
-  end
+  # def feeler_triggered momentum
+    # @brain.process_feeler(momentum)
+  # end
   
   def handle_collisions
     handle_eo_collisions
@@ -168,7 +162,8 @@ class Eo
             if @angle_vect.dot(vec) <= 0
               diff = Vector_Array.new(velocity).sub(other.velocity).magnitude+0.1
               unless @eo_triggered.include? other
-                feeler_triggered(other.mass*diff)
+                # feeler_triggered(other.mass*diff)
+                @brain.process_feeler(other.mass*diff)
               end
               @feeler.poke other
               @eo_triggered << other
@@ -212,7 +207,8 @@ class Eo
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0
-            feeler_triggered(food.mass*@velo_magnitude+0.1)
+            # feeler_triggered(food.mass*@velo_magnitude+0.1)
+            @brain.process_feeler(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
           
@@ -225,11 +221,14 @@ class Eo
   
   def determine_newtonian_collision other
     unless @velo_magnitude == 0
+      
       diff = Vector_Array.from_points(other.pos,@pos)
       normal = diff.unit_vector.ortho_2D
       new_velo = normal.mult(2*(@velocity.dot(normal))).sub(@velocity)
       
       new_velo = new_velo.mult(-1) if (new_velo.dot diff) < 0
+      
+      @brain.process_collision(diff.mult(-1).angle_to(@angle_vect))
       
       set_velocity(new_velo)
       
@@ -249,7 +248,7 @@ class Eo
     if @body.hp < @body.shell
       @energy *= (@total_heal_drain) if @body.hp < @body.shell
     end
-    @energy -= (@velo_magnitude+0.2)/(@body.efficiency*20+0.1)   ## find out way to un-hardcode
+    @energy -= (@velo_magnitude+0.2)*@total_mass_drag
     if @energy < 0
       log_message "Eo_#{@id}\tStarved;\ta#{@age}"
       die :starvation
@@ -288,7 +287,7 @@ class Eo
       
       die :reproduction
       
-      @energy -= (5-@body.efficiency/2)
+      @energy -= (5-@body.efficiency/2)       # I really do hate to introduce more config constants, but should un-hardcode this
       
       if @velo_magnitude == 0
         
@@ -374,8 +373,8 @@ class Eo
     packet_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
     packet_final_vect = packet_angle_vect.mult(speed).add(@velocity)
     
-    new_x = @pos[0] + packet_angle_vect[0]*7
-    new_y = @pos[1] + packet_angle_vect[1]*7
+    new_x = @pos[0] + packet_angle_vect[0]*(6+@velo_magnitude)
+    new_y = @pos[1] + packet_angle_vect[1]*(6+@velo_magnitude)
     
     @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
     
@@ -386,8 +385,8 @@ class Eo
     spike_angle_vect = Vector_Array.from_angle(270-(@angle+angle))
     spike_final_vect = spike_angle_vect.mult(speed).add(@velocity)
     
-    new_x = @pos[0] + spike_angle_vect[0]*7
-    new_y = @pos[1] + spike_angle_vect[1]*7
+    new_x = @pos[0] + spike_angle_vect[0]*(6+@velo_magnitude)
+    new_y = @pos[1] + spike_angle_vect[1]*(6+@velo_magnitude)
     
     @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle 
     
@@ -459,6 +458,10 @@ class Eo
     return @groups.size > 0
   end
   
+  def report
+    $LOGGER.info "Age: #{@age}"
+  end
+  
 end
 
 class Eo_Body
@@ -472,7 +475,7 @@ class Eo_Body
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
-    @mass = $B_MASS
+    @mass = (@shell+0.5)*$B_MASS_FACTOR
     
     @hp = @shell
     
@@ -566,7 +569,7 @@ class Feeler
     
     @length = length
     @strength = strength
-    @mass = length*strength*$F_MASS    # define this more later on
+    @mass = (length+strength)/2 * $F_MASS
     
     @image = graphic
     @rect = @image.make_rect
@@ -576,6 +579,7 @@ class Feeler
     return @f_graphic if @f_graphic
     
     pen_thickness = (@strength/2).to_i
+    pen_thickness = 1 if pen_thickness < 1
     pen = Surface.new([pen_thickness,pen_thickness],0)
     pen.fill([100,100,100])
     
