@@ -437,6 +437,10 @@ class Eo
     @col_rect = @rect
   end
   
+  def strike force,source=:unknown
+    @body.strike force,source
+  end
+  
   def inspect
     to_s
   end
@@ -519,6 +523,19 @@ class Eo_Body
         poker.log_message message
       end
       @owner.eaten
+    end
+  end
+  
+  def lose_hp amount
+    @hp -= amount
+  end
+  
+  def strike force,source=:unknown
+    @hp -= force*(1-0.05*@shell)
+    @owner.log_message "Eo_#{@owner.id}\tstruck with a force of #{(force*10).to_i} for #{(force*(1-0.05*@shell)*10).to_i} damage by #{source.to_s}.",false
+    if @hp < 0
+      @owner.log_message "Eo_#{@owner.id}\tdied from being struck by #{source.to_s};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+      @owner.die source
     end
   end
   

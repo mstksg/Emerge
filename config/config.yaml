@@ -49,6 +49,7 @@ settings:
   food_mass: 0.2
   drag: 0.04
   spike_decay: 0.997
+  pond_disaster: 25
   auto_track: true
  eo_constants:
   main:

@@ -7,6 +7,11 @@ class Pond
   
   attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
   
+  @@DISASTERS = [:plague,:'a divine wind',:flooding,:'gamma radiation',:'poisoned water',
+                  :'global warming',:'the ice age',:'a zombie apocalypse',:'an asteroid impact',
+                  :'you meddling kids',:'an earthquake',:'a hurricane',:'an alien invasion',
+                  :'a volcanic eruption',:'an oil spill']
+  
   def initialize environment
     @environment = environment
     
@@ -239,7 +244,7 @@ class Pond
     @eo_follower.update_follow
     
     if @eos.size == 0
-      $LOGGER.warn "Repopulating empty pool..."
+      $LOGGER.warn "POND\tRepopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
       select_random if $AUTO_TRACKING
     end
@@ -307,6 +312,8 @@ class Pond
       if @eo_follower.tracking_eo
         @eo_follower.step_up_ancestor
       end
+    when K_D
+      disaster
     end
   end
   
@@ -314,6 +321,13 @@ class Pond
     @eo_follower.start_following @eos.pick_rand if @eos.size > 0
   end
   
+  def disaster
+    cause = @@DISASTERS.pick_rand
+    $LOGGER.info "POND\tA terrible disaster caused by #{cause.to_s} brings destruction across the pond."
+    @eos.clone.each do |eo|
+      eo.strike(Mutations.rand_norm_dist(0,$POND_DISASTER,2),cause)
+    end
+  end
 end
 
 class Follower
@@ -401,6 +415,7 @@ class Follower
     @dna_dialog = Bubble_Dialog.new([0,@environment.height],dna_text,[0,255,255],127)
     @environment.dialog_layer.add_dialog @curr_dialog
     @environment.dialog_layer.add_dialog @dna_dialog
+    
   end
   
   def step_up_ancestor
