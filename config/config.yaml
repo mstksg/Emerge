@@ -53,6 +53,7 @@ settings:
   auto_track: true
  eo_constants:
   main:
+   eo_starting_energy: 10
    rep_variance: 2
    rep_rate: 72
    rep_rate_degree: 2

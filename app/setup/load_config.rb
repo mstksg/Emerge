@@ -73,6 +73,7 @@ def setup_constants config_hash
   eo_consts = settings["eo_constants"]
 
   # Main #
+  $EO_STARTING_ENERGY = eo_consts["main"]["eo_starting_energy"]
   $REP_VARIANCE = eo_consts["main"]["rep_variance"]
   $REP_RATE = eo_consts["main"]["rep_rate"]
   $REP_RATE_DEGREE = eo_consts["main"]["rep_rate_degree"]

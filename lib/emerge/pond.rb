@@ -154,10 +154,12 @@ class Pond
     end
   end
   
-  def sprinkle_eo(amount=1,energy=10)
-    for i in 0...amount
-      add_eo(Eo_DNA.generate,energy,rand*@environment.width,rand*@environment.height,rand*360)
+  def sprinkle_eo(amount=1,energy=$EO_STARTING_ENERGY)
+    sprinkled = Array.new
+    amount.times do
+      sprinkled << add_eo(Eo_DNA.generate,energy,rand*@environment.width,rand*@environment.height,rand*360)
     end
+    return sprinkled
   end
   
   def remove_eo(to_remove)
@@ -291,7 +293,7 @@ class Pond
         else
           if button == 3
             spawned = add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
-            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (dna:#{spawned.dna.inspect}})"
+            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical}})"
           else
             add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
           end
@@ -314,6 +316,10 @@ class Pond
       end
     when K_D
       disaster
+    when K_E
+      # maybe implement shift = x5
+      spawned = sprinkle_eo
+      $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical})"
     end
   end
   
