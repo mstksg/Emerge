@@ -71,7 +71,8 @@ settings:
    max_speed: 2.5
   feeler:
    poke_force_factor: 0.5
-   mass_factor: 1
+   feeler_mass_factor: 1
+   length_strength_mass_ratio: 0.6
   dna:
    mutate_time_scale: 1.25
    mutation_factor: 0.13

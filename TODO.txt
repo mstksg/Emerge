@@ -22,4 +22,4 @@
 - kamikaze spikes? eliminate?
 - allow "sticking"/hooking?
 - experiment with solid walls
-- advanced tracking (highlight all common descendants...)
+- advanced tracking (highlight all common descendants, count relatives...)

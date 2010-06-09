@@ -109,7 +109,7 @@ class Brain
     when :age then @owner.age
     when :velocity then @owner.velo_magnitude
     when :momentum then @momentum_trigger
-    when :m_angle then @owner.movement_angle
+    when :m_angle then @owner.movement_angle+@angle_shift
     when :random then rand()
     else raise "Bad 'if' condition #{if_command.args[0]}"
     end   ## maybe add more conditions later

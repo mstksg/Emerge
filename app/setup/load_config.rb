@@ -93,7 +93,8 @@ def setup_constants config_hash
   
   # Feeler #
   $F_POKE = eo_consts["feeler"]["poke_force_factor"]
-  $F_MASS = eo_consts["feeler"]["mass_factor"]
+  $F_MASS = eo_consts["feeler"]["feeler_mass_factor"]
+  $F_L_S_RATIO = eo_consts["feeler"]["length_strength_mass_ratio"]
   
   # DNA #
   $MUTATE_TIME_SCALE = eo_consts["dna"]["mutate_time_scale"]

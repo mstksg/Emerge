@@ -586,7 +586,7 @@ class Feeler
     
     @length = length
     @strength = strength
-    @mass = (length+strength)/2 * $F_MASS
+    @mass = ((length*$F_L_S_RATIO+strength)/($F_L_S_RATIO+1)) * $F_MASS
     
     @image = graphic
     @rect = @image.make_rect
