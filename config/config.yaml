@@ -33,7 +33,7 @@ settings:
    repop: 10
   regular:
    food_start: 125
-   food_rate: 35
+   food_rate: 25
    eo_start: 10
    repop: 5
   small:
@@ -72,7 +72,7 @@ settings:
    poke_force_factor: 0.5
    mass_factor: 1
   dna:
-   mutate_time_scale: 1
+   mutate_time_scale: 1.25
    mutation_factor: 0.13
    mutation_variance: 1.2
    brain_mutate_factor: 0.08
