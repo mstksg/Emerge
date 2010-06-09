@@ -298,9 +298,14 @@ class Pond
   
   def keyed key,mods
     
-    if key == K_SPACE
+    case key
+    when K_SPACE
       if @eo_follower.tracking_eo
         @eo_follower.tracked_eo.report
+      end
+    when K_Z
+      if @eo_follower.tracking_eo
+        @eo_follower.step_up_ancestor
       end
     end
   end
@@ -398,9 +403,26 @@ class Follower
     @environment.dialog_layer.add_dialog @dna_dialog
   end
   
+  def step_up_ancestor
+    if @original_generation == 1
+      $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no ancestors."
+    else
+      new_ancestor = @archive.find_parent(@original_tracked)
+      if new_ancestor
+        $LOGGER.info "TRACK\tNow tracking family line of Eo_#{new_ancestor} [g#{@original_generation-1}], parent of Eo_#{@original_tracked} [g#{@original_generation}]."
+        @original_generation -= 1
+        @original_tracked = new_ancestor
+      else
+        $LOGGER.info "TRACK\tNo earlier ancestor of Eo_#{@original_tracked} [g#{@original_generation}] found."
+      end
+    end
+  end
+  
   def stop_following
     
     if @tracked_eo
+      
+      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of Eo_#{@original_tracked} [g#{@original_generation}] family line."
       
       @curr_dialog.kill
       @dna_dialog.kill
@@ -408,8 +430,6 @@ class Follower
       @original_generation = nil
       @curr_dialog = nil
       @dna_dialog = nil
-      
-      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of Eo_#{@original_tracked} [g#{@original_generation}] family line."
       
       @tracked_eo.followed = nil if @tracked_eo
       @tracked_eo = nil

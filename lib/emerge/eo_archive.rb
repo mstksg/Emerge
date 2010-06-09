@@ -33,11 +33,14 @@ class Eo_Archive
   end
   
   def find_parent id
+    id = id.to_i(36) if id.class == String
     @database.size.times do |n|
-      if @database[n].contains? id
+      next unless @database[n]
+      if @database[n].any? { |m| m == id }
         return n.to_s(36)
       end
     end
+    return nil
   end
   
   def is_eo_alive? id
