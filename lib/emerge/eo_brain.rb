@@ -2,7 +2,7 @@ class Brain
   
   attr_reader :owner
   
-  def initialize (owner, container_walls, programs, birth_program)
+  def initialize (owner, container_walls, programs, birth_program, c_program)
     
     if programs.size() != container_walls.size() + 1
       raise "Improper brain settings; #{programs.size} programs for #{container_walls.size} walls"
@@ -12,15 +12,18 @@ class Brain
     @container_walls = container_walls
     @programs = programs
     @birth_program = birth_program
+    @c_program = c_program
     
     @program_queue = []
     @momentum_trigger = 0
+    @angle_shift = 0              # for collisions, this is the angle to offset collision
     @waiting = 0
   end
   
-  def process momentum
+  def process_feeler momentum
     
     @momentum_trigger = momentum
+    @angle_trigger = 0
     
     if @container_walls.size() == 0
       run_program @programs[0]
@@ -32,6 +35,13 @@ class Brain
       run_program @programs[count]
     end
     
+  end
+  
+  def process_collision angle
+    @angle_trigger = angle
+    @momentum_trigger = 0
+    
+    run_program @c_program
   end
   
   def run_birth_program
@@ -121,32 +131,25 @@ class Brain
         
         case curr_command.command
         when :move
-          if curr_command.args[1] > 1
-            raise "Bad velocity for 'move': #{curr_command.args[1]}"
-          end
-          @owner.move(curr_command.args[0],curr_command.args[1])
+          @owner.move(curr_command.args[0]+@angle_shift,curr_command.args[1])
         when :wait
           @waiting = curr_command.args[0].to_i
         when :turn
-          @owner.turn(curr_command.args[0])
+          @owner.turn(curr_command.args[0]+@angle_shift)
         when :stop
           @owner.stop
         when :emit_energy
-          @owner.emit_energy(curr_command.args[0],curr_command.args[1],curr_command.args[2])
+          @owner.emit_energy(curr_command.args[0]+@angle_shift,curr_command.args[1],curr_command.args[2])
         when :multiply_speed
           @owner.multiply_speed(curr_command.args[0])
         when :set_speed
-          if curr_command.args[0] > 1
-            raise "Bad velocity for 'set speed': #{curr_command.args[0]}"
-          end
           @owner.set_speed(curr_command.args[0])
         when :shoot_spike
-          @owner.shoot_spike(curr_command.args[0],curr_command.args[1],curr_command.args[2])
+          @owner.shoot_spike(curr_command.args[0]+@angle_shift,curr_command.args[1],curr_command.args[2])
         else
           raise "Bad command #{curr_command.command}"
         end
       end
-      
       
     else
       @waiting -= 1

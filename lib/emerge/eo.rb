@@ -27,7 +27,7 @@ class Eo
     
     @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
     @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
-    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
     
     @mass = @feeler.mass + @body.mass
     @energy = energy
@@ -121,23 +121,16 @@ class Eo
   end
   
   def movement_angle
-    angle_from = @angle_vect.angle_to(@velocity)
-    
-    possible_angle = Vector_Array.from_angle(270-(@angle+angle_from))
-    if possible_angle == @velocity.unit_vector
-      return angle_from
-    else
-      return -angle_from
-    end
+    return (270-@velocity.angle-@angle)%360
   end
   
   def add_angle added_angle
     set_angle @angle+added_angle
   end
   
-  def feeler_triggered momentum
-    @brain.process(momentum)
-  end
+  # def feeler_triggered momentum
+    # @brain.process_feeler(momentum)
+  # end
   
   def handle_collisions
     handle_eo_collisions
@@ -169,7 +162,8 @@ class Eo
             if @angle_vect.dot(vec) <= 0
               diff = Vector_Array.new(velocity).sub(other.velocity).magnitude+0.1
               unless @eo_triggered.include? other
-                feeler_triggered(other.mass*diff)
+                # feeler_triggered(other.mass*diff)
+                @brain.process_feeler(other.mass*diff)
               end
               @feeler.poke other
               @eo_triggered << other
@@ -213,7 +207,8 @@ class Eo
           
           feeler_dist = @angle_vect.distance_to_point(food.pos,@pos)
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and @angle_vect.dot(vec) <= 0
-            feeler_triggered(food.mass*@velo_magnitude+0.1)
+            # feeler_triggered(food.mass*@velo_magnitude+0.1)
+            @brain.process_feeler(food.mass*@velo_magnitude+0.1)
             @food_triggered << food
           end
           
@@ -226,11 +221,14 @@ class Eo
   
   def determine_newtonian_collision other
     unless @velo_magnitude == 0
+      
       diff = Vector_Array.from_points(other.pos,@pos)
       normal = diff.unit_vector.ortho_2D
       new_velo = normal.mult(2*(@velocity.dot(normal))).sub(@velocity)
       
       new_velo = new_velo.mult(-1) if (new_velo.dot diff) < 0
+      
+      @brain.process_collision(diff.mult(-1).angle_to(@angle_vect))
       
       set_velocity(new_velo)
       
@@ -458,6 +456,10 @@ class Eo
   
   def is_dead
     return @groups.size > 0
+  end
+  
+  def report
+    $LOGGER.info "Age: #{@age}"
   end
   
 end

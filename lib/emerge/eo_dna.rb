@@ -16,11 +16,11 @@ class Eo_DNA
   
   @@MAX_MOMENTUM = (10*$B_MASS_FACTOR+10*$F_MASS)*$B_MAX_SPEED
   
-  attr_reader :shell,:efficiency,:f_length,:f_strength,
-              :b_containers,:b_programs,:birth_program,:color
+  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+              :b_programs,:birth_program,:c_program,:color
   
   def initialize(shell,max_speed,efficiency,f_length,f_strength,
-                 b_containers,b_programs,birth_program,color)
+                 b_containers,b_programs,birth_program,c_program,color)
     @shell = shell
     @max_speed = max_speed
     @efficiency = efficiency
@@ -29,12 +29,13 @@ class Eo_DNA
     @b_containers = Array.new(b_containers)
     @b_programs = Array.new(b_programs)
     @birth_program = birth_program.clone
+    @c_program = c_program.clone
     @color = color
   end
   
   def self.generate(shell=1,max_speed=1,efficiency=1,f_length=1,
                     f_strength=1,b_containers=[],b_programs=[Command_Block.fresh_block],
-                    birth_program=Command_Block.blank_block)
+                    birth_program=Command_Block.blank_block,c_program=Command_Block.blank_block)
     
     if @@DEFAULT_COLORS.size > 0
       new_color = @@DEFAULT_COLORS.pick_rand
@@ -49,7 +50,7 @@ class Eo_DNA
     Mutations.rand_norm_dist(0,10*f_length),
     Mutations.rand_norm_dist(0,10*f_strength),
     b_containers,b_programs,birth_program,
-    new_color)
+    c_program,new_color)
   end
   
   def max_speed
@@ -65,6 +66,7 @@ class Eo_DNA
     mutate_b_containers
     mutate_b_programs
     @birth_program.mutate!
+    @c_program.mutate!
     @color = Array.new(3) { |i| Mutations.mutate(@color[i],0,255,@@COLOR_VAR,2) }
     
     return self
@@ -73,7 +75,8 @@ class Eo_DNA
   def clone
     Eo_DNA.new(@shell,@max_speed,@efficiency,
                @f_length,@f_strength,Array.new(@b_containers),
-                clone_b_programs,@birth_program.clone,Array.new(color))
+                clone_b_programs,@birth_program.clone,
+                @c_program.clone,Array.new(color))
   end
   
   def clone_b_programs
@@ -151,9 +154,9 @@ class Eo_DNA
   
   def inspect_programs
     if @b_containers.size == 0
-      return "[b:#{@birth_program},0:#{@b_programs[0]}]"
+      return "[b:#{@birth_program},c:#{@c_program},0:#{@b_programs[0]}]"
     else
-      inspected = "[b:#{@birth_program},0:"
+      inspected = "[b:#{@birth_program},c:#{@c_program},0:"
       for i in 0...@b_containers.size
         inspected += "#{@b_programs[i]},#{@b_containers[i].to_i}:"
       end

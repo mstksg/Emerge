@@ -153,6 +153,7 @@ module Pond_Bits
     def handle_collisions
       possibles = @pond.eo_in_rect(@pond.zone_rects[@pond.point_in_zone(@pos)])
       for eo in possibles
+        next if eo == owner  ## for debug
         vec = Vector_Array.from_points(@pos,eo.pos)
         dist = vec.magnitude
         if dist <= 6
@@ -165,7 +166,8 @@ module Pond_Bits
           if (feeler_dist < 3 or feeler_dist < @velo_magnitude*2) and eo.angle_vect.dot(vec) <= 0
             eo.body.spiked(self,false)
             kill
-            eo.feeler_triggered(@energy_content*@velo_magnitude+0.1)
+            # eo.feeler_triggered(@energy_content*@velo_magnitude+0.1)
+            eo.brain.process_feeler(@energy_content*@velo_magnitude+0.1)
             return true
           end
           
