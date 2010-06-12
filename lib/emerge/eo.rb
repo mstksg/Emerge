@@ -40,7 +40,7 @@ class Eo
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.efficiency/10))**$REP_RATE_DEGREE
     @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.efficiency/10 + $REP_MINIMUM
-    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*20+0.1)
+    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*$BASE_DRAG_REDUCTOR+0.1)
     
     
     @pond = pond
@@ -248,7 +248,7 @@ class Eo
     if @body.hp < @body.shell
       @energy *= (@total_heal_drain) if @body.hp < @body.shell
     end
-    @energy -= (@velo_magnitude+0.2)*@total_mass_drag
+    @energy -= (@velo_magnitude+$REST_ENERGY_DECAY)*@total_mass_drag
     if @energy < 0
       log_message "Eo_#{@id}\tStarved;\ta#{@age}"
       die :starvation

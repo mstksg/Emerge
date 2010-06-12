@@ -23,3 +23,8 @@
 - allow "sticking"/hooking?
 - experiment with solid walls
 - advanced tracking (highlight all common descendants, count relatives...)
+- "random drifting" gets too much food compared to detectors =(  Or well, not moreso, but
+    rather, one needs only to randomly drift before one can get enough to reproduce.  oh well
+- spikes shooting in the wrong direction
+- picking up food with 0 energy?
+- collision angle if condition

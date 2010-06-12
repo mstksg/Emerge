@@ -148,7 +148,7 @@ class Pond
     @spikes << Pond_Bits::Spike.new(self,mass,owner,x,y,speed,angle)
   end
   
-  def sprinkle_food(amount=1,max_energy=20,min_energy=5)
+  def sprinkle_food(amount=1,max_energy=20,min_energy=7.5)
     for i in 0...amount
       add_food(Mutations.rand_norm_dist(min_energy,max_energy,2),rand*@environment.width,rand*@environment.height)
     end
@@ -319,7 +319,7 @@ class Pond
     when K_E
       # maybe implement shift = x5
       spawned = sprinkle_eo
-      $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical})"
+      $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned[0].id} (#{spawned[0].dna.inspect_physical})"
     end
   end
   

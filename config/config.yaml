@@ -63,7 +63,9 @@ settings:
    healing_drain_min: 0.942
    healing_drain_max: 0.985
    spike_damage: 1.5
-   mass_drag: 1.5
+   mass_drag: 2
+   rest_energy_decay: 0.2
+   base_drag_reductor: 20
   body:
    body_mass_factor: 2.5
    recovery: 0.0125
@@ -75,7 +77,7 @@ settings:
    feeler_mass_factor: 1
    length_strength_mass_ratio: 0.6
   dna:
-   mutate_time_scale: 1.25
+   mutate_time_scale: 1.15
    mutation_factor: 0.13
    mutation_variance: 1.2
    brain_mutate_factor: 0.08

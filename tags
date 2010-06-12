@@ -1,0 +1,296 @@
+1276127697
+Array	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	class Array
+Brain	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	class Brain
+Bubble_Dialog	C:/Users/justin/workspace/Emerge/app/dialog.rb	class Bubble_Dialog 
+Command_Block	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	class Command_Block 
+Command_Data	C:/Users/justin/workspace/Emerge/lib/emerge/command_data.rb	module Command_Data
+Dialog	C:/Users/justin/workspace/Emerge/app/dialog.rb	class Dialog
+Dialog_Layer	C:/Users/justin/workspace/Emerge/app/dialog.rb	class Dialog_Layer
+Dir	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	class Dir
+Environment	C:/Users/justin/workspace/Emerge/app/environment.rb	class Environment
+Eo	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	class Eo
+Eo_Archive	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	class Eo_Archive
+Eo_Body	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	class Eo_Body
+Eo_Command	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	class Eo_Command
+Eo_DNA	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	class Eo_DNA
+Feeler	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	class Feeler
+Follower	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	class Follower
+Food	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	  class Food
+Group	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	  class Group
+Math	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	module Math
+Mutations	C:/Users/justin/workspace/Emerge/lib/utils/mutations.rb	module Mutations
+Packet	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	  class Packet 
+Pond	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	class Pond
+Pond_Bits	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	module Pond_Bits
+Rect	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	class Rect
+SDL_PATHS	C:/Users/justin/workspace/Emerge/emerge.rb	SDL_PATHS =
+Spike	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	  class Spike
+Sprite	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	  module Sprite
+Sprites	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	module Sprites
+Vector_Array	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	class Vector_Array 
+add	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def add
+add_angle	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def add_angle
+add_dialog	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def add_dialog
+add_eo	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def add_eo
+add_eo_still	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def add_eo_still
+add_food	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def add_food
+add_packet	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def add_packet
+add_spike	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def add_spike
+age	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+alpha	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :pos,:message,:color,:alpha
+anchor	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_accessor :anchor,:margin
+angle	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+angle	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def angle
+angle_between	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def angle_between
+angle_to	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def angle_to
+archive	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+args	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :command, :args
+b_containers	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+background	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+blank_block	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def self.blank_block
+body	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+boxes	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :environment,:boxes
+brain	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+change_message	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def change_message
+clean_up	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def clean_up
+clicked	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def clicked
+clock	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+clone	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def clone
+clone	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def clone
+clone	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def clone
+clone_b_programs	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def clone_b_programs
+collect_energy	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def collect_energy
+collide_rect?	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	    def collide_rect?
+color	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :pos,:message,:color,:alpha
+command	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :command, :args
+command_length	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def command_length
+command_length	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def command_length
+corners	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	  def corners
+d2r	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d2r
+d_acos	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_acos
+d_asin	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_asin
+d_atan	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_atan
+d_cos	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_cos
+d_sin	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_sin
+d_tan	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.d_tan
+debug	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+determine_newtonian_collision	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def determine_newtonian_collision
+determine_zone_count	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def determine_zone_count
+dialog_layer	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+die	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def die
+disaster	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def disaster
+distance_to_point	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def distance_to_point
+dna	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+dna_text	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def dna_text
+dot	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def dot
+draw	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def draw
+draw	C:/Users/justin/workspace/Emerge/app/environment.rb	  def draw
+draw	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def draw
+eat	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def eat
+eaten	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def eaten
+eaten	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def eaten
+efficiency	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+efficiency	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+emit_energy	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def emit_energy
+energy	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+energy	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :energy, :pos, :velocity
+energy_content	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :mass, :owner, :velocity, :energy_content
+energy_decay	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def energy_decay
+environment	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :environment,:boxes
+environment	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_accessor :environment,:tracked_eo
+environment	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+eo_in_rect	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def eo_in_rect
+eos	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+eval_if	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def eval_if
+execute_newtonian_collision	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def execute_newtonian_collision
+f_length	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+f_strength	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+feeler	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
+fill_tree	C:/Users/justin/workspace/Emerge/app/setup/load_config.rb	def fill_tree
+find_descendants	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def find_descendants
+find_first_living_descendant	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def find_first_living_descendant
+find_parent	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def find_parent
+find_possible_eo_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def find_possible_eo_collisions
+find_possible_food_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def find_possible_food_collisions
+followed	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_accessor :pos,:followed
+food_in_rect	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def food_in_rect
+food_in_zone_rect	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def food_in_zone_rect
+foods	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+for	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+fresh_block	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def self.fresh_block
+from_angle	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def self.from_angle
+from_array	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def self.from_array
+from_points	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def self.from_points
+generate	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def self.generate
+get_sprites	C:/Users/justin/workspace/Emerge/lib/utils/rubygame_mods.rb	    def get_sprites
+graphic	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def graphic
+graphic	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def graphic
+graphic	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def graphic
+graphic	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def graphic
+graphic	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def graphic
+graphic	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def graphic
+handle_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def handle_collisions
+handle_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def handle_collisions
+handle_eo_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def handle_eo_collisions
+handle_food_collisions	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def handle_food_collisions
+has_descendants	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def has_descendants
+height	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+hp	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+info_text	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def info_text
+initialize	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/app/environment.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def initialize
+initialize	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def initialize
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def inspect
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def inspect
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def inspect
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect
+inspect	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect
+inspect_color	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect_color
+inspect_physical	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect_physical
+inspect_programs	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def inspect_programs
+is_dead	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def is_dead
+is_eo_alive?	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def is_eo_alive?
+is_in_bounds?	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def is_in_bounds?
+keyed	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def keyed
+length	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner, :length, :strength, :mass
+log_message	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def log_message
+lose_hp	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def lose_hp
+magnitude	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def magnitude
+make_top	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def make_top
+make_zones	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def make_zones
+margin	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_accessor :anchor,:margin
+mass	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner, :length, :strength, :mass
+mass	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+mass	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :mass, :owner, :velocity, :energy_content
+mass	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def mass
+max_dist	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def max_dist
+max_speed	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+max_speed	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def max_speed
+message	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :pos,:message,:color,:alpha
+momentum_magnitude	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def momentum_magnitude
+move	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def move
+move_to	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def move_to
+movement_angle	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def movement_angle
+mult	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def mult
+multiply_speed	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def multiply_speed
+mutate	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def mutate
+mutate	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate
+mutate	C:/Users/justin/workspace/Emerge/lib/utils/mutations.rb	  def self.mutate
+mutate!	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate!
+mutate!	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate!
+mutate!	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate!
+mutate_b_containers	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate_b_containers
+mutate_b_programs	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate_b_programs
+mutate_percent	C:/Users/justin/workspace/Emerge/lib/utils/mutations.rb	  def self.mutate_percent
+mutate_value	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def mutate_value
+new_block	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def self.new_block
+new_command	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def self.new_command
+normalize	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  alias :normalize
+ortho_2D	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def ortho_2D
+owner	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner, :length, :strength, :mass
+owner	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+owner	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  attr_reader :owner
+owner	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :mass, :owner, :velocity, :energy_content
+pick_rand	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def pick_rand
+pick_rand	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def pick_rand
+point_in_zone	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def point_in_zone
+poke	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def poke
+poked	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def poked
+pond	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+pos	C:/Users/justin/workspace/Emerge/app/dialog.rb	  attr_reader :pos,:message,:color,:alpha
+pos	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_accessor :pos,:followed
+pos	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :energy, :pos, :velocity
+process_collision	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def process_collision
+process_config	C:/Users/justin/workspace/Emerge/app/setup/load_config.rb	def process_config
+process_feeler	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def process_feeler
+pull_next_command	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def pull_next_command
+put_in_zones	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def put_in_zones
+r2d	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.r2d
+rand_norm_dist	C:/Users/justin/workspace/Emerge/lib/utils/mutations.rb	  def self.rand_norm_dist
+rand_params	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def rand_params
+randomize_params	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def randomize_params
+read_program	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def read_program
+recover_hp	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def recover_hp
+remove_dialog	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def remove_dialog
+remove_eo	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def remove_eo
+replicate	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def replicate
+report	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def report
+require_all	C:/Users/justin/workspace/Emerge/lib/utils/ruby_mods.rb	  def self.require_all
+reset_image	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def reset_image
+run	C:/Users/justin/workspace/Emerge/app/environment.rb	  def run
+run_birth_program	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def run_birth_program
+run_program	C:/Users/justin/workspace/Emerge/lib/emerge/eo_brain.rb	  def run_program
+screen	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+select_random	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def select_random
+set_angle	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def set_angle
+set_rects	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def set_rects
+set_speed	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def set_speed
+set_velocity	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def set_velocity
+set_zone_count	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def set_zone_count
+setup_constants	C:/Users/justin/workspace/Emerge/app/setup/load_config.rb	def setup_constants
+setup_log	C:/Users/justin/workspace/Emerge/app/setup/setup_log.rb	def setup_log
+shell	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
+shell	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  attr_reader :shell,:efficiency,:f_length,:f_strength,:b_containers,
+shoot_spike	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def shoot_spike
+size	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+spiked	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def spiked
+sprinkle_eo	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def sprinkle_eo
+sprinkle_food	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def sprinkle_food
+start_following	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def start_following
+step_up_ancestor	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def step_up_ancestor
+stop	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def stop
+stop_following	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def stop_following
+store_eo	C:/Users/justin/workspace/Emerge/lib/emerge/eo_archive.rb	  def store_eo
+strength	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  attr_reader :owner, :length, :strength, :mass
+strike	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def strike
+strike	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def strike
+sub	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def sub
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/emerge/eo_dna.rb	  def to_s
+to_s	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def to_s
+tracked_eo	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_accessor :environment,:tracked_eo
+tracking_eo	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def tracking_eo
+trigger	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def trigger
+turn	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def turn
+turn_into_food	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def turn_into_food
+turn_into_food	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def turn_into_food
+turn_into_food	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def turn_into_food
+undraw	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def undraw
+undraw	C:/Users/justin/workspace/Emerge/app/environment.rb	  def undraw
+undraw	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def undraw
+unit_vector	C:/Users/justin/workspace/Emerge/lib/utils/vector.rb	  def unit_vector
+update	C:/Users/justin/workspace/Emerge/app/dialog.rb	  def update
+update	C:/Users/justin/workspace/Emerge/app/environment.rb	  def update
+update	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def update
+update	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def update
+update	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update
+update	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update
+update_follow	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def update_follow
+update_pos	C:/Users/justin/workspace/Emerge/lib/emerge/eo.rb	  def update_pos
+update_pos	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update_pos
+update_pos	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update_pos
+update_velo	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update_velo
+update_velo	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    def update_velo
+update_zones	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  def update_zones
+velocity	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :energy, :pos, :velocity
+velocity	C:/Users/justin/workspace/Emerge/lib/emerge/pond_bits.rb	    attr_reader :mass, :owner, :velocity, :energy_content
+width	C:/Users/justin/workspace/Emerge/app/environment.rb	  attr_reader :screen, :background, :width, :height, :size, :clock, :pond, :dialog_layer
+zone_rects	C:/Users/justin/workspace/Emerge/lib/emerge/pond.rb	  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
