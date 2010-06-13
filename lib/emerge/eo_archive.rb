@@ -2,7 +2,7 @@ class Eo_Archive
   
   def initialize eo_group
     
-    @database = Array.new()
+    @database = Hash.new()
     @eo_group = eo_group
     @stored_count = 0
     
@@ -30,8 +30,8 @@ class Eo_Archive
   
   def clean_up count=1
     c = 0
-    for n in @database
-      next if n == nil
+    for n in @database.keys.sort!
+      next if @database[n] == nil
       @database.delete n
       @stored_count -= 1
       c += 1
@@ -76,7 +76,7 @@ class Eo_Archive
   def descendants_of id
     descs = _descendants_of id.to_i(36)
     return nil if descs == nil
-    return descs.map { |n| n.to_s(36) }
+    return descs.map! { |n| n.to_s(36) }
   end
   
   def parent_of id
@@ -121,7 +121,7 @@ class Eo_Archive
   
   def group_roots ids,levels=0
     gr = _group_roots ids.map { |n| n.to_i(36) },levels
-    return gr.map { |n| n.to_s(36) }                        # for performance enhancement, use "map!"
+    return gr.map! { |n| n.to_s(36) }
   end
   
   ## Internal methods
@@ -131,12 +131,13 @@ class Eo_Archive
   end
   
   def _parent_of id
-    id.times do |n|
-      next unless @database[n]
-      if @database[n].any? { |m| m == id }
-        return n
-      end
+    for n in @database.keys.sort!
+      
+      return nil if n >= id
+      return n if @database[n].any? { |m| m == id }
+      
     end
+    
     return nil
   end
   
@@ -214,7 +215,6 @@ class Eo_Archive
   end
   
   def _LCA_of_group ids
-    # lca = ids.inject(ids[0]) { |curr,new| puts [curr,new,_lowest_common_ancestor(curr,new)].join(","); _lowest_common_ancestor(curr,new) }
     ids.inject(ids[0]) { |curr,new| _lowest_common_ancestor_of(curr,new) }
   end
   
