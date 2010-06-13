@@ -326,10 +326,16 @@ class Pond
       if lca == nil
         $LOGGER.info "REPORT\tNo most recent common ancestor exists."
       else
-        $LOGGER.info "REPORT\tMost recent common ancestor: Eo_#{lca}."
+        lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
+        $LOGGER.info "REPORT\tMost recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
       end
       roots = @archive.group_roots ids
-      $LOGGER.info "Currently living Eos descended from #{roots.map {|n| "Eo_#{n}" }.join(", ")}."
+      $LOGGER.info "REPORT\tCurrently living Eos descended from #{roots.map {|n| "Eo_#{n} (#{@archive.count_living_descendants_of n})" }.join(", ")}."
+      if @eo_follower.tracking_eo
+        tracker_offspring = @archive.count_living_descendants_of @eo_follower.original_tracked
+        member_plural = tracker_offspring > 1 ? "s" : ""
+        $LOGGER.info "REPORT\tCurrent tracked family line Eo_#{@eo_follower.original_tracked} [g#{@eo_follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
+      end
     end
   end
   
@@ -348,7 +354,7 @@ end
 
 class Follower
   
-  attr_accessor :environment,:tracked_eo
+  attr_accessor :environment,:tracked_eo,:original_tracked,:original_generation
   
   def initialize environment, archive, auto_track=false
     @environment = environment

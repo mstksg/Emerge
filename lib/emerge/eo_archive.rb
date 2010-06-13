@@ -49,6 +49,27 @@ class Eo_Archive
     return @database[id] != nil
   end
   
+  def generation_gap id_1,id_2
+    id_1 = id_1.to_i(36) if id_1.class == String
+    id_2 = id_2.to_i(36) if id_2.class == String
+    
+    if id_1 > id_2
+      child = id_1
+      parent = id_2
+    else
+      child = id_2
+      parent = id_1
+    end
+    
+    count = 0
+    while true
+      return count if child == parent
+      child = _parent_of child
+      return nil if child == nil
+      count += 1
+    end
+  end
+  
   ## Proxy methods
   ## (replace with meta-programming)
   
@@ -74,6 +95,10 @@ class Eo_Archive
     ua = _ultimate_ancestor_of id.to_i(36)
     return nil if ua == nil
     return ua.to_s(36)
+  end
+  
+  def count_living_descendants_of id
+    return _count_living_descendants_of(id.to_i(36))
   end
   
   def first_living_descendant_of id
@@ -134,6 +159,21 @@ class Eo_Archive
     end
   end
   
+  def _count_living_descendants_of id
+    curr_check = @database[id]
+    
+    if curr_check == nil
+      if is_alive? id
+        return 1
+      else
+        return 0
+      end
+    else
+      return _descendants_of(id).inject(0) { |sum,n| sum + _count_living_descendants_of(n) }
+    end
+    
+  end
+  
   def _first_living_descendant_of id
     
     curr_check = @database[id]
@@ -144,14 +184,14 @@ class Eo_Archive
       else
         return nil
       end
+    else
+      2.times do |n|
+        branch = _first_living_descendant_of curr_check[n]
+        return branch if branch
+      end
+      
+      return nil
     end
-    
-    2.times do |n|
-      branch = _first_living_descendant_of curr_check[n]
-      return branch if branch
-    end
-    
-    return nil
   end
   
   def _lowest_common_ancestor_of id_1,id_2
