@@ -463,8 +463,8 @@ class Eo
   end
   
   def report
-    $LOGGER.info "Age: #{@age}"
-    $LOGGER.info "Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of id} [g1]"
+    $C_LOG.info "REPORT\t#{to_s} (Age: #{@age})"
+    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of id} [g1]"
   end
   
 end

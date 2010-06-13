@@ -28,4 +28,3 @@
 - spikes shooting in the wrong direction
 - picking up food with 0 energy?
 - collision angle if condition
-- non-logged "reporting" method

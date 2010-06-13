@@ -293,7 +293,7 @@ class Pond
         else
           if button == 3
             spawned = add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
-            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical}})"
+            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical})"
           else
             add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
           end
@@ -321,21 +321,7 @@ class Pond
       spawned = sprinkle_eo
       $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned[0].id} (#{spawned[0].dna.inspect_physical})"
     when K_R
-      ids = @eos.map { |e| e.id }
-      lca = @archive.LCA_of_group ids
-      if lca == nil
-        $LOGGER.info "REPORT\tNo most recent common ancestor exists."
-      else
-        lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
-        $LOGGER.info "REPORT\tMost recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
-      end
-      roots = @archive.group_roots ids
-      $LOGGER.info "REPORT\tCurrently living Eos descended from #{roots.map {|n| "Eo_#{n} (#{@archive.count_living_descendants_of n})" }.join(", ")}."
-      if @eo_follower.tracking_eo
-        tracker_offspring = @archive.count_living_descendants_of @eo_follower.original_tracked
-        member_plural = tracker_offspring > 1 ? "s" : ""
-        $LOGGER.info "REPORT\tCurrent tracked family line Eo_#{@eo_follower.original_tracked} [g#{@eo_follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
-      end
+      report
     end
   end
   
@@ -350,6 +336,30 @@ class Pond
       eo.strike(Mutations.rand_norm_dist(0,$POND_DISASTER,2),cause)
     end
   end
+  
+  def report
+    $C_LOG.info "REPORT\tPond (Age: #{@environment.clock.ticks})"
+    
+    ids = @eos.map { |e| e.id }
+    lca = @archive.LCA_of_group ids
+    if lca == nil
+      $C_LOG.info "\t- No most recent common ancestor exists."
+    else
+      lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
+      $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
+    end
+    
+    roots = @archive.group_roots ids
+    $C_LOG.info "\t- Currently living Eos descended from #{roots.map {|n| "Eo_#{n} (#{@archive.count_living_descendants_of n})" }.join(", ")}."
+    
+    if @eo_follower.tracking_eo
+      tracker_offspring = @archive.count_living_descendants_of @eo_follower.original_tracked
+      member_plural = tracker_offspring > 1 ? "s" : ""
+      $C_LOG.info "\t- Current tracked family line Eo_#{@eo_follower.original_tracked} [g#{@eo_follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
+    end
+    
+  end
+  
 end
 
 class Follower
