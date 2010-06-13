@@ -5,7 +5,7 @@ include Rubygame
 
 class Pond
   
-  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+  attr_reader :environment, :eos, :foods, :zone_rects, :archive
   
   @@DISASTERS = [:plague,:'a divine wind',:flooding,:'gamma radiation',:'poisoned water',
                   :'global warming',:'the ice age',:'a zombie apocalypse',:'an asteroid impact',
@@ -320,6 +320,16 @@ class Pond
       # maybe implement shift = x5
       spawned = sprinkle_eo
       $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned[0].id} (#{spawned[0].dna.inspect_physical})"
+    when K_R
+      ids = @eos.map { |e| e.id }
+      lca = @archive.LCA_of_group ids
+      if lca == nil
+        $LOGGER.info "REPORT\tNo most recent common ancestor exists."
+      else
+        $LOGGER.info "REPORT\tMost recent common ancestor: Eo_#{lca}."
+      end
+      roots = @archive.group_roots ids
+      $LOGGER.info "Currently living Eos descended from #{roots.map {|n| "Eo_#{n}" }.join(", ")}."
     end
   end
   
@@ -374,7 +384,7 @@ class Follower
       find_next = false
       
       if @tracked_eo.groups.size == 0
-        next_track_id = @archive.find_first_living_descendant(@original_tracked)
+        next_track_id = @archive.first_living_descendant_of @original_tracked
         next_track = @environment.pond.eos.find { |eo| eo.id == next_track_id }
         if @archive.has_descendants @tracked_eo.id
           $LOGGER.info "TRACK\tNow tracking #{next_track} (child of Eo_#{@tracked_eo.id}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
@@ -428,7 +438,7 @@ class Follower
     if @original_generation == 1
       $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no ancestors."
     else
-      new_ancestor = @archive.find_parent(@original_tracked)
+      new_ancestor = @archive.parent_of(@original_tracked)
       if new_ancestor
         $LOGGER.info "TRACK\tNow tracking family line of Eo_#{new_ancestor} [g#{@original_generation-1}], parent of Eo_#{@original_tracked} [g#{@original_generation}]."
         @original_generation -= 1

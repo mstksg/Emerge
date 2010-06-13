@@ -1,7 +1,9 @@
 $LOGGER.debug "Initializing..."
 
+require "set"
 require "rubygems"
 require "rubygame"
+
 Rubygame::TTF.setup()
 
 Dir.require_all("lib/emerge/")

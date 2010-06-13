@@ -464,6 +464,7 @@ class Eo
   
   def report
     $LOGGER.info "Age: #{@age}"
+    $LOGGER.info "Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of id} [g1]"
   end
   
 end
