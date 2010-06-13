@@ -340,6 +340,7 @@ class Pond
   def report
     $C_LOG.info "REPORT\tPond (Age: #{@environment.clock.ticks})"
     
+    ## Common Ancestors
     ids = @eos.map { |e| e.id }
     lca = @archive.LCA_of_group ids
     if lca == nil
@@ -349,9 +350,15 @@ class Pond
       $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
     end
     
+    ## Roots
     roots = @archive.group_roots ids
-    $C_LOG.info "\t- Currently living Eos descended from #{roots.map {|n| "Eo_#{n} (#{@archive.count_living_descendants_of n})" }.join(", ")}."
+    $C_LOG.info "\t- Surviving original family lines include#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} alive)" }.join("")}"
     
+    ## Average Generation
+    gens = @eos.map { |e| e.generation }
+    $C_LOG.info "\t- Average generation: [g#{(gens.mean+0.5).to_i}]; s^2: #{gens.standard_deviation.to_s[0,5]}; min: [g#{gens.min}]; max: [g#{gens.max}]"
+    
+    ## Tracking Stats
     if @eo_follower.tracking_eo
       tracker_offspring = @archive.count_living_descendants_of @eo_follower.original_tracked
       member_plural = tracker_offspring > 1 ? "s" : ""
