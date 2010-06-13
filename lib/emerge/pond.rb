@@ -352,7 +352,7 @@ class Pond
     
     ## Roots
     roots = @archive.group_roots ids
-    $C_LOG.info "\t- Surviving original family lines include#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} alive)" }.join("")}"
+    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
     
     ## Average Generation
     gens = @eos.map { |e| e.generation }

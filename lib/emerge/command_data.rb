@@ -30,12 +30,13 @@ module Command_Data
   
   
   
-  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:m_angle,:random]
+  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:m_angle,:c_angle,:random]
   @@IF_WEIGHTS        = { :energy   => 1  ,
                           :age      => 0.5,
                           :velocity => 0.7,
                           :momentum => 0.5,
                           :m_angle  => 0.6,
+                          :c_angle  => 0.4,
                           :random   => 0.2 }
   @@IF_WEIGHT_SUM     = @@IF_WEIGHTS.values.inject { |sum,n| sum+n }
   
@@ -44,12 +45,14 @@ module Command_Data
                           :velocity => [0,4]   ,
                           :momentum => [0,80]  ,
                           :m_angle  => [0,360] ,
+                          :c_angle  => [0,360] ,
                           :random   => [0,1]    }
   @@IF_WRAPPABLE      = { :energy   => false ,
                           :age      => false ,
                           :velocity => false ,
                           :momentum => false ,
                           :m_angle  => true  ,
+                          :c_angle  => true  ,
                           :random   => false  }
   @@IF_COMPS          = [:lt,:gt]
   
@@ -76,6 +79,7 @@ module Command_Data
                           :velocity       => "V" ,
                           :momentum       => "M" ,
                           :m_angle        => "O" ,
+                          :c_angle        => "C" ,
                           :random         => "R"  }
   
 end
