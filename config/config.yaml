@@ -50,6 +50,7 @@ settings:
   drag: 0.04
   spike_decay: 0.997
   pond_disaster: 25
+  energy_infusion: 75
   auto_track: true
  eo_constants:
   main:

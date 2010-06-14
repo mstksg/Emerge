@@ -329,9 +329,7 @@ class Command_Block < Array
   
   def self.fresh_block iterations=$DNA_INITIAL_VARIANCE
     new_block = Command_Block.new([Eo_Command.new_command])
-     (iterations/$BRAIN_MUTATE_FACTOR).to_i.times do
-      new_block.mutate! 10
-    end
+    (iterations/$BRAIN_MUTATE_FACTOR).to_i.times { new_block.mutate! 10 }
     return new_block
   end
   

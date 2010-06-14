@@ -60,6 +60,7 @@ def setup_constants config_hash
   $POND_DRAG = settings["pond"]["drag"]
   $POND_SPIKE_DECAY = settings["pond"]["spike_decay"]
   $POND_DISASTER = settings["pond"]["pond_disaster"]
+  $POND_ENERGY_INFUSION = settings["pond"]["energy_infusion"]
   $AUTO_TRACKING = settings["pond"]["auto_track"] if $AUTO_TRACKING == nil
   
   pond_settings = settings["pond"][$env_choice]

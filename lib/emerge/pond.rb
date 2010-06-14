@@ -7,11 +7,6 @@ class Pond
   
   attr_reader :environment, :eos, :foods, :zone_rects, :archive
   
-  @@DISASTERS = [:plague,:'a divine wind',:flooding,:'gamma radiation',:'poisoned water',
-                  :'global warming',:'the ice age',:'a zombie apocalypse',:'an asteroid impact',
-                  :'you meddling kids',:'an earthquake',:'a hurricane',:'an alien invasion',
-                  :'a volcanic eruption',:'an oil spill']
-  
   def initialize environment
     @environment = environment
     
@@ -28,6 +23,11 @@ class Pond
     
     @spikes = Sprites::Group.new
     @spikes.extend(Sprites::UpdateGroup)
+    
+    @key_handler = Pond_Key_Handler.new(self,@eos,@foods,@packets,@eo_follower,@archive)
+    
+    @food_rate = $POND_FOOD_RATE
+    @drought = false
     
     @zone_count = determine_zone_count
     @total_zones = @zone_count*@zone_count
@@ -86,12 +86,12 @@ class Pond
     add_eo(dna,energy,x,y,rot,generation,[0,0])
   end
   
-  def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
+  def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false, hp_percent=1)
     
     x %= @environment.width
     y %= @environment.height
     
-    new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
+    new_eo = Eo.new(self,dna,energy,x,y,rot,generation,hp_percent)
     
     if direction and speed_frac
       new_eo.move(direction,speed_frac)
@@ -232,7 +232,7 @@ class Pond
   
   def update
     
-    if rand*$POND_FOOD_RATE < 1
+    if rand*@food_rate < 1
       sprinkle_food
     end
     @packets.update
@@ -260,7 +260,17 @@ class Pond
     @spikes.draw(@environment.screen)
   end
   
-  
+  def drought
+    unless @drought
+      $LOGGER.info "POND\tA horrible drought has befallen the pond."
+      @food_rate *= 100.0
+      @drought = true
+    else
+      $LOGGER.info "POND\tThe drought that has plagued the pond has been lifted!"
+      @food_rate /= 100.0
+      @drought = false
+    end
+  end
   
   def clicked pos, button
     if button > 0 or button < 4
@@ -304,67 +314,11 @@ class Pond
   end
   
   def keyed key,mods
-    
-    case key
-    when K_SPACE
-      if @eo_follower.tracking_eo
-        @eo_follower.tracked_eo.report
-      end
-    when K_Z
-      if @eo_follower.tracking_eo
-        @eo_follower.step_up_ancestor
-      end
-    when K_D
-      disaster
-    when K_E
-      # maybe implement shift = x5
-      spawned = sprinkle_eo
-      $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned[0].id} (#{spawned[0].dna.inspect_physical})"
-    when K_R
-      report
-    end
+    @key_handler.process key,mods
   end
   
   def select_random
     @eo_follower.start_following @eos.pick_rand if @eos.size > 0
-  end
-  
-  def disaster
-    cause = @@DISASTERS.pick_rand
-    $LOGGER.info "POND\tA terrible disaster caused by #{cause.to_s} brings destruction across the pond."
-    @eos.clone.each do |eo|
-      eo.strike(Mutations.rand_norm_dist(0,$POND_DISASTER,2),cause)
-    end
-  end
-  
-  def report
-    $C_LOG.info "REPORT\tPond (Age: #{@environment.clock.ticks})"
-    
-    ## Common Ancestors
-    ids = @eos.map { |e| e.id }
-    lca = @archive.LCA_of_group ids
-    if lca == nil
-      $C_LOG.info "\t- No most recent common ancestor exists."
-    else
-      lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
-      $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
-    end
-    
-    ## Roots
-    roots = @archive.group_roots ids
-    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
-    
-    ## Average Generation
-    gens = @eos.map { |e| e.generation }
-    $C_LOG.info "\t- Average generation: [g#{(gens.mean+0.5).to_i}]; s^2: #{gens.standard_deviation.to_s[0,5]}; min: [g#{gens.min}]; max: [g#{gens.max}]"
-    
-    ## Tracking Stats
-    if @eo_follower.tracking_eo
-      tracker_offspring = @archive.count_living_descendants_of @eo_follower.original_tracked
-      member_plural = tracker_offspring > 1 ? "s" : ""
-      $C_LOG.info "\t- Current tracked family line Eo_#{@eo_follower.original_tracked} [g#{@eo_follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
-    end
-    
   end
   
 end
@@ -496,6 +450,123 @@ class Follower
   end
   def dna_text
     "#{@tracked_eo}: #{@tracked_eo.dna.inspect_programs}"
+  end
+end
+  
+class Pond_Key_Handler
+
+  @@DISASTERS = [:plague,:'a divine wind',:flooding,:'gamma radiation',:'poisoned water',
+                  :'global warming',:'the ice age',:'a zombie apocalypse',:'an asteroid impact',
+                  :'you meddling kids',:'an earthquake',:'a hurricane',:'an alien invasion',
+                  :'a volcanic eruption',:'an oil spill']
+  
+  def initialize pond, eos, foods, packets, follower, archive
+    @pond = pond
+    @eos = eos
+    @foods = foods
+    @packets = packets
+    @follower = follower
+    @archive = archive
+  end
+  
+  def process key,mods
+    case key
+    when K_SPACE
+      if @follower.tracking_eo
+        @follower.tracked_eo.report
+      end
+    when K_Z
+      if @follower.tracking_eo
+        @follower.step_up_ancestor
+      end
+    when K_D
+      disaster
+    when K_I
+      infuse_energy
+    when K_O
+      mass_reproduction
+    when K_M
+      mass_mutation
+    when K_F
+      vanish_food
+    when K_P
+      drought
+    when K_R
+      report
+    when K_S
+      # maybe implement shift = x5
+      spawned = sprinkle_eo
+      $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned[0].id} (#{spawned[0].dna.inspect_physical})"
+    end
+  end
+  
+  def disaster
+    cause = @@DISASTERS.pick_rand
+    $LOGGER.info "POND\tA terrible disaster caused by #{cause.to_s} brings destruction across the pond."
+    @eos.clone.each do |eo|
+      eo.strike(Mutations.rand_norm_dist(0,$POND_DISASTER,2),cause)
+    end
+  end
+  
+  def infuse_energy
+    $LOGGER.info "POND\tAll of a sudden, a surge of energy has been infused in the pond's creatures."
+    @eos.each do |eo|
+      energy_infusion = Mutations.mutate($POND_ENERGY_INFUSION,0,1/0.0,10)
+      eo.collect_energy energy_infusion
+      eo.log_message "Eo_#{eo.id}\tinfused with #{energy_infusion} energy.",false
+    end
+  end
+  
+  def mass_reproduction
+    @eos.clone.each do |eo|
+      eo.replicate true
+    end
+    $LOGGER.info "POND\tBy some divide circumstance, every Eo has been forced to reproduce."
+  end
+  
+  def mass_mutation
+    $LOGGER.info "POND\tA nearby solar flare has caused every Eo to radically mutate."
+    @eos.each do |eo|
+      eo.mutate! $DNA_INITIAL_VARIANCE/2
+    end
+  end
+  
+  def vanish_food
+    cause = @@DISASTERS.pick_rand
+    (@foods | @packets).each do |food|
+      food.kill
+    end
+    $LOGGER.info "POND\t#{cause.to_s.capitalize} has caused all food in the pond to vanish."
+  end
+  
+  def report
+    $C_LOG.info "REPORT\tPond (Age: #{@pond.environment.clock.ticks})"
+    
+    ## Common Ancestors
+    ids = @eos.map { |e| e.id }
+    lca = @archive.LCA_of_group ids
+    if lca == nil
+      $C_LOG.info "\t- No most recent common ancestor exists."
+    else
+      lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
+      $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
+    end
+    
+    ## Roots
+    roots = @archive.group_roots ids
+    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
+    
+    ## Average Generation
+    gens = @eos.map { |e| e.generation }
+    $C_LOG.info "\t- Average generation: [g#{(gens.mean+0.5).to_i}]; s^2: #{gens.standard_deviation.to_s[0,5]}; min: [g#{gens.min}]; max: [g#{gens.max}]"
+    
+    ## Tracking Stats
+    if @follower.tracking_eo
+      tracker_offspring = @archive.count_living_descendants_of @follower.original_tracked
+      member_plural = tracker_offspring > 1 ? "s" : ""
+      $C_LOG.info "\t- Current tracked family line Eo_#{@follower.original_tracked} [g#{@follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
+    end
+    
   end
   
 end

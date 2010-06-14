@@ -15,7 +15,7 @@ class Eo
               :death_cause,:angle_vect
   attr_accessor :pos,:followed
   
-  def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
+  def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1,starting_hp_percent=1)
     
     @id = @@count.to_s(36)
     @@count += 1
@@ -25,7 +25,7 @@ class Eo
     
     @dna = dna
     
-    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
+    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency,starting_hp_percent)
     @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
     @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
     
@@ -74,6 +74,15 @@ class Eo
     @eo_graphic = @eo_graphic.to_display
     
     return @eo_graphic
+  end
+  
+  def update_graphic
+    @eo_graphic = nil
+    @body.update_graphic
+    @feeler.update_graphic
+    
+    @image = graphic.rotozoom(@angle,1)
+    @image.colorkey = [10,10,10]
   end
   
   def set_rects
@@ -274,6 +283,11 @@ class Eo
     return Eo.new(new_dna, new_energy)
   end
   
+  def mutate! iterations=1
+    (iterations/$MUTATION_FACTOR).to_i.times { @dna.mutate! }
+    update_graphic
+  end
+  
   def replicate force=false
     
     if @energy >= $ENERGY_CAP
@@ -321,9 +335,9 @@ class Eo
       ## Consider making this a bit simpler
       
       descendant1 = @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
-                                 @angle+90,@generation+1,angle_disp,speed_frac)
+                                 @angle+90,@generation+1,angle_disp,speed_frac,@body.hp_percent)
       descendant2 = @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
-                                 @angle-90,@generation+1,angle_disp,speed_frac)
+                                 @angle-90,@generation+1,angle_disp,speed_frac,@body.hp_percent)
       
       @pond.archive.store_eo(id,descendant1.id,descendant2.id)
       
@@ -474,7 +488,7 @@ class Eo_Body
   
   attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
   
-  def initialize owner, shell, max_speed, efficiency
+  def initialize owner, shell, max_speed, efficiency, starting_hp_percent=1
     @owner = owner
     
     @shell = shell
@@ -482,7 +496,7 @@ class Eo_Body
     @efficiency = efficiency
     @mass = (@shell+0.5)*$B_MASS_FACTOR
     
-    @hp = @shell
+    @hp = @shell*starting_hp_percent
     
     @image = graphic
     @rect = @image.make_rect
@@ -506,6 +520,11 @@ class Eo_Body
     return @body_graphic
   end
   
+  def update_graphic
+    @body_graphic = nil
+    @image = graphic
+  end
+  
   def recover_hp
     if @hp < @shell
       @hp += @shell*$B_RECOVERY
@@ -513,6 +532,10 @@ class Eo_Body
         @hp = @shell
       end
     end
+  end
+  
+  def hp_percent
+    @hp/@shell.to_f
   end
   
   def poked poke_force, poker
@@ -619,6 +642,11 @@ class Feeler
     @f_graphic = @f_graphic.to_display
     
     return @f_graphic
+  end
+  
+  def update_graphic
+    @f_graphic = nil
+    @image = graphic
   end
   
   def max_dist
