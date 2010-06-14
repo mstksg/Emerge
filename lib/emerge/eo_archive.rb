@@ -389,3 +389,59 @@ class Eo_Archive
   end
   
 end
+
+class Eo_HoF
+  
+  @@CATEGORIES = [:kill_count,:age]
+  
+  def initialize
+    @records = Hash.new
+    @hall = Hash.new
+    
+    for category in @@CATEGORIES
+      @records[category] = nil
+      @hall[category] = nil
+    end
+  end
+  
+  def submit eo
+  
+    if not record_exists? :kill_count or eo.kill_count > curr_record(:kill_count)
+      set_record :kill_count,eo,eo.kill_count
+    end
+    
+    if not record_exists? :age or eo.age > curr_record(:age)
+      set_record :age,eo,eo.age
+    end
+    
+  end
+  
+  def set_record record_name,holder,record
+    @hall[record_name] = holder.inspect
+    @records[record_name] = record
+  end
+  
+  def curr_record record
+    @records[record]
+  end
+  
+  def curr_holder record
+    @hall[record]
+  end
+  
+  def record_exists? record
+    return @hall[record] != nil
+  end
+  
+  def empty?
+    for category in @@CATEGORIES
+      return false if record_exists? category
+    end
+    return true
+  end
+  
+  def categories
+    return @@CATEGORIES.clone
+  end
+  
+end

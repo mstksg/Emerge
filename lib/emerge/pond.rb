@@ -5,7 +5,7 @@ include Rubygame
 
 class Pond
   
-  attr_reader :environment, :eos, :foods, :zone_rects, :archive
+  attr_reader :environment, :eos, :foods, :zone_rects, :archive, :hall
   
   def initialize environment
     @environment = environment
@@ -14,6 +14,7 @@ class Pond
     @eos.extend(Sprites::UpdateGroup)
     @archive = Eo_Archive.new(@eos)
     @eo_follower = Follower.new(@environment,@archive,$AUTO_TRACKING)
+    @hall = Eo_HoF.new
     
     @foods = Sprites::Group.new
     @foods.extend(Sprites::UpdateGroup)
@@ -493,7 +494,7 @@ class Pond_Key_Handler
   @@DISASTERS = [:plague,:'a divine wind',:flooding,:'gamma radiation',:'poisoned water',
                   :'global warming',:'the ice age',:'a zombie apocalypse',:'an asteroid impact',
                   :'you meddling kids',:'an earthquake',:'a hurricane',:'an alien invasion',
-                  :'a volcanic eruption',:'an oil spill']
+                  :'a volcanic eruption',:'an oil spill']                                       # symbols might be overkill
   
   def initialize pond, eos, foods, packets, follower, archive
     @pond = pond
@@ -532,6 +533,8 @@ class Pond_Key_Handler
       drought
     when K_R
       report
+    when K_H
+      hall_of_fame
     when K_S
       # maybe implement shift = x5
       spawned = sprinkle_eo
@@ -619,6 +622,22 @@ class Pond_Key_Handler
       member_plural = tracker_offspring > 1 ? "s" : ""
       $C_LOG.info "\t- Current tracked family line Eo_#{@follower.original_tracked} [g#{@follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
       $C_LOG.info "\t   (Tracking current family line for #{@follower.track_elapsed_time} ticks and #{@follower.track_elapsed_generations} generations)"
+    end
+    
+  end
+  
+  def hall_of_fame
+    
+    $C_LOG.info "REPORT:\t~~ HALL OF FAME ~~"
+    
+    if @pond.hall.empty?
+      $C_LOG.info "\t(Hall of fame is currently empty)"
+    else
+      for record in @pond.hall.categories
+        if @pond.hall.record_exists? record
+          $C_LOG.info "\t#{record.to_s.gsub(/_/){" "}.gsub!(/\b\w/){$&.upcase}}:\t#{@pond.hall.curr_record record} (#{@pond.hall.curr_holder record})"
+        end
+      end
     end
     
   end

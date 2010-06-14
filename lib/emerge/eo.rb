@@ -447,7 +447,9 @@ class Eo
       end
     end
     @pond.remove_eo(self)
+    @pond.hall.submit(self)
     kill
+    
     if reason != :reproduction and reason != :eaten and @energy > 0
       turn_into_food
     end
@@ -486,7 +488,7 @@ class Eo
   end
   
   def report
-    $C_LOG.info "REPORT:\t~~ #{to_s} (Age: #{@age}) ~~"
+    $C_LOG.info "REPORT:\t~~ #{inspect} (Age: #{@age}) ~~"
     
     if @generation >= 1
       $C_LOG.info "\t- No ancestors; top of family line."

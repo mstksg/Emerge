@@ -26,4 +26,4 @@
 - picking up food with 0 energy?
 - work out angle comparism trickeries
 - save states
-- implement Eo hall of fame to track most kills, longest life, etc.
+- Fleshen out hall of fame
