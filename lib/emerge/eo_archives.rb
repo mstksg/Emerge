@@ -77,6 +77,16 @@ class Eo_Archive
   ## Proxy methods
   ## (replace with meta-programming)
   
+  @@Proxy_Methods = [:descendants_of,:parent_of,:nth_ancestor_of,:ultimate_ancestor_of,:has_living_descendants?,
+                     :count_living_descendants_of,:first_living_descendant_of,:narrow_down,
+                     :distance_to_closest_relative_of,:closest_relative_of,:lowest_common_ancestor_of,
+                     :LCA_of_group,:group_roots,:group_ancestors]
+  
+  # @@Proxy_Methods.each do |method|
+    # proxy_method = "def #{method.to_s}\n" +
+                     # "result = _#{method.to_s} "
+  # end
+  
   def descendants_of id
     descs = _descendants_of id.to_i(36)
     return nil if descs == nil
@@ -335,6 +345,14 @@ class Eo_Archive
     ids.inject(ids[0]) { |curr,new| _lowest_common_ancestor_of(curr,new) }
   end
   
+  # def _split_group_by_LCA ids
+    # LCAs = Set.new
+    # (ids.size-1) do |n|
+      # curr_lca = _lowest_common_ancestor_of(ids[n],ids[n+1])
+    # end
+    # return LCAs
+  # end
+  
   def _group_roots ids,levels=0
     roots = Set.new
     for id in ids
@@ -392,26 +410,52 @@ end
 
 class Eo_HoF
   
-  @@CATEGORIES = [:kill_count,:age]
+  @@CATEGORIES = [:kill_count,:age,:energy,:energy_col]
+  @@CATEGORIES_DEFAULTS = { :kill_count => 0,
+                            :age        => 0,
+                            :energy     => 0,
+                            :energy_col => 0 }
+  @@CATEGORIES_NAMES =    { :kill_count => "Highest kill count  ",
+                            :age        => "Longest living      ",
+                            :energy     => "Highest energy      ",
+                            :energy_col => "Most energy gathered" }
   
   def initialize
     @records = Hash.new
     @hall = Hash.new
     
     for category in @@CATEGORIES
-      @records[category] = nil
+      @records[category] = @@CATEGORIES_DEFAULTS[category]
       @hall[category] = nil
     end
   end
   
   def submit eo
-  
-    if not record_exists? :kill_count or eo.kill_count > curr_record(:kill_count)
+    
+    admitted = Set.new
+    
+    if eo.kill_count > curr_record(:kill_count)
       set_record :kill_count,eo,eo.kill_count
+      admitted.add :kill_count
     end
     
-    if not record_exists? :age or eo.age > curr_record(:age)
+    if eo.age > curr_record(:age)
       set_record :age,eo,eo.age
+      admitted.add :age
+    end
+    
+    if eo.energy_record > curr_record(:energy)
+      set_record :energy,eo,eo.energy_record
+      admitted.add :energy
+    end
+    
+    if eo.collected_energy > curr_record(:energy_col)
+      set_record :energy_col,eo,eo.collected_energy
+      admitted.add :energy_col
+    end
+    
+    if admitted.size > 0
+      eo.log_message "#{eo.to_s} inducted in the hall of fame for #{ admitted.map { |r| record_name(r,true) }.join(", ") }."
     end
     
   end
@@ -421,8 +465,12 @@ class Eo_HoF
     @records[record_name] = record
   end
   
-  def curr_record record
-    @records[record]
+  def curr_record record,to_s=false
+    return @records[record] unless to_s
+    
+    rec = @records[record]
+    return rec.to_s[0,6] if rec.class == Float
+    return rec.to_s
   end
   
   def curr_holder record
@@ -431,6 +479,19 @@ class Eo_HoF
   
   def record_exists? record
     return @hall[record] != nil
+  end
+  
+  def record_name record,strip=false
+    return @@CATEGORIES_NAMES[record].strip if strip
+    return @@CATEGORIES_NAMES[record]
+  end
+  
+  def record_to_s record
+    if record_exists? record
+      return "#{curr_record(record,true)}\t(#{curr_holder record})"
+    else
+      return "No record yet set for #{record.to_s}"
+    end
   end
   
   def empty?

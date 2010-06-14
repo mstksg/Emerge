@@ -191,7 +191,9 @@ module Pond_Bits
     
     def turn_into_food
       kill
-      @pond.add_food(@energy_content/8.0,@pos[0],@pos[1])
+      if rand*6 < @energy_content
+        @pond.add_food(@energy_content/12.0,@pos[0],@pos[1])
+      end
     end
     
   end

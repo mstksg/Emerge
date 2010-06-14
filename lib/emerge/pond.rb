@@ -635,7 +635,7 @@ class Pond_Key_Handler
     else
       for record in @pond.hall.categories
         if @pond.hall.record_exists? record
-          $C_LOG.info "\t#{record.to_s.gsub(/_/){" "}.gsub!(/\b\w/){$&.upcase}}:\t#{@pond.hall.curr_record record} (#{@pond.hall.curr_holder record})"
+          $C_LOG.info "\t#{@pond.hall.record_name record}:\t#{@pond.hall.record_to_s record}"
         end
       end
     end

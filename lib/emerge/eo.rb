@@ -10,9 +10,9 @@ class Eo
   
   @@count = 0
   
-  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
-              :velocity,:velo_magnitude,:mass,:id,:generation,
-              :death_cause,:angle_vect,:kill_count
+  attr_reader :body,:feeler,:energy,:brain,:dna,:angle,:velocity,
+              :velo_magnitude,:mass,:id,:generation,:death_cause,
+              :angle_vect,:kill_count,:energy_record,:collected_energy
   attr_accessor :pos,:followed
   
   def self.fmt_str id,gen
@@ -36,8 +36,9 @@ class Eo
     @mass = @feeler.mass + @body.mass
     @energy = energy
     set_velocity [0,0]
-    @age = 0
     @kill_count = 0
+    @energy_record = energy
+    @collected_energy = 0
     
     @food_triggered = []
     @eo_triggered = []
@@ -59,6 +60,7 @@ class Eo
     set_rects
     
     log_message "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
+    @birth_time = @pond.environment.clock.ticks
     
     @brain.run_birth_program
   end
@@ -96,7 +98,6 @@ class Eo
   end
   
   def update
-    @age += 1
     unless replicate
       @body.recover_hp
       energy_decay
@@ -264,7 +265,7 @@ class Eo
     end
     @energy -= (@velo_magnitude+$REST_ENERGY_DECAY)*@total_mass_drag
     if @energy < 0
-      log_message "Eo_#{@id}\tStarved;\ta#{@age}"
+      log_message "Eo_#{@id}\tStarved;\ta#{age}"
       die :starvation
     end
   end
@@ -281,6 +282,8 @@ class Eo
   
   def collect_energy amount
     @energy += amount
+    @collected_energy += amount
+    @energy_record = @energy if @energy > @energy_record
   end
   
   def mutate new_energy=0
@@ -297,12 +300,12 @@ class Eo
     
     if @energy >= $ENERGY_CAP
       reproduce_now = true
-      $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
+      $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{age}/e#{@energy.to_i}"
     end
     
     if reproduce_now or force or ((@energy > @total_rep_threshold) and (rand*@total_rep_rate < @energy))
       
-      log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
+      log_message "Eo_#{@id}\tReplicates;\ta#{age}, e#{@energy.to_i}"
       
       die :reproduction
       
@@ -441,9 +444,9 @@ class Eo
     if log
       case reason
       when :divine
-        log_message "Eo_#{@id}\tDies by divine hand\ta#{@age}, e#{@energy.to_i}"
+        log_message "Eo_#{@id}\tDies by divine hand\ta#{age}, e#{@energy.to_i}"
       else
-        log_message "Eo_#{@id}\tDies;\t\ta#{@age}, e#{@energy.to_i}\t(Cause: #{reason})"
+        log_message "Eo_#{@id}\tDies;\t\ta#{age}, e#{@energy.to_i}\t(Cause: #{reason})"
       end
     end
     @pond.remove_eo(self)
@@ -468,6 +471,9 @@ class Eo
   def to_s
     "Eo_#{@id} [g#{@generation}]"
   end
+  def age
+    return @pond.environment.clock.ticks - @birth_time
+  end
   
   def log_message message,post_anyway=true
     if @followed
@@ -488,17 +494,18 @@ class Eo
   end
   
   def report
-    $C_LOG.info "REPORT:\t~~ #{inspect} (Age: #{@age}) ~~"
+    $C_LOG.info "REPORT:\t~~ #{inspect} (Age: #{age}) ~~"
     
-    if @generation >= 1
+    if @generation <= 1
       $C_LOG.info "\t- No ancestors; top of family line."
     else
       recent_parents = Array.new(5) { |n| @pond.archive.nth_ancestor_of(@id,n+1) }.compact
       $C_LOG.info "\t- Recent ancestors: #{recent_parents.map { |n| "Eo_#{n} [g#{@generation-recent_parents.index(n)-1}]" }.join(", ") }"
     end
     
-    $C_LOG.info "\t- Kill count: #{@kill_count}."
-    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of @id} [g1]."
+    $C_LOG.info "\t- Kill count: #{@kill_count}"
+    $C_LOG.info "\t- Energy collected: #{@collected_energy.to_s[0,5]} (maximum #{@energy_record.to_s[0,6]})"
+    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of @id} [g1]"
     
     closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
     if closest_rel_dist == nil
