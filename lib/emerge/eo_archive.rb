@@ -22,7 +22,7 @@ class Eo_Archive
       
       unless @reached_limit
         $LOGGER.debug "Reached archive limit of #{$ARCHIVE_LIMIT}"
-        @reached_limit = true
+        @reached_limit = true if @archive_limit < 1000
       end
       
     end
@@ -32,10 +32,14 @@ class Eo_Archive
     c = 0
     for n in @database.keys.sort!
       next if @database[n] == nil
-      @database.delete n
-      @stored_count -= 1
+      
       c += 1
       break if c >= count
+      
+      next if _has_living_descendants? n
+      
+      @database.delete n
+      @stored_count -= 1
     end
   end
   
@@ -97,6 +101,10 @@ class Eo_Archive
     return ua.to_s(36)
   end
   
+  def has_living_descendants? id
+    return _has_living_descendants?(id.to_i(36))
+  end
+  
   def count_living_descendants_of id
     return _count_living_descendants_of(id.to_i(36))
   end
@@ -105,6 +113,22 @@ class Eo_Archive
     fld = _first_living_descendant_of id.to_i(36)
     return nil if fld == nil
     return fld.to_s(36)
+  end
+  
+  def narrow_down id
+    nd = _narrow_down id.to_i(36)
+    return nil if nd == nil
+    return nd.to_s(36)
+  end
+  
+  def distance_to_closest_relative_of id
+    _distance_to_closest_relative_of id.to_i(36)
+  end
+  
+  def closest_relative_of id
+    c_rel = _closest_relative_of id.to_i(36)
+    return nil if c_rel == nil
+    return c_rel.to_s(36)
   end
   
   def lowest_common_ancestor_of id_1,id_2
@@ -124,18 +148,36 @@ class Eo_Archive
     return gr.map! { |n| n.to_s(36) }
   end
   
+  def group_ancestors ids,groups=4
+    ga = _group_ancestors ids.map { |n| n.to_i(36) },groups
+    return ga.map! { |n| n.to_s(36) }
+  end
+  
   ## Internal methods
   
   def _descendants_of id
-    Array.new(@database[id])
+    @database[id]
   end
   
   def _parent_of id
-    for n in @database.keys.sort!
+    keys = @database.keys.sort!
+    
+    n = keys.index(id)
+    
+    if n == nil
       
-      return nil if n >= id
-      return n if @database[n].any? { |m| m == id }
+      for m in keys
+        return nil if m >= id
+        return m if @database[m].any? { |j| j == id }
+      end
       
+    else
+    
+      while n >= 0
+        return keys[n] if @database[keys[n]].any? { |m| m == id }
+        n -= 1
+      end
+    
     end
     
     return nil
@@ -160,6 +202,22 @@ class Eo_Archive
     end
   end
   
+  def _has_living_descendants? id
+    
+    curr_check = @database[id]
+    
+    if curr_check == nil
+      if is_alive? id
+        return true
+      else
+        return false
+      end
+    else
+      return _descendants_of(id).any? { |n| _has_living_descendants? n }
+    end
+    
+  end
+  
   def _count_living_descendants_of id
     curr_check = @database[id]
     
@@ -176,7 +234,6 @@ class Eo_Archive
   end
   
   def _first_living_descendant_of id
-    
     curr_check = @database[id]
     
     if curr_check == nil
@@ -190,9 +247,69 @@ class Eo_Archive
         branch = _first_living_descendant_of curr_check[n]
         return branch if branch
       end
-      
       return nil
     end
+  end
+  
+  def _living_descendants_of id
+    curr_check = @database[id]
+    
+    if curr_check == nil
+      if is_alive? id
+        return Set.new.add(id)
+      else
+        return Set.new                            # this has a danger of blowing up, memory-wise
+      end
+    else
+      return _descendants_of(id).inject(Set.new) { |total,n| total | _living_descendants_of(n) }
+    end
+  end
+  
+  def _narrow_down id
+    while true
+      children = _descendants_of id
+      return id if children == nil
+      
+      children_counts = children.map { |n| _count_living_descendants_of n }
+      
+      return id unless children_counts.any? { |n| n < 1 }
+      
+      if children_counts[0] == 0
+        id = children[1]
+      else
+        id = children[0]
+      end
+      
+    end
+  end
+  
+  def _distance_to_closest_relative_of id
+    dist = 1
+    parent_check = _parent_of(id)
+    while parent_check != nil
+      
+      if _living_descendants_of(parent_check).size > 1
+        return dist
+      end
+      
+      dist += 1
+      parent_check = _parent_of(parent_check)
+    end
+    return nil
+  end
+  
+  def _closest_relative_of id
+    parent_check = _parent_of(id)
+    while parent_check != nil
+      descs = _living_descendants_of(parent_check).delete(id)
+      
+      if descs.size > 0
+        return descs.to_a[0]
+      end
+      
+      parent_check = _parent_of(parent_check)
+    end
+    return nil
   end
   
   def _lowest_common_ancestor_of id_1,id_2
@@ -233,6 +350,42 @@ class Eo_Archive
       end
     end
     return roots
+  end
+  
+  def _group_ancestors ids,groups=4
+    
+    roots = _group_roots ids
+    
+    ancestors = Hash.new
+    
+    for root in roots
+      desc_count = _count_living_descendants_of root
+      ancestors[_narrow_down(root)] = desc_count
+    end
+    
+    return ancestors.keys if roots.size >= groups
+    
+    while ancestors.size < groups
+      
+      if ancestors.values.max < 2
+        return ancestors.keys.map! { |n| _narrow_down n }
+      end
+      
+      smallest = ancestors.max {|a,b| a[1] <=> b[1]}[0]
+      descs = _descendants_of smallest
+      ancestors.delete smallest
+      
+      for desc in descs
+        desc_ancs = _count_living_descendants_of desc
+        if desc_ancs > 0
+          ancestors[_narrow_down(desc)] = desc_ancs
+        end
+      end
+      
+    end
+    
+    return ancestors.keys
+    
   end
   
 end

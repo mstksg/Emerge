@@ -1,6 +1,5 @@
 ## TODO
 
-- Track kills? heh
 - Try to catch some programs mutating within same organism, after trigger?
 - watch out for possible Eo moving over food and not eating?
 - perhaps exponential decay is not the best choice for healing?  or maybe it is,
@@ -27,3 +26,4 @@
 - picking up food with 0 energy?
 - work out angle comparism trickeries
 - save states
+- implement Eo hall of fame to track most kills, longest life, etc.

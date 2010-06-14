@@ -337,6 +337,7 @@ class Follower
     @original_tracked = nil
     @original_generation = nil
     @dna_dialog = nil
+    @tracked_start_time = nil
     
   end
   
@@ -355,6 +356,7 @@ class Follower
         @original_generation = nil
         @dna_dialog.kill
         @dna_dialog = nil
+        @tracked_start_time = nil
       end
     else
       
@@ -401,6 +403,7 @@ class Follower
     @original_generation = eo.generation
     @tracked_eo = eo
     @tracked_eo.followed = true
+    @tracked_start_time = @environment.clock.ticks
     
     $LOGGER.info "TRACK\tNow tracking #{@tracked_eo} and its family line"
     
@@ -415,7 +418,7 @@ class Follower
     if @original_generation == 1
       $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no ancestors."
     else
-      new_ancestor = @archive.parent_of(@original_tracked)
+      new_ancestor = @archive.parent_of @original_tracked
       if new_ancestor
         $LOGGER.info "TRACK\tNow tracking family line of Eo_#{new_ancestor} [g#{@original_generation-1}], parent of Eo_#{@original_tracked} [g#{@original_generation}]."
         @original_generation -= 1
@@ -426,8 +429,23 @@ class Follower
     end
   end
   
+  def narrow_down
+    if @original_generation == @tracked_eo.generation
+      $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no descendants."
+    else
+      narrow_down_id = @archive.narrow_down @original_tracked
+      if narrow_down_id == @original_tracked
+        $LOGGER.info "TRACK\tNo narrowed down descendant of Eo_#{@original_tracked} [g#{@original_generation}] found; both children have living descendants."
+      else
+        narrow_down_gen = @original_generation + @archive.generation_gap(@original_tracked,narrow_down_id)
+        $LOGGER.info "TRACK\tNow tracking family line of Eo_#{narrow_down_id} [g#{narrow_down_gen}], narrowed-down ancestor of #{@tracked_eo} descended from Eo_#{@original_tracked} [g#{@original_generation}."
+        @original_tracked = narrow_down_id
+        @original_generation = narrow_down_gen
+      end
+    end
+  end
+  
   def stop_following
-    
     if @tracked_eo
       
       $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of Eo_#{@original_tracked} [g#{@original_generation}] family line."
@@ -438,10 +456,27 @@ class Follower
       @original_generation = nil
       @curr_dialog = nil
       @dna_dialog = nil
+      @tracked_start_time = nil
       
       @tracked_eo.followed = nil if @tracked_eo
       @tracked_eo = nil
       
+    end
+  end
+  
+  def track_elapsed_time
+    if @tracked_start_time
+      return @environment.clock.ticks - @tracked_start_time
+    else
+      return 0
+    end
+  end
+  
+  def track_elapsed_generations
+    if @tracked_eo
+      return @tracked_eo.generation - @original_generation + 1
+    else
+      return 0
     end
   end
   
@@ -479,6 +514,10 @@ class Pond_Key_Handler
       if @follower.tracking_eo
         @follower.step_up_ancestor
       end
+    when K_N
+      if @follower.tracking_eo
+        @follower.narrow_down
+      end
     when K_D
       disaster
     when K_I
@@ -511,7 +550,7 @@ class Pond_Key_Handler
   def infuse_energy
     $LOGGER.info "POND\tAll of a sudden, a surge of energy has been infused in the pond's creatures."
     @eos.each do |eo|
-      energy_infusion = Mutations.mutate($POND_ENERGY_INFUSION,0,1/0.0,10)
+      energy_infusion = Mutations.mutate($POND_ENERGY_INFUSION,0,1/0.0,$POND_ENERGY_INFUSION/10.0,10)
       eo.collect_energy energy_infusion
       eo.log_message "Eo_#{eo.id}\tinfused with #{energy_infusion} energy.",false
     end
@@ -540,7 +579,15 @@ class Pond_Key_Handler
   end
   
   def report
-    $C_LOG.info "REPORT\tPond (Age: #{@pond.environment.clock.ticks})"
+    $C_LOG.info "REPORT:\t~~ Pond (Age: #{@pond.environment.clock.ticks}) ~~"
+    
+    ## Living, Ages
+    ages = @eos.map { |e| e.age }
+    $C_LOG.info "\t- Currently #{@eos.size} Eos alive; Average age: #{(ages.mean+0.5).to_i} (min: #{ages.min}, max: #{ages.max}, s^2: #{ages.standard_deviation.to_s[0,5]})"
+    
+    ## Average Generation
+    gens = @eos.map { |e| e.generation }
+    $C_LOG.info "\t   (Average generation: [g#{(gens.mean+0.5).to_i}]; min: [g#{gens.min}]; max: [g#{gens.max}]; s^2: #{gens.standard_deviation.to_s[0,5]})"
     
     ## Common Ancestors
     ids = @eos.map { |e| e.id }
@@ -554,17 +601,24 @@ class Pond_Key_Handler
     
     ## Roots
     roots = @archive.group_roots ids
-    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1] (#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
+    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1]\t(#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
     
-    ## Average Generation
-    gens = @eos.map { |e| e.generation }
-    $C_LOG.info "\t- Average generation: [g#{(gens.mean+0.5).to_i}]; s^2: #{gens.standard_deviation.to_s[0,5]}; min: [g#{gens.min}]; max: [g#{gens.max}]"
+    ## Ancestor Groups
+    ga = @archive.group_ancestors ids
+    ga_gens = Hash.new
+    for ancestor in ga
+      curr_desc_id = @archive.first_living_descendant_of ancestor
+      curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
+      ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
+    end
+    $C_LOG.info "\t- Largest families alive include:#{ga.map {|n| "\n\t\t\tEo_#{n} [g#{ga_gens[n]}], of Eo_#{@archive.ultimate_ancestor_of n} [g1]\t(#{@archive.count_living_descendants_of n} surviving)" } }"
     
     ## Tracking Stats
     if @follower.tracking_eo
       tracker_offspring = @archive.count_living_descendants_of @follower.original_tracked
       member_plural = tracker_offspring > 1 ? "s" : ""
       $C_LOG.info "\t- Current tracked family line Eo_#{@follower.original_tracked} [g#{@follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
+      $C_LOG.info "\t   (Tracking current family line for #{@follower.track_elapsed_time} ticks and #{@follower.track_elapsed_generations} generations)"
     end
     
   end

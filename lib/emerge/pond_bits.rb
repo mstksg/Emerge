@@ -191,7 +191,7 @@ module Pond_Bits
     
     def turn_into_food
       kill
-      @pond.add_food(@energy_content/4,@pos[0],@pos[1])
+      @pond.add_food(@energy_content/8.0,@pos[0],@pos[1])
     end
     
   end

@@ -12,8 +12,12 @@ class Eo
   
   attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
               :velocity,:velo_magnitude,:mass,:id,:generation,
-              :death_cause,:angle_vect
+              :death_cause,:angle_vect,:kill_count
   attr_accessor :pos,:followed
+  
+  def self.fmt_str id,gen
+    return "Eo_#{id} [g#{gen}]"
+  end
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1,starting_hp_percent=1)
     
@@ -33,6 +37,7 @@ class Eo
     @energy = energy
     set_velocity [0,0]
     @age = 0
+    @kill_count = 0
     
     @food_triggered = []
     @eo_triggered = []
@@ -402,9 +407,9 @@ class Eo
     new_x = @pos[0] + spike_angle_vect[0]*(6+@velo_magnitude)
     new_y = @pos[1] + spike_angle_vect[1]*(6+@velo_magnitude)
     
-    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle 
+    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle
     
-    @energy -= (mass*speed)/(@body.efficiency+3)
+    @energy -= (mass*(speed+1))/(7.0+@body.efficiency/10.0)
   end
   
   def eaten
@@ -476,9 +481,33 @@ class Eo
     return @groups.size > 0
   end
   
+  def get_kill
+    @kill_count += 1
+  end
+  
   def report
-    $C_LOG.info "REPORT\t#{to_s} (Age: #{@age})"
-    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of id} [g1]"
+    $C_LOG.info "REPORT:\t~~ #{to_s} (Age: #{@age}) ~~"
+    
+    if @generation >= 1
+      $C_LOG.info "\t- No ancestors; top of family line."
+    else
+      recent_parents = Array.new(5) { |n| @pond.archive.nth_ancestor_of(@id,n+1) }.compact
+      $C_LOG.info "\t- Recent ancestors: #{recent_parents.map { |n| "Eo_#{n} [g#{@generation-recent_parents.index(n)-1}]" }.join(", ") }"
+    end
+    
+    $C_LOG.info "\t- Kill count: #{@kill_count}."
+    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of @id} [g1]."
+    
+    closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
+    if closest_rel_dist == nil
+      $C_LOG.info "\t- No living relatives."
+    else
+      closest_rel = @pond.archive.closest_relative_of @id
+      common_ancestor = @pond.archive.lowest_common_ancestor_of @id,closest_rel
+      common_ancestor_gen = @generation - @pond.archive.generation_gap(id,common_ancestor)
+      closest_rel_gen = common_ancestor_gen + @pond.archive.generation_gap(closest_rel,common_ancestor)
+      $C_LOG.info "\t- Closest living relative is Eo_#{closest_rel} [g#{closest_rel_gen}], by Eo_#{common_ancestor} [g#{common_ancestor_gen}]"
+    end
   end
   
 end
@@ -542,6 +571,7 @@ class Eo_Body
     @hp -= poke_force*$B_DAMAGE
     if @hp < 0
       poker.eat @owner
+      poker.get_kill
       message = "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
       unless @owner.log_message message,false
         poker.log_message message
@@ -573,6 +603,7 @@ class Eo_Body
     end
     if @hp < 0
       if spiker.owner
+        spiker.owner.get_kill
         message = "Eo_#{@owner.id}\tKilled by spike from Eo_#{spiker.owner.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
         unless @owner.log_message message,false
           spiker.owner.log_message message
