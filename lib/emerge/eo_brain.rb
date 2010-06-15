@@ -105,15 +105,15 @@ class Brain
   
   def eval_if if_command
     cond = case if_command.args[0]
-    when :energy then @owner.energy
-    when :age then @owner.age
-    when :velocity then @owner.velo_magnitude
-    when :momentum then @momentum_trigger
-    when :m_angle then (@owner.movement_angle+@angle_shift)%360
-    when :c_angle then @angle_shift
-    when :random then rand()
-    else raise "Bad 'if' condition #{if_command.args[0]}"
-    end   ## maybe add more conditions later
+           when :energy then @owner.energy
+           when :age then @owner.age
+           when :velocity then @owner.velo_magnitude
+           when :momentum then @momentum_trigger
+           when :m_angle then (@owner.movement_angle+@angle_shift)%360
+           when :c_angle then @angle_shift
+           when :random then rand()
+           else raise "Bad 'if' condition #{if_command.args[0]}"
+           end
     
     if if_command.args[1] == :lt
       return cond < if_command.args[2]

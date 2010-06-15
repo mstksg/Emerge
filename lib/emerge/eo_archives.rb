@@ -3,6 +3,8 @@ class Eo_Archive
   def initialize eo_group
     
     @database = Hash.new()
+    @ultimate_ancestor_cache = Hash.new()
+    
     @eo_group = eo_group
     @stored_count = 0
     
@@ -17,7 +19,7 @@ class Eo_Archive
     descendant_array.freeze
     @database[id.to_i(36)] = descendant_array
     @stored_count += 1
-    if @stored_count > @archive_limit
+    if @stored_count >= @archive_limit
       clean_up $ARCHIVE_CLEANUP
       
       unless @reached_limit
@@ -36,9 +38,14 @@ class Eo_Archive
       c += 1
       break if c >= count
       
+      @ultimate_ancestor_cache.select { |k,v| v == n }.map{ |a| a[0] }.each do |m|
+        @ultimate_ancestor_cache.delete(m) unless _has_living_descendants?(m)
+      end
+      
       next if _has_living_descendants? n
       
       @database.delete n
+      
       @stored_count -= 1
     end
   end
@@ -74,96 +81,46 @@ class Eo_Archive
     end
   end
   
-  ## Proxy methods
-  ## (replace with meta-programming)
+  ## Creating proxy methods
   
-  @@Proxy_Methods = [:descendants_of,:parent_of,:nth_ancestor_of,:ultimate_ancestor_of,:has_living_descendants?,
+  @@PROXY_METHODS = [:descendants_of,:parent_of,:ultimate_ancestor_of,:has_living_descendants?,
                      :count_living_descendants_of,:first_living_descendant_of,:narrow_down,
                      :distance_to_closest_relative_of,:closest_relative_of,:lowest_common_ancestor_of,
                      :LCA_of_group,:group_roots,:group_ancestors]
+  @@no_back_conversion = [:has_living_descendants?,:count_living_descendants_of,:distance_to_closest_relative_of]
   
-  # @@Proxy_Methods.each do |method|
-    # proxy_method = "def #{method.to_s}\n" +
-                     # "result = _#{method.to_s} "
-  # end
   
-  def descendants_of id
-    descs = _descendants_of id.to_i(36)
-    return nil if descs == nil
-    return descs.map! { |n| n.to_s(36) }
+  @@PROXY_METHODS.each do |proxy|
+    class_eval %{ def #{proxy} *args
+                    args.map! do |a|
+                      if a.class == String
+                        a.to_i(36)
+                      else
+                        a.map { |id| id.to_i(36) }
+                      end
+                    end
+                    result = _#{proxy}(*args)
+                    return result if @@no_back_conversion.include? :#{proxy}
+                    
+                    result and if result.respond_to?(:each)
+                                 result.map { |r| r.to_s(36) }
+                               else
+                                 result.to_s(36)
+                               end
+                  end
+                }
   end
   
-  def parent_of id
-    parent = _parent_of id.to_i(36)
-    return nil if parent == nil
-    return parent.to_s(36)
-  end
+  # Special Proxy Methods
   
   def nth_ancestor_of id,num
-    na = _nth_ancestor_of id.to_i(36),num
-    return nil if na == nil
-    return na.to_s(36)
-  end
-  
-  def ultimate_ancestor_of id
-    ua = _ultimate_ancestor_of id.to_i(36)
-    return nil if ua == nil
-    return ua.to_s(36)
-  end
-  
-  def has_living_descendants? id
-    return _has_living_descendants?(id.to_i(36))
-  end
-  
-  def count_living_descendants_of id
-    return _count_living_descendants_of(id.to_i(36))
-  end
-  
-  def first_living_descendant_of id
-    fld = _first_living_descendant_of id.to_i(36)
-    return nil if fld == nil
-    return fld.to_s(36)
-  end
-  
-  def narrow_down id
-    nd = _narrow_down id.to_i(36)
-    return nil if nd == nil
-    return nd.to_s(36)
-  end
-  
-  def distance_to_closest_relative_of id
-    _distance_to_closest_relative_of id.to_i(36)
-  end
-  
-  def closest_relative_of id
-    c_rel = _closest_relative_of id.to_i(36)
-    return nil if c_rel == nil
-    return c_rel.to_s(36)
-  end
-  
-  def lowest_common_ancestor_of id_1,id_2
-    lca = _lowest_common_ancestor_of id_1.to_i(36),id_2.to_i(36)
-    return nil if lca == nil
-    return lca.to_s(36)
-  end
-  
-  def LCA_of_group ids
-    lca = _LCA_of_group ids.map { |n| n.to_i(36) }
-    return nil if lca == nil
-    return lca.to_s(36)
-  end
-  
-  def group_roots ids,levels=0
-    gr = _group_roots ids.map { |n| n.to_i(36) },levels
-    return gr.map! { |n| n.to_s(36) }
-  end
-  
-  def group_ancestors ids,groups=4
-    ga = _group_ancestors ids.map { |n| n.to_i(36) },groups
-    return ga.map! { |n| n.to_s(36) }
+    result = _nth_ancestor_of id.to_i(36),num
+    result and result.to_s(36)
   end
   
   ## Internal methods
+  
+  private
   
   def _descendants_of id
     @database[id]
@@ -202,14 +159,25 @@ class Eo_Archive
   end
   
   def _ultimate_ancestor_of id
+    return @ultimate_ancestor_cache[id] if @ultimate_ancestor_cache[id]
+    
+    check_id = id
     while true
-      parent = _parent_of id
+      
+      if @ultimate_ancestor_cache[check_id]
+        @ultimate_ancestor_cache[id] = @ultimate_ancestor_cache[check_id]
+        return @ultimate_ancestor_cache[check_id]
+      end
+      
+      parent = _parent_of check_id
       if parent == nil
-        return id
+        @ultimate_ancestor_cache[id] = check_id
+        return check_id
       else
-        id = parent
+        check_id = parent
       end
     end
+    
   end
   
   def _has_living_descendants? id
@@ -345,34 +313,52 @@ class Eo_Archive
     ids.inject(ids[0]) { |curr,new| _lowest_common_ancestor_of(curr,new) }
   end
   
-  # def _split_group_by_LCA ids
-    # LCAs = Set.new
-    # (ids.size-1) do |n|
-      # curr_lca = _lowest_common_ancestor_of(ids[n],ids[n+1])
-    # end
-    # return LCAs
-  # end
-  
-  def _group_roots ids,levels=0
-    roots = Set.new
+  def _split_group_by_LCA ids
+    lcas = Set.new.add(ids[0])
     for id in ids
-      if levels == 0
-        roots << _ultimate_ancestor_of(id)
-      else
-        na = _nth_ancestor_of id,levels
-        if na == nil
-          roots << _ultimate_ancestor_of(id)
-        else
-          roots << na
+      matched = false
+      for lca in lcas.clone
+        test_lca = _lowest_common_ancestor_of id,lca
+        if test_lca
+          lcas.delete lca
+          lcas.add test_lca
+          matched = true
         end
       end
+      unless matched
+        lcas.add id
+      end
     end
-    return roots
+    return lcas
+  end
+  
+  def _group_roots ids,levels=0
+    
+    group_lca = _LCA_of_group ids
+    if group_lca
+      return Set.new.add(_ultimate_ancestor_of(group_lca))
+    else
+      roots = Set.new
+      for id in ids
+        if levels == 0
+          roots << _ultimate_ancestor_of(id)
+        else
+          na = _nth_ancestor_of id,levels
+          if na == nil
+            roots << _ultimate_ancestor_of(id)
+          else
+            roots << na
+          end
+        end
+      end
+      return roots
+    end
   end
   
   def _group_ancestors ids,groups=4
     
-    roots = _group_roots ids
+    #roots = _group_roots ids
+    roots = _split_group_by_LCA ids
     
     ancestors = Hash.new
     
@@ -434,24 +420,21 @@ class Eo_HoF
     
     admitted = Set.new
     
-    if eo.kill_count > curr_record(:kill_count)
-      set_record :kill_count,eo,eo.kill_count
-      admitted.add :kill_count
-    end
-    
-    if eo.age > curr_record(:age)
-      set_record :age,eo,eo.age
-      admitted.add :age
-    end
-    
-    if eo.energy_record > curr_record(:energy)
-      set_record :energy,eo,eo.energy_record
-      admitted.add :energy
-    end
-    
-    if eo.collected_energy > curr_record(:energy_col)
-      set_record :energy_col,eo,eo.collected_energy
-      admitted.add :energy_col
+    for record in @@CATEGORIES
+      
+      check = case record
+              when :kill_count then eo.kill_count
+              when :age        then eo.age
+              when :energy     then eo.energy_record
+              when :energy_col then eo.collected_energy
+              else raise "Improper record #{record.to_s}"
+              end
+      
+      if check > curr_record(record)
+        set_record record,eo,check
+        admitted.add record
+      end
+      
     end
     
     if admitted.size > 0

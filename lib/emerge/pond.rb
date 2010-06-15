@@ -603,8 +603,15 @@ class Pond_Key_Handler
     end
     
     ## Roots
-    roots = @archive.group_roots ids
-    $C_LOG.info "\t- Surviving original family lines:#{roots.map {|n| "\n\t\t\tEo_#{n} [g1]\t(#{@archive.count_living_descendants_of n} surviving)" }.join("")}"
+    $C_LOG.info "\t- Surviving original family lines:"
+    if lca
+      $C_LOG.info "\t\t\tEo_#{@archive.ultimate_ancestor_of lca} [g1]\t(#{@eos.size} surviving)"
+    else
+      roots = @archive.group_roots ids
+      roots.each do |root|
+        $C_LOG.info "\t\t\tEo_#{root} [g1]\t(#{@archive.count_living_descendants_of root} surviving)"
+      end
+    end
     
     ## Ancestor Groups
     ga = @archive.group_ancestors ids
@@ -614,7 +621,13 @@ class Pond_Key_Handler
       curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
       ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
     end
-    $C_LOG.info "\t- Largest families alive include:#{ga.map {|n| "\n\t\t\tEo_#{n} [g#{ga_gens[n]}], of Eo_#{@archive.ultimate_ancestor_of n} [g1]\t(#{@archive.count_living_descendants_of n} surviving)" } }"
+    $C_LOG.info "\t- Largest families alive include:"
+    ga.each do |anc|
+      unless lca
+        anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
+      end
+      $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
+    end
     
     ## Tracking Stats
     if @follower.tracking_eo

@@ -14,7 +14,7 @@ class Array
   end
   
   def mean
-    self.inject(0) { |sum,n| sum+n }/size.to_f
+    self.inject(0.0) { |sum,n| sum+n }/size
   end
   
   def variance
