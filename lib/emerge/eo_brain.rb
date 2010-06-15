@@ -115,10 +115,20 @@ class Brain
            else raise "Bad 'if' condition #{if_command.args[0]}"
            end
     
-    if if_command.args[1] == :lt
-      return cond < if_command.args[2]
+    if Command_Data.wrapping_if?(if_command.args[0])
+      max,min = Command_Data.if_range(if_command.args[0])
+      clockwise_dist = (if_command.args[2] - cond).abs
+      return compare_if(if_command.args[1],clockwise_dist,(max-min)/2.0)
     else
-      return cond > if_command.args[2]
+      return compare_if(if_command.args[1],cond,if_command.args[2])
+    end
+  end
+  
+  def compare_if comp,cond,arg
+    if comp == :lt
+      return cond < arg
+    else
+      return cond > arg
     end
   end
   

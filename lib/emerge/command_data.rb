@@ -1,4 +1,5 @@
 module Command_Data
+  
   @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,
                           :set_speed,:shoot_spike,:if]
   @@COMMAND_WEIGHTS   = { :move           => 1.5 ,
@@ -81,5 +82,13 @@ module Command_Data
                           :m_angle        => "O" ,
                           :c_angle        => "C" ,
                           :random         => "R"  }
+  
+  def self.wrapping_if? command
+    return @@IF_WRAPPABLE[command]
+  end
+  
+  def self.if_range command
+    return @@IF_RANGES[command]
+  end
   
 end

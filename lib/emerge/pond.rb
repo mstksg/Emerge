@@ -530,7 +530,7 @@ class Pond_Key_Handler
     when K_F
       vanish_food
     when K_P
-      drought
+      @pond.drought
     when K_R
       report
     when K_H
@@ -631,16 +631,19 @@ class Pond_Key_Handler
         curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
         ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
       end
+      
       $C_LOG.info "\t- Largest families alive include:"
       ga.each do |anc|
         if lca
           ascend = ga_gens[anc] - lca_gen - 1
+          ascend = 1 if ascend < 1
           anc_root = ", of Eo_#{@archive.nth_ancestor_of anc,ascend} [g#{ga_gens[anc]-ascend}]"
         else
           anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
         end
         $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
       end
+      
     end
     
     ## Tracking Stats

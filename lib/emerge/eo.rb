@@ -398,7 +398,7 @@ class Eo
     new_x = @pos[0] + packet_angle_vect[0]*(6+@velo_magnitude)
     new_y = @pos[1] + packet_angle_vect[1]*(6+@velo_magnitude)
     
-    @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
+    @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, (270-packet_final_vect.angle)
     
     @energy -= amount
   end
@@ -410,7 +410,7 @@ class Eo
     new_x = @pos[0] + spike_angle_vect[0]*(6+@velo_magnitude)
     new_y = @pos[1] + spike_angle_vect[1]*(6+@velo_magnitude)
     
-    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle
+    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, (270-spike_final_vect.angle)
     
     @energy -= (mass*(speed+1))/(7.0+@body.efficiency/10.0)
   end
