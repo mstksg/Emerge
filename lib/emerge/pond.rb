@@ -584,6 +584,11 @@ class Pond_Key_Handler
   def report
     $C_LOG.info "REPORT:\t~~ Pond (Age: #{@pond.environment.clock.ticks}) ~~"
     
+    if @eos.size == 0
+      $C_LOG.info "\t- A silent pond, with no life of which to speak..."
+      return
+    end
+    
     ## Living, Ages
     ages = @eos.map { |e| e.age }
     $C_LOG.info "\t- Currently #{@eos.size} Eos alive; Average age: #{(ages.mean+0.5).to_i} (min: #{ages.min}, max: #{ages.max}, s^2: #{ages.standard_deviation.to_s[0,5]})"
@@ -599,7 +604,11 @@ class Pond_Key_Handler
       $C_LOG.info "\t- No most recent common ancestor exists."
     else
       lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
-      $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
+      if @eos.size > 1
+        $C_LOG.info "\t- Most recent common ancestor: Eo_#{lca} [g#{lca_gen}]"
+      else
+        $C_LOG.info "\t- Lone Surviving Eo: #{@eos[0].inspect}"
+      end
     end
     
     ## Roots
@@ -614,19 +623,24 @@ class Pond_Key_Handler
     end
     
     ## Ancestor Groups
-    ga = @archive.group_ancestors ids
-    ga_gens = Hash.new
-    for ancestor in ga
-      curr_desc_id = @archive.first_living_descendant_of ancestor
-      curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
-      ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
-    end
-    $C_LOG.info "\t- Largest families alive include:"
-    ga.each do |anc|
-      unless lca
-        anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
+    if @eos.size > 1
+      ga = @archive.group_ancestors ids
+      ga_gens = Hash.new
+      for ancestor in ga
+        curr_desc_id = @archive.first_living_descendant_of ancestor
+        curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
+        ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
       end
-      $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
+      $C_LOG.info "\t- Largest families alive include:"
+      ga.each do |anc|
+        if lca
+          ascend = ga_gens[anc] - lca_gen - 1
+          anc_root = ", of Eo_#{@archive.nth_ancestor_of anc,ascend} [g#{ga_gens[anc]-ascend}]"
+        else
+          anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
+        end
+        $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
+      end
     end
     
     ## Tracking Stats
