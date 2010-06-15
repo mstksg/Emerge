@@ -10,10 +10,10 @@ class Eo
   
   @@count = 0
   
-  attr_reader :body,:feeler,:energy,:brain,:dna,:angle,:velocity,
-              :velo_magnitude,:mass,:id,:generation,:death_cause,
-              :angle_vect,:kill_count,:energy_record,:collected_energy
-  attr_accessor :pos,:followed
+  attr_reader :body,:feeler,:energy,:brain,:dna,:angle,:velocity,:velo_magnitude,
+              :mass,:id,:generation,:death_cause,:angle_vect,:kill_count,:energy_record,
+              :collected_energy
+  attr_accessor :pos,:followed,:damage_dealt
   
   def self.fmt_str id,gen
     return "Eo_#{id} [g#{gen}]"
@@ -39,6 +39,7 @@ class Eo
     @kill_count = 0
     @energy_record = energy
     @collected_energy = 0
+    @damage_dealt = 0
     
     @food_triggered = []
     @eo_triggered = []
@@ -293,6 +294,13 @@ class Eo
   
   def mutate! iterations=1
     (iterations/$MUTATION_FACTOR).to_i.times { @dna.mutate! }
+    
+    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency,@body.hp/@dna.shell)
+    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
+    
+    @mass = @feeler.mass + @body.mass
+    
     update_graphic
   end
   
@@ -577,7 +585,9 @@ class Eo_Body
   end
   
   def poked poke_force, poker
-    @hp -= poke_force*$B_DAMAGE
+    damage = poke_force*$B_DAMAGE
+    @hp -= damage
+    poker.damage_dealt += damage
     if @hp < 0
       poker.eat @owner
       poker.get_kill
@@ -607,8 +617,10 @@ class Eo_Body
     damage = (spiker.mass+spiker.energy_content)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE/2
     if direct
       @hp -= damage
+      spiker.owner.damage_dealt += damage if spiker.owner
     else
       @hp -= damage/2
+      spiker.owner.damage_dealt += damage if spiker.owner
     end
     if @hp < 0
       if spiker.owner

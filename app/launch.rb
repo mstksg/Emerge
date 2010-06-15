@@ -31,6 +31,7 @@ unless defined?(Ocra)             ## if being compiled
   end
   
   $LOGGER.info "Quitting..."
+  environment.close
   Rubygame.quit
   $LOGGER.info "Closed."
 else

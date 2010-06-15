@@ -534,7 +534,7 @@ class Pond_Key_Handler
     when K_R
       report
     when K_H
-      hall_of_fame
+      @pond.hall.log_HoF $C_LOG
     when K_S
       # maybe implement shift = x5
       spawned = sprinkle_eo
@@ -652,22 +652,6 @@ class Pond_Key_Handler
       member_plural = tracker_offspring > 1 ? "s" : ""
       $C_LOG.info "\t- Current tracked family line Eo_#{@follower.original_tracked} [g#{@follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
       $C_LOG.info "\t   (Tracking current family line for #{@follower.track_elapsed_time} ticks and #{@follower.track_elapsed_generations} generations)"
-    end
-    
-  end
-  
-  def hall_of_fame
-    
-    $C_LOG.info "REPORT:\t~~ HALL OF FAME ~~"
-    
-    if @pond.hall.empty?
-      $C_LOG.info "\t(Hall of fame is currently empty)"
-    else
-      for record in @pond.hall.categories
-        if @pond.hall.record_exists? record
-          $C_LOG.info "\t#{@pond.hall.record_name record}:\t#{@pond.hall.record_to_s record}"
-        end
-      end
     end
     
   end

@@ -396,29 +396,40 @@ end
 
 class Eo_HoF
   
-  @@CATEGORIES = [:kill_count,:age,:energy,:energy_col]
+  @@CATEGORIES = [:kill_count,:age,:energy,:energy_col,:damage_dlt,:fastest,:strongest,:thickest,:heaviest]
   @@CATEGORIES_DEFAULTS = { :kill_count => 0,
                             :age        => 0,
                             :energy     => 0,
-                            :energy_col => 0 }
+                            :energy_col => 0,
+                            :damage_dlt => 0,
+                            :fastest    => 0,
+                            :strongest  => 0,
+                            :thickest   => 0,
+                            :heaviest   => 0 }
   @@CATEGORIES_NAMES =    { :kill_count => "Highest kill count  ",
                             :age        => "Longest living      ",
                             :energy     => "Highest energy      ",
-                            :energy_col => "Most energy gathered" }
+                            :energy_col => "Most energy gathered",
+                            :damage_dlt => "Most damage dealt   ",
+                            :fastest    => "Fastest max. speed  ",
+                            :strongest  => "Strongest feeler    ",
+                            :thickest   => "Thickest shell      ",
+                            :heaviest   => "Most massive        " }
   
   def initialize
     @records = Hash.new
     @hall = Hash.new
     
     for category in @@CATEGORIES
-      @records[category] = @@CATEGORIES_DEFAULTS[category]
+      # @records[category] = @@CATEGORIES_DEFAULTS[category]
+      @records[category] = 0
       @hall[category] = nil
     end
   end
   
   def submit eo
     
-    admitted = Set.new
+    admitted = Hash.new
     
     for record in @@CATEGORIES
       
@@ -427,18 +438,23 @@ class Eo_HoF
               when :age        then eo.age
               when :energy     then eo.energy_record
               when :energy_col then eo.collected_energy
+              when :damage_dlt then eo.damage_dealt
+              when :fastest    then eo.body.max_speed
+              when :strongest  then eo.feeler.strength
+              when :thickest   then eo.body.shell
+              when :heaviest   then eo.mass
               else raise "Improper record #{record.to_s}"
               end
       
       if check > curr_record(record)
+        admitted[record] = curr_record(record)
         set_record record,eo,check
-        admitted.add record
       end
       
     end
     
     if admitted.size > 0
-      eo.log_message "#{eo.to_s} inducted in the hall of fame for #{ admitted.map { |r| record_name(r,true) }.join(", ") }."
+      eo.log_message "#{eo.to_s} inducted in the hall of fame for #{ admitted.map { |r,p| "#{record_name(r,true)} (#{convert_record_str(p)} => #{curr_record(r,true)})" }.join(", ") }."
     end
     
   end
@@ -452,6 +468,10 @@ class Eo_HoF
     return @records[record] unless to_s
     
     rec = @records[record]
+    return convert_record_str(rec)
+  end
+  
+  def convert_record_str rec
     return rec.to_s[0,6] if rec.class == Float
     return rec.to_s
   end
@@ -486,6 +506,20 @@ class Eo_HoF
   
   def categories
     return @@CATEGORIES.clone
+  end
+  
+  def log_HoF logger
+    logger.info "REPORT:\t~~ HALL OF FAME ~~"
+    
+    if empty?
+      logger.info "\t(Hall of fame is currently empty)"
+    else
+      @@CATEGORIES.each do |record|
+        if record_exists? record
+          logger.info "\t#{record_name record}:\t#{record_to_s record}"
+        end
+      end
+    end
   end
   
 end
