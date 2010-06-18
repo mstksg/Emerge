@@ -15,7 +15,7 @@ class Eo
   attr_reader :body,:feeler,:energy,:brain,:dna,:angle,:velocity,:velo_magnitude,
               :mass,:id,:generation,:death_cause,:angle_vect,:kill_count,:energy_record,
               :collected_energy
-  attr_accessor :pos,:followed,:damage_dealt
+  attr_accessor :pos,:followed,:damage_dealt,:spike_hits
   
   def self.fmt_str id,gen
     return "Eo_#{id} [g#{gen}]"
@@ -45,6 +45,7 @@ class Eo
     @energy_record = energy
     @collected_energy = 0
     @damage_dealt = 0
+    @spike_hits = 0
     
     @food_triggered = []
     @eo_triggered = []
@@ -623,6 +624,8 @@ class Eo_Body
   end
   
   def spiked spiker, direct=true
+    spiker.owner.spike_hits += 1 if spiker.owner
+    
     diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
     damage = (spiker.mass+spiker.energy_content)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE/2
     if direct

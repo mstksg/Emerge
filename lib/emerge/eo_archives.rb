@@ -427,7 +427,7 @@ end
 
 class Eo_HoF
   
-  @@CATEGORIES = [:kill_count,:age,:reproduct,:energy,:energy_col,:damage_dlt,:fastest,:strongest,:thickest,:heaviest]
+  @@CATEGORIES = [:kill_count,:age,:reproduct,:energy,:energy_col,:damage_dlt,:spikes,:fastest,:strongest,:thickest,:heaviest]
   @@CATEGORIES_DEFAULTS = Hash.new do |h,k|
                                      h[k] = case k
                                             when :reproduct then 1.0/0
@@ -441,6 +441,7 @@ class Eo_HoF
                             :energy     => "Highest energy      ",
                             :energy_col => "Most energy gathered",
                             :damage_dlt => "Most damage dealt   ",
+                            :spikes     => "Most spikes landed  ",
                             :fastest    => "Fastest max. speed  ",
                             :strongest  => "Strongest feeler    ",
                             :thickest   => "Thickest shell      ",
@@ -474,6 +475,7 @@ class Eo_HoF
               when :energy     then eo.energy_record
               when :energy_col then eo.collected_energy
               when :damage_dlt then eo.damage_dealt
+              when :spikes     then eo.spike_hits
               when :fastest    then eo.body.max_speed
               when :strongest  then eo.feeler.strength
               when :thickest   then eo.body.shell
