@@ -455,7 +455,11 @@ class Follower
       $C_LOG.info "REPORT\tFamily line of Eo_#{@original_tracked} [g#{@original_generation}] (Time: #{track_elapsed_time}, #{track_elapsed_generations} generations)"
       
       offsprings = @archive.all_living_descendants_of @original_tracked
-      $C_LOG.info "\t- Currently #{offsprings.size} living descendants remaining."
+      $C_LOG.info "\t- Currently #{offsprings.size} living descendants alive."
+      
+      ## Average Generation
+      gens = offsprings.map { |e| @environment.pond.eos.find { |eo| eo.id == e }.generation - @original_generation }
+      $C_LOG.info "\t   (Average generation: [+#{(gens.mean+0.5).to_i}]; min: [+#{gens.min}]; max: [+#{gens.max}]; s^2: #{gens.standard_deviation.to_s[0,5]})"
       
       lca = @archive.narrow_down @original_tracked
       lca_gen = @original_generation  + ( lca == @orignal_tracked ? 0 : @archive.generation_gap(@original_tracked,lca) )
@@ -465,16 +469,10 @@ class Follower
       
       
       if offsprings.size > 1
-        ga = @archive.group_descendants(lca,8)
-        ga_gens = Hash.new do |h,k|
-          curr_desc_id = @archive.first_living_descendant_of k
-          curr_desc_gen = @environment.pond.eos.find { |eo| eo.id == curr_desc_id }.generation
-          h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
-        end
         
-        # ga.each do |anc|
-          # $C_LOG.info "#{anc} #{@archive.count_living_descendants_of anc}"
-        # end
+        $C_LOG.info "\t- Graphing major surviving sub-families..."
+        
+        ga = @archive.group_descendants(lca,10)
         
         g_builder = Graph_Builder.new "Eo_#{lca} [g#{lca_gen}]"
         to_expand = [[lca,0]]
@@ -482,18 +480,23 @@ class Follower
           curr_parent,curr_gen = to_expand.shift
           expanded = @archive.descendants_with_living_descendants_of curr_parent
           expanded.each do |eo|
-            add_str = "Eo_#{eo} [g#{lca_gen+curr_gen+1}]"
-            if ga.include? eo
-              surviving = @archive.count_living_descendants_of eo
-            else
-              to_expand.push [eo,curr_gen+1] unless ga.include? eo
-            end
-            g_builder.add_node("Eo_#{curr_parent} [g#{lca_gen+curr_gen}]",curr_gen+1,add_str)
+            g_builder.add_node("Eo_#{curr_parent} [g#{lca_gen+curr_gen}]",curr_gen+1,"Eo_#{eo} [g#{lca_gen+curr_gen+1}]")
+            to_expand.push [eo,curr_gen+1] unless ga.include? eo
           end
         end
         
         g_builder.render_horizontal(lca != @original_tracked) do |n|
-          $C_LOG.info n
+          last_eo = n.scan(Eo.eo_regex)[-1][0]
+          survivors = @archive.count_living_descendants_of last_eo
+          
+          if survivors == 1
+            appender = last_eo == @tracked_eo.id ? "**" : "*"
+          else
+            appender = "->(#{survivors})"
+            appender += "**" if @archive.is_living_descendant_of(last_eo,@tracked_eo.id)
+          end
+          
+          $C_LOG.info "\t#{n.rstrip}#{appender}"
         end
         
       end
@@ -683,23 +686,59 @@ class Pond_Key_Handler
     
     ## Ancestor Groups
     if @eos.size > 1
-      ga = lca ? @archive.group_descendants(lca) : @archive.group_ancestors(ids)
+      ga = lca ? @archive.group_descendants(lca,10) : @archive.group_ancestors(ids,4)
       ga_gens = Hash.new do |h,k|
         curr_desc_id = @archive.first_living_descendant_of k
         curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
         h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
       end
       
-      $C_LOG.info "\t- Largest families alive include:"
-      ga.each do |anc|
-        if lca
-          ascend = ga_gens[anc] - lca_gen - 1
-          ascend = 1 if ascend < 1
-          anc_root = ", of Eo_#{@archive.nth_ancestor_of anc,ascend} [g#{ga_gens[anc]-ascend}]"
-        else
-          anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
+      if not lca
+        $C_LOG.info "\t- Largest families alive include:"
+        ga.each do |anc|
+          if lca
+            ascend = ga_gens[anc] - lca_gen - 1
+            ascend = 1 if ascend < 1
+            anc_root = ", of Eo_#{@archive.nth_ancestor_of anc,ascend} [g#{ga_gens[anc]-ascend}]"
+          else
+            anc_root = ", of Eo_#{@archive.ultimate_ancestor_of anc} [g1]"
+          end
+          $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
         end
-        $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
+        
+      else
+      
+        $C_LOG.info "\t- Graphing major surviving families..."
+        
+        g_builder = Graph_Builder.new "Eo_#{lca} [g#{lca_gen}]"
+        to_expand = [[lca,0]]
+        while to_expand.size > 0
+          curr_parent,curr_gen = to_expand.shift
+          expanded = @archive.descendants_with_living_descendants_of curr_parent
+          expanded.each do |eo|
+            g_builder.add_node("Eo_#{curr_parent} [g#{lca_gen+curr_gen}]",curr_gen+1,"Eo_#{eo} [g#{lca_gen+curr_gen+1}]")
+            to_expand.push [eo,curr_gen+1] unless ga.include? eo
+          end
+        end
+        
+        g_builder.render_horizontal(lca_gen != 1) do |n|
+          last_eo = n.scan(Eo.eo_regex)[-1][0]
+          survivors = @archive.count_living_descendants_of last_eo
+          
+          if survivors == 1
+            if @follower.tracking_eo
+              appender = last_eo == @follower.tracked_eo.id ? "**" : "*"
+            else
+              appender = "*"
+            end
+          else
+            appender = "->(#{survivors})"
+            appender += "**" if @follower.tracking_eo and @archive.is_living_descendant_of(last_eo,@follower.tracked_eo.id)
+          end
+          
+          $C_LOG.info "\t#{n.rstrip}#{appender}"
+        end
+        
       end
     end
   end

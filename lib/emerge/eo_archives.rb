@@ -85,9 +85,9 @@ class Eo_Archive
   
   @@PROXY_METHODS = [:descendants_of,:living_descendants_of,:descendants_with_living_descendants_of,:parent_of,:nth_ancestor_of,
                      :ultimate_ancestor_of,:has_living_descendants?,:count_living_descendants_of,:first_living_descendant_of,
-                     :all_living_descendants_of,:narrow_down,:distance_to_closest_relative_of,:closest_relative_of,
-                     :lowest_common_ancestor_of,:LCA_of_group,:group_roots,:group_ancestors,:group_descendants]
-  @@no_back_conversion = [:has_living_descendants?,:count_living_descendants_of,:distance_to_closest_relative_of]
+                     :all_living_descendants_of,:is_living_descendant_of,:narrow_down,:distance_to_closest_relative_of,
+                     :closest_relative_of,:lowest_common_ancestor_of,:LCA_of_group,:group_roots,:group_ancestors,:group_descendants]
+  @@no_back_conversion = [:has_living_descendants?,:count_living_descendants_of,:is_living_descendant_of,:distance_to_closest_relative_of]
   
   @@PROXY_METHODS.each do |proxy|
     define_method(proxy) do |*args|
@@ -193,7 +193,6 @@ class Eo_Archive
   end
   
   def _has_living_descendants? id
-    
     curr_check = @database[id]
     
     if curr_check == nil
@@ -205,7 +204,6 @@ class Eo_Archive
     else
       return _descendants_of(id).any? { |n| _has_living_descendants? n }
     end
-    
   end
   
   def _count_living_descendants_of id
@@ -255,6 +253,20 @@ class Eo_Archive
     end
   end
   
+  def _is_living_descendant_of parent,child
+    curr_check = @database[parent]
+    
+    if curr_check == nil
+      if parent == child and is_alive? child
+        return true
+      else
+        return false
+      end
+    else
+      return _descendants_of(parent).any? { |n| _is_living_descendant_of n,child }
+    end
+  end
+  
   def _narrow_down id
     while true
       children = _descendants_of id
@@ -291,7 +303,7 @@ class Eo_Archive
   def _closest_relative_of id
     parent_check = _parent_of(id)
     while parent_check != nil
-      descs = _living_descendants_of(parent_check).delete(id)
+      descs = _all_living_descendants_of(parent_check).delete(id)
       
       if descs.size > 0
         return descs.to_a[0]
@@ -504,7 +516,7 @@ class Eo_HoF
   end
   
   def convert_record_str rec
-    return "%.3f" % rec if rec.class == Float
+    return "%.2f" % rec if rec.class == Float
     return rec.to_s
   end
   

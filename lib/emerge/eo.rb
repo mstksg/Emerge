@@ -516,9 +516,11 @@ class Eo
       $C_LOG.info "\t- Recent ancestors: #{recent_parents.map { |n| "Eo_#{n} [g#{@generation-recent_parents.index(n)-1}]" }.join(", ") }"
     end
     
+    ult_anc = @pond.archive.ultimate_ancestor_of @id
+    
     $C_LOG.info "\t- Kill count: #{@kill_count} (#{@damage_dealt.to_s[0,6]} damage dealt"
     $C_LOG.info "\t- Energy collected: #{@collected_energy.to_s[0,5]} (maximum #{@energy_record.to_s[0,6]})"
-    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of @id} [g1]"
+    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{ult_anc} [g1]"
     
     closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
     if closest_rel_dist == nil
@@ -530,6 +532,9 @@ class Eo
       closest_rel_gen = common_ancestor_gen + @pond.archive.generation_gap(closest_rel,common_ancestor)
       $C_LOG.info "\t- Closest living relative is Eo_#{closest_rel} [g#{closest_rel_gen}], by Eo_#{common_ancestor} [g#{common_ancestor_gen}]"
     end
+    
+    # Build a graph here, too!  Of maybe closest relatives.
+    
   end
   
 end
