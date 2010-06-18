@@ -417,7 +417,7 @@ class Follower
   
   def step_up_ancestor
     if @original_generation == 1
-      $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no ancestors."
+      $C_LOG.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no ancestors."
     else
       new_ancestor = @archive.parent_of @original_tracked
       if new_ancestor
@@ -431,18 +431,75 @@ class Follower
   end
   
   def narrow_down
-    if @original_generation == @tracked_eo.generation
-      $LOGGER.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no descendants."
-    else
-      narrow_down_id = @archive.narrow_down @original_tracked
-      if narrow_down_id == @original_tracked
-        $LOGGER.info "TRACK\tNo narrowed down descendant of Eo_#{@original_tracked} [g#{@original_generation}] found; both children have living descendants."
+    if @tracked_eo
+      if @original_generation == @tracked_eo.generation
+        $C_LOG.info "TRACK\tEo_#{@original_tracked} [g#{@original_generation}] has no descendants."
       else
-        narrow_down_gen = @original_generation + @archive.generation_gap(@original_tracked,narrow_down_id)
-        $LOGGER.info "TRACK\tNow tracking family line of Eo_#{narrow_down_id} [g#{narrow_down_gen}], narrowed-down ancestor of #{@tracked_eo} descended from Eo_#{@original_tracked} [g#{@original_generation}."
-        @original_tracked = narrow_down_id
-        @original_generation = narrow_down_gen
+        narrow_down_id = @archive.narrow_down @original_tracked
+        if narrow_down_id == @original_tracked
+          $LOGGER.info "TRACK\tNo narrowed down descendant of Eo_#{@original_tracked} [g#{@original_generation}] found; both children have living descendants."
+        else
+          narrow_down_gen = @original_generation + @archive.generation_gap(@original_tracked,narrow_down_id)
+          $LOGGER.info "TRACK\tNow tracking family line of Eo_#{narrow_down_id} [g#{narrow_down_gen}], narrowed-down ancestor of #{@tracked_eo} descended from Eo_#{@original_tracked} [g#{@original_generation}]."
+          @original_tracked = narrow_down_id
+          @original_generation = narrow_down_gen
+        end
       end
+    else
+      $C_LOG.info "TRACK\tNot following any family line."
+    end
+  end
+  
+  def report
+    if @tracked_eo
+      $C_LOG.info "REPORT\tFamily line of Eo_#{@original_tracked} [g#{@original_generation}] (Time: #{track_elapsed_time}, #{track_elapsed_generations} generations)"
+      
+      offsprings = @archive.all_living_descendants_of @original_tracked
+      $C_LOG.info "\t- Currently #{offsprings.size} living descendants remaining."
+      
+      lca = @archive.narrow_down @original_tracked
+      lca_gen = @original_generation  + ( lca == @orignal_tracked ? 0 : @archive.generation_gap(@original_tracked,lca) )
+      if lca != @original_tracked
+        $C_LOG.info "\t- Family line can be narrowed down to Eo_#{lca} [g#{lca_gen}]."
+      end
+      
+      
+      if offsprings.size > 1
+        ga = @archive.group_descendants(lca,8)
+        ga_gens = Hash.new do |h,k|
+          curr_desc_id = @archive.first_living_descendant_of k
+          curr_desc_gen = @environment.pond.eos.find { |eo| eo.id == curr_desc_id }.generation
+          h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
+        end
+        
+        # ga.each do |anc|
+          # $C_LOG.info "#{anc} #{@archive.count_living_descendants_of anc}"
+        # end
+        
+        g_builder = Graph_Builder.new "Eo_#{lca} [g#{lca_gen}]"
+        to_expand = [[lca,0]]
+        while to_expand.size > 0
+          curr_parent,curr_gen = to_expand.shift
+          expanded = @archive.descendants_with_living_descendants_of curr_parent
+          expanded.each do |eo|
+            add_str = "Eo_#{eo} [g#{lca_gen+curr_gen+1}]"
+            if ga.include? eo
+              surviving = @archive.count_living_descendants_of eo
+            else
+              to_expand.push [eo,curr_gen+1] unless ga.include? eo
+            end
+            g_builder.add_node("Eo_#{curr_parent} [g#{lca_gen+curr_gen}]",curr_gen+1,add_str)
+          end
+        end
+        
+        g_builder.render_horizontal(lca != @original_tracked) do |n|
+          $C_LOG.info n
+        end
+        
+      end
+      
+    else
+      $C_LOG.info "\tNot following any family line"
     end
   end
   
@@ -533,6 +590,8 @@ class Pond_Key_Handler
       @pond.drought
     when K_R
       report
+    when K_T
+      @follower.report
     when K_H
       @pond.hall.log_HoF $C_LOG
     when K_S
@@ -600,7 +659,7 @@ class Pond_Key_Handler
     ## Common Ancestors
     ids = @eos.map { |e| e.id }
     lca = @archive.LCA_of_group ids
-    if lca == nil
+    if lca.nil?
       $C_LOG.info "\t- No most recent common ancestor exists."
     else
       lca_gen = @eos[0].generation - @archive.generation_gap(@eos[0].id,lca)
@@ -624,12 +683,11 @@ class Pond_Key_Handler
     
     ## Ancestor Groups
     if @eos.size > 1
-      ga = @archive.group_ancestors ids
-      ga_gens = Hash.new
-      for ancestor in ga
-        curr_desc_id = @archive.first_living_descendant_of ancestor
+      ga = lca ? @archive.group_descendants(lca) : @archive.group_ancestors(ids)
+      ga_gens = Hash.new do |h,k|
+        curr_desc_id = @archive.first_living_descendant_of k
         curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
-        ga_gens[ancestor] = curr_desc_gen - @archive.generation_gap(curr_desc_id,ancestor)
+        h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
       end
       
       $C_LOG.info "\t- Largest families alive include:"
@@ -643,17 +701,7 @@ class Pond_Key_Handler
         end
         $C_LOG.info "\t\t\tEo_#{anc} [g#{ga_gens[anc]}]#{anc_root}\t(#{@archive.count_living_descendants_of anc} surviving)"
       end
-      
     end
-    
-    ## Tracking Stats
-    if @follower.tracking_eo
-      tracker_offspring = @archive.count_living_descendants_of @follower.original_tracked
-      member_plural = tracker_offspring > 1 ? "s" : ""
-      $C_LOG.info "\t- Current tracked family line Eo_#{@follower.original_tracked} [g#{@follower.original_generation}] has #{tracker_offspring} living member#{member_plural}."
-      $C_LOG.info "\t   (Tracking current family line for #{@follower.track_elapsed_time} ticks and #{@follower.track_elapsed_generations} generations)"
-    end
-    
   end
   
 end

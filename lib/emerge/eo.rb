@@ -6,6 +6,8 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
+  @@EO_REGEX = /Eo_(\w+) \[g(\d+)\]/
+  
   @@HEAL_DRAIN_OFFSET = ($HEAL_DRAIN_MAX-$HEAL_DRAIN_MIN)/10
   
   @@count = 0
@@ -18,9 +20,12 @@ class Eo
   def self.fmt_str id,gen
     return "Eo_#{id} [g#{gen}]"
   end
+  def self.eo_regex
+    return @@EO_REGEX
+  end
   
   def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1,starting_hp_percent=1)
-    
+
     @id = @@count.to_s(36)
     @@count += 1
     @generation = generation
@@ -511,7 +516,7 @@ class Eo
       $C_LOG.info "\t- Recent ancestors: #{recent_parents.map { |n| "Eo_#{n} [g#{@generation-recent_parents.index(n)-1}]" }.join(", ") }"
     end
     
-    $C_LOG.info "\t- Kill count: #{@kill_count}"
+    $C_LOG.info "\t- Kill count: #{@kill_count} (#{@damage_dealt.to_s[0,6]} damage dealt"
     $C_LOG.info "\t- Energy collected: #{@collected_energy.to_s[0,5]} (maximum #{@energy_record.to_s[0,6]})"
     $C_LOG.info "\t- Ultimate Ancestor: Eo_#{@pond.archive.ultimate_ancestor_of @id} [g1]"
     

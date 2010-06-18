@@ -83,39 +83,33 @@ class Eo_Archive
   
   ## Creating proxy methods
   
-  @@PROXY_METHODS = [:descendants_of,:parent_of,:ultimate_ancestor_of,:has_living_descendants?,
-                     :count_living_descendants_of,:first_living_descendant_of,:narrow_down,
-                     :distance_to_closest_relative_of,:closest_relative_of,:lowest_common_ancestor_of,
-                     :LCA_of_group,:group_roots,:group_ancestors]
+  @@PROXY_METHODS = [:descendants_of,:living_descendants_of,:descendants_with_living_descendants_of,:parent_of,:nth_ancestor_of,
+                     :ultimate_ancestor_of,:has_living_descendants?,:count_living_descendants_of,:first_living_descendant_of,
+                     :all_living_descendants_of,:narrow_down,:distance_to_closest_relative_of,:closest_relative_of,
+                     :lowest_common_ancestor_of,:LCA_of_group,:group_roots,:group_ancestors,:group_descendants]
   @@no_back_conversion = [:has_living_descendants?,:count_living_descendants_of,:distance_to_closest_relative_of]
   
-  
   @@PROXY_METHODS.each do |proxy|
-    class_eval %{ def #{proxy} *args
-                    args.map! do |a|
-                      if a.class == String
-                        a.to_i(36)
-                      else
-                        a.map { |id| id.to_i(36) }
-                      end
-                    end
-                    result = _#{proxy}(*args)
-                    return result if @@no_back_conversion.include? :#{proxy}
-                    
-                    result and if result.respond_to?(:each)
-                                 result.map { |r| r.to_s(36) }
-                               else
-                                 result.to_s(36)
-                               end
+    define_method(proxy) do |*args|
+      args.map! do |a|
+                  if a.class == String
+                    a.to_i(36)
+                  elsif a.class == Fixnum or a.class == Bignum
+                    a
+                  else
+                    a.map { |id| id.to_i(36) }
                   end
-                }
-  end
-  
-  # Special Proxy Methods
-  
-  def nth_ancestor_of id,num
-    result = _nth_ancestor_of id.to_i(36),num
-    result and result.to_s(36)
+                end
+      
+      result = self.send("_#{proxy}", *args)
+      return result if @@no_back_conversion.include? proxy
+      
+      result and if result.respond_to?(:each)
+                   result.map { |r| r.to_s(36) }
+                 else
+                   result.to_s(36)
+                 end
+    end
   end
   
   ## Internal methods
@@ -124,6 +118,24 @@ class Eo_Archive
   
   def _descendants_of id
     @database[id]
+  end
+  
+  def _living_descendants_of id
+    desc_array = @database[id]
+    if desc_array
+      return desc_array.select { |i| is_alive? i }
+    else
+      return Array.new()
+    end
+  end
+  
+  def _descendants_with_living_descendants_of id
+    desc_array = @database[id]
+    if desc_array
+      return desc_array.select { |i| _has_living_descendants? i }
+    else
+      return Array.new()
+    end
   end
   
   def _parent_of id
@@ -229,7 +241,7 @@ class Eo_Archive
     end
   end
   
-  def _living_descendants_of id
+  def _all_living_descendants_of id
     curr_check = @database[id]
     
     if curr_check == nil
@@ -239,7 +251,7 @@ class Eo_Archive
         return Set.new                            # this has a danger of blowing up, memory-wise
       end
     else
-      return _descendants_of(id).inject(Set.new) { |total,n| total | _living_descendants_of(n) }
+      return _descendants_of(id).inject(Set.new) { |total,n| total | _all_living_descendants_of(n) }
     end
   end
   
@@ -314,6 +326,9 @@ class Eo_Archive
   end
   
   def _split_group_by_LCA ids
+    
+    return ids if ids.size == 1
+    
     lcas = Set.new.add(ids[0])
     for id in ids
       matched = false
@@ -392,22 +407,25 @@ class Eo_Archive
     
   end
   
+  def _group_descendants id,groups=4
+    _group_ancestors(Set.new.add(id),groups)
+  end
+  
 end
 
 class Eo_HoF
   
-  @@CATEGORIES = [:kill_count,:age,:energy,:energy_col,:damage_dlt,:fastest,:strongest,:thickest,:heaviest]
-  @@CATEGORIES_DEFAULTS = { :kill_count => 0,
-                            :age        => 0,
-                            :energy     => 0,
-                            :energy_col => 0,
-                            :damage_dlt => 0,
-                            :fastest    => 0,
-                            :strongest  => 0,
-                            :thickest   => 0,
-                            :heaviest   => 0 }
+  @@CATEGORIES = [:kill_count,:age,:reproduct,:energy,:energy_col,:damage_dlt,:fastest,:strongest,:thickest,:heaviest]
+  @@CATEGORIES_DEFAULTS = Hash.new do |h,k|
+                                     h[k] = case k
+                                            when :reproduct then 1.0/0
+                                            else 0
+                                            end
+                                   end
+  @@REVERSE_RECORDS = [:reproduct]
   @@CATEGORIES_NAMES =    { :kill_count => "Highest kill count  ",
                             :age        => "Longest living      ",
+                            :reproduct  => "Fastest reproduction",
                             :energy     => "Highest energy      ",
                             :energy_col => "Most energy gathered",
                             :damage_dlt => "Most damage dealt   ",
@@ -421,8 +439,7 @@ class Eo_HoF
     @hall = Hash.new
     
     for category in @@CATEGORIES
-      # @records[category] = @@CATEGORIES_DEFAULTS[category]
-      @records[category] = 0
+      @records[category] = @@CATEGORIES_DEFAULTS[category]
       @hall[category] = nil
     end
   end
@@ -433,9 +450,15 @@ class Eo_HoF
     
     for record in @@CATEGORIES
       
+      cond = case record
+             when :reproduct then eo.death_cause == :reproduction
+             else true
+             end
+      
       check = case record
               when :kill_count then eo.kill_count
               when :age        then eo.age
+              when :reproduct  then eo.age
               when :energy     then eo.energy_record
               when :energy_col then eo.collected_energy
               when :damage_dlt then eo.damage_dealt
@@ -446,9 +469,18 @@ class Eo_HoF
               else raise "Improper record #{record.to_s}"
               end
       
-      if check > curr_record(record)
-        admitted[record] = curr_record(record)
-        set_record record,eo,check
+      if cond
+        if @@REVERSE_RECORDS.include? record
+          admit = check < curr_record(record)
+        else
+          admit = check > curr_record(record)
+        end
+        
+        if admit
+          admitted[record] = curr_record(record)
+          set_record record,eo,check
+        end
+        
       end
       
     end
@@ -472,7 +504,7 @@ class Eo_HoF
   end
   
   def convert_record_str rec
-    return rec.to_s[0,6] if rec.class == Float
+    return "%.3f" % rec if rec.class == Float
     return rec.to_s
   end
   
