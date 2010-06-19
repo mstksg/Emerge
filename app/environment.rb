@@ -104,4 +104,8 @@ class Environment
     @dialog_layer.draw
     @screen.flip()
   end
+  
+  def close
+    @pond.hall.log_HoF $LOGGER
+  end
 end

@@ -59,6 +59,8 @@ def setup_constants config_hash
   $POND_FOOD_MASS = settings["pond"]["food_mass"]
   $POND_DRAG = settings["pond"]["drag"]
   $POND_SPIKE_DECAY = settings["pond"]["spike_decay"]
+  $POND_DISASTER = settings["pond"]["pond_disaster"]
+  $POND_ENERGY_INFUSION = settings["pond"]["energy_infusion"]
   $AUTO_TRACKING = settings["pond"]["auto_track"] if $AUTO_TRACKING == nil
   
   pond_settings = settings["pond"][$env_choice]
@@ -72,6 +74,7 @@ def setup_constants config_hash
   eo_consts = settings["eo_constants"]
 
   # Main #
+  $EO_STARTING_ENERGY = eo_consts["main"]["eo_starting_energy"]
   $REP_VARIANCE = eo_consts["main"]["rep_variance"]
   $REP_RATE = eo_consts["main"]["rep_rate"]
   $REP_RATE_DEGREE = eo_consts["main"]["rep_rate_degree"]
@@ -82,6 +85,8 @@ def setup_constants config_hash
   $HEAL_DRAIN_MAX = eo_consts["main"]["healing_drain_max"]
   $SPIKE_DAMAGE = eo_consts["main"]["spike_damage"]
   $MASS_DRAG = eo_consts["main"]["mass_drag"]
+  $REST_ENERGY_DECAY = eo_consts["main"]["rest_energy_decay"]
+  $BASE_DRAG_REDUCTOR = eo_consts["main"]["base_drag_reductor"]
   
   # Body #
   $B_MASS_FACTOR = eo_consts["body"]["body_mass_factor"]
@@ -92,7 +97,8 @@ def setup_constants config_hash
   
   # Feeler #
   $F_POKE = eo_consts["feeler"]["poke_force_factor"]
-  $F_MASS = eo_consts["feeler"]["mass_factor"]
+  $F_MASS = eo_consts["feeler"]["feeler_mass_factor"]
+  $F_L_S_RATIO = eo_consts["feeler"]["length_strength_mass_ratio"]
   
   # DNA #
   $MUTATE_TIME_SCALE = eo_consts["dna"]["mutate_time_scale"]

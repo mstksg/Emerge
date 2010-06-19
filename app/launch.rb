@@ -1,7 +1,9 @@
 $LOGGER.debug "Initializing..."
 
+require "set"
 require "rubygems"
 require "rubygame"
+
 Rubygame::TTF.setup()
 
 Dir.require_all("lib/emerge/")
@@ -29,6 +31,7 @@ unless defined?(Ocra)             ## if being compiled
   end
   
   $LOGGER.info "Quitting..."
+  environment.close
   Rubygame.quit
   $LOGGER.info "Closed."
 else

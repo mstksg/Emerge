@@ -1,11 +1,12 @@
 module Command_Data
+  
   @@POSSIBLE_COMMANDS = [:move,:wait,:turn,:stop,:emit_energy,:multiply_speed,
                           :set_speed,:shoot_spike,:if]
   @@COMMAND_WEIGHTS   = { :move           => 1.5 ,
                           :wait           => 1.0 ,
                           :turn           => 1.0 ,
-                          :stop           => 0.1 ,
-                          :emit_energy    => 0.15,
+                          :stop           => 0.06,
+                          :emit_energy    => 0.1 ,
                           :multiply_speed => 0.5 ,
                           :set_speed      => 0.5 ,
                           :shoot_spike    => 0.3 ,
@@ -30,12 +31,13 @@ module Command_Data
   
   
   
-  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:m_angle,:random]
+  @@POSSIBLE_IF_CONDS = [:energy,:age,:velocity,:momentum,:m_angle,:c_angle,:random]
   @@IF_WEIGHTS        = { :energy   => 1  ,
                           :age      => 0.5,
                           :velocity => 0.7,
                           :momentum => 0.5,
                           :m_angle  => 0.6,
+                          :c_angle  => 0.4,
                           :random   => 0.2 }
   @@IF_WEIGHT_SUM     = @@IF_WEIGHTS.values.inject { |sum,n| sum+n }
   
@@ -44,12 +46,14 @@ module Command_Data
                           :velocity => [0,4]   ,
                           :momentum => [0,80]  ,
                           :m_angle  => [0,360] ,
+                          :c_angle  => [0,360] ,
                           :random   => [0,1]    }
   @@IF_WRAPPABLE      = { :energy   => false ,
                           :age      => false ,
                           :velocity => false ,
                           :momentum => false ,
                           :m_angle  => true  ,
+                          :c_angle  => true  ,
                           :random   => false  }
   @@IF_COMPS          = [:lt,:gt]
   
@@ -76,6 +80,15 @@ module Command_Data
                           :velocity       => "V" ,
                           :momentum       => "M" ,
                           :m_angle        => "O" ,
+                          :c_angle        => "C" ,
                           :random         => "R"  }
+  
+  def self.wrapping_if? command
+    return @@IF_WRAPPABLE[command]
+  end
+  
+  def self.if_range command
+    return @@IF_RANGES[command]
+  end
   
 end

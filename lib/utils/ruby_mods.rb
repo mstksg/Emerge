@@ -12,6 +12,28 @@ class Array
   def pick_rand
     self[Kernel.rand(length)]
   end
+  
+  def mean
+    self.inject(0.0) { |sum,n| sum+n }/size
+  end
+  
+  def variance
+    n = 0
+    mean = 0.0
+    s = 0.0
+    self.each do |x|
+      n = n + 1
+      delta = x - mean
+      mean = mean + (delta / n)
+      s = s + delta * (x - mean)
+    end
+    return s / n
+  end
+  
+  def standard_deviation
+    Math.sqrt(variance)
+  end
+  
 end
 
 module Math

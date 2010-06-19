@@ -5,7 +5,7 @@ include Rubygame
 
 class Pond
   
-  attr_reader :environment, :eos, :foods, :zone_rects, :archive # for debug
+  attr_reader :environment, :eos, :foods, :zone_rects, :archive, :hall
   
   def initialize environment
     @environment = environment
@@ -14,6 +14,7 @@ class Pond
     @eos.extend(Sprites::UpdateGroup)
     @archive = Eo_Archive.new(@eos)
     @eo_follower = Follower.new(@environment,@archive,$AUTO_TRACKING)
+    @hall = Eo_HoF.new
     
     @foods = Sprites::Group.new
     @foods.extend(Sprites::UpdateGroup)
@@ -23,6 +24,11 @@ class Pond
     
     @spikes = Sprites::Group.new
     @spikes.extend(Sprites::UpdateGroup)
+    
+    @key_handler = Pond_Key_Handler.new(self,@eos,@foods,@packets,@eo_follower,@archive)
+    
+    @food_rate = $POND_FOOD_RATE
+    @drought = false
     
     @zone_count = determine_zone_count
     @total_zones = @zone_count*@zone_count
@@ -81,12 +87,12 @@ class Pond
     add_eo(dna,energy,x,y,rot,generation,[0,0])
   end
   
-  def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false)
+  def add_eo(dna, energy=10, x=0, y=0, rot=0, generation=1, direction=false, speed_frac=false, hp_percent=1)
     
     x %= @environment.width
     y %= @environment.height
     
-    new_eo = Eo.new(self,dna,energy,x,y,rot,generation)
+    new_eo = Eo.new(self,dna,energy,x,y,rot,generation,hp_percent)
     
     if direction and speed_frac
       new_eo.move(direction,speed_frac)
@@ -143,16 +149,18 @@ class Pond
     @spikes << Pond_Bits::Spike.new(self,mass,owner,x,y,speed,angle)
   end
   
-  def sprinkle_food(amount=1,max_energy=20,min_energy=5)
+  def sprinkle_food(amount=1,max_energy=20,min_energy=7.5)
     for i in 0...amount
       add_food(Mutations.rand_norm_dist(min_energy,max_energy,2),rand*@environment.width,rand*@environment.height)
     end
   end
   
-  def sprinkle_eo(amount=1,energy=10)
-    for i in 0...amount
-      add_eo(Eo_DNA.generate,energy,rand*@environment.width,rand*@environment.height,rand*360)
+  def sprinkle_eo(amount=1,energy=$EO_STARTING_ENERGY)
+    sprinkled = Array.new
+    amount.times do
+      sprinkled << add_eo(Eo_DNA.generate,energy,rand*@environment.width,rand*@environment.height,rand*360)
     end
+    return sprinkled
   end
   
   def remove_eo(to_remove)
@@ -225,7 +233,7 @@ class Pond
   
   def update
     
-    if rand*$POND_FOOD_RATE < 1
+    if rand*@food_rate < 1
       sprinkle_food
     end
     @packets.update
@@ -239,7 +247,7 @@ class Pond
     @eo_follower.update_follow
     
     if @eos.size == 0
-      $LOGGER.warn "Repopulating empty pool..."
+      $LOGGER.warn "POND\tRepopulating empty pool..."
       sprinkle_eo($POND_REPOP_COUNT)
       select_random if $AUTO_TRACKING
     end
@@ -253,7 +261,17 @@ class Pond
     @spikes.draw(@environment.screen)
   end
   
-  
+  def drought
+    unless @drought
+      $LOGGER.info "POND\tA horrible drought has befallen the pond."
+      @food_rate *= 100.0
+      @drought = true
+    else
+      $LOGGER.info "POND\tThe drought that has plagued the pond has been lifted!"
+      @food_rate /= 100.0
+      @drought = false
+    end
+  end
   
   def clicked pos, button
     if button > 0 or button < 4
@@ -286,7 +304,7 @@ class Pond
         else
           if button == 3
             spawned = add_eo(Eo_DNA.generate,10,pos[0],pos[1],rand*360)
-            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (dna:#{spawned.dna.inspect}})"
+            $LOGGER.info "SPAWN\tManually spawned Eo_#{spawned.id} (#{spawned.dna.inspect_physical})"
           else
             add_food(Mutations.rand_norm_dist(5,20,2),pos[0],pos[1])
           end
@@ -297,131 +315,11 @@ class Pond
   end
   
   def keyed key,mods
-    
-    if key == K_SPACE
-      if @eo_follower.tracking_eo
-        @eo_follower.tracked_eo.report
-      end
-    end
+    @key_handler.process key,mods
   end
   
   def select_random
     @eo_follower.start_following @eos.pick_rand if @eos.size > 0
-  end
-  
-end
-
-class Follower
-  
-  attr_accessor :environment,:tracked_eo
-  
-  def initialize environment, archive, auto_track=false
-    @environment = environment
-    @auto_track = auto_track
-    @archive = archive
-    
-    @curr_dialog = nil
-    @tracked_eo = nil
-    @original_tracked = nil
-    @original_generation = nil
-    @dna_dialog = nil
-    
-  end
-  
-  def tracking_eo
-    return true if @tracked_eo
-    return false
-  end
-  
-  def update_follow
-    
-    if @tracked_eo == nil
-      if @curr_dialog
-        @curr_dialog.kill
-        @curr_dialog = nil
-        @original_tracked = nil
-        @original_generation = nil
-        @dna_dialog.kill
-        @dna_dialog = nil
-      end
-    else
-      
-      find_next = false
-      
-      if @tracked_eo.groups.size == 0
-        next_track_id = @archive.find_first_living_descendant(@original_tracked)
-        next_track = @environment.pond.eos.find { |eo| eo.id == next_track_id }
-        if @archive.has_descendants @tracked_eo.id
-          $LOGGER.info "TRACK\tNow tracking #{next_track} (child of Eo_#{@tracked_eo.id}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
-          @tracked_eo.followed = nil
-          @tracked_eo = next_track
-          @tracked_eo.followed = true
-        else
-          if next_track
-            $LOGGER.info "TRACK\t#{@tracked_eo} has died (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
-            $LOGGER.info "TRACK\tNow tracking closest relative (#{next_track}), of Eo_#{@original_tracked} [g#{@original_generation}] family line"
-            @tracked_eo = next_track
-            @tracked_eo.followed = true
-          else
-            $LOGGER.info "TRACK\tFamily line of Eo_#{@original_tracked} [g#{@original_generation}] ended with death of #{@tracked_eo} (#{@tracked_eo.death_cause}, a#{@tracked_eo.age})"
-            @tracked_eo.followed = nil
-            @tracked_eo = nil
-            update_follow
-            
-            @environment.pond.select_random if @auto_track
-          end
-        end
-      end
-      
-      if @tracked_eo
-        @curr_dialog.change_message(info_text,@tracked_eo.pos)
-        @dna_dialog.change_message(dna_text)
-      end
-      
-    end
-  end
-  
-  def start_following eo
-    
-    stop_following if @tracked_eo
-    
-    @original_tracked = eo.id
-    @original_generation = eo.generation
-    @tracked_eo = eo
-    @tracked_eo.followed = true
-    
-    $LOGGER.info "TRACK\tNow tracking #{@tracked_eo} and its family line"
-    
-    @curr_dialog = Bubble_Dialog.new(@tracked_eo.pos,info_text)
-    @dna_dialog = Bubble_Dialog.new([0,@environment.height],dna_text,[0,255,255],127)
-    @environment.dialog_layer.add_dialog @curr_dialog
-    @environment.dialog_layer.add_dialog @dna_dialog
-  end
-  
-  def stop_following
-    
-    if @tracked_eo
-      
-      @curr_dialog.kill
-      @dna_dialog.kill
-      @original_tracked = nil
-      @original_generation = nil
-      @curr_dialog = nil
-      @dna_dialog = nil
-      
-      $LOGGER.info "TRACK\tStopped tracking #{@tracked_eo}, of Eo_#{@original_tracked} [g#{@original_generation}] family line."
-      
-      @tracked_eo.followed = nil if @tracked_eo
-      @tracked_eo = nil
-      
-    end
-  end
-  
-  def info_text
-    "#{@tracked_eo}; #{@tracked_eo.dna.inspect_physical}; e:#{@tracked_eo.energy.to_i},h:#{(@tracked_eo.body.hp*10).to_i}/#{(@tracked_eo.body.shell*10).to_i}"
-  end
-  def dna_text
-    "#{@tracked_eo}: #{@tracked_eo.dna.inspect_programs}"
   end
   
 end

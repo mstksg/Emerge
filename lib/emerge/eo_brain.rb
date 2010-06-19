@@ -38,7 +38,7 @@ class Brain
   end
   
   def process_collision angle
-    @angle_trigger = angle
+    @angle_trigger = angle % 360
     @momentum_trigger = 0
     
     run_program @c_program
@@ -105,19 +105,30 @@ class Brain
   
   def eval_if if_command
     cond = case if_command.args[0]
-    when :energy then @owner.energy
-    when :age then @owner.age
-    when :velocity then @owner.velo_magnitude
-    when :momentum then @momentum_trigger
-    when :m_angle then @owner.movement_angle
-    when :random then rand()
-    else raise "Bad 'if' condition #{if_command.args[0]}"
-    end   ## maybe add more conditions later
+           when :energy then @owner.energy
+           when :age then @owner.age
+           when :velocity then @owner.velo_magnitude
+           when :momentum then @momentum_trigger
+           when :m_angle then (@owner.movement_angle+@angle_shift)%360
+           when :c_angle then @angle_shift
+           when :random then rand()
+           else raise "Bad 'if' condition #{if_command.args[0]}"
+           end
     
-    if if_command.args[1] == :lt
-      return cond < if_command.args[2]
+    if Command_Data.wrapping_if?(if_command.args[0])
+      max,min = Command_Data.if_range(if_command.args[0])
+      clockwise_dist = (if_command.args[2] - cond).abs
+      return compare_if(if_command.args[1],clockwise_dist,(max-min)/2.0)
     else
-      return cond > if_command.args[2]
+      return compare_if(if_command.args[1],cond,if_command.args[2])
+    end
+  end
+  
+  def compare_if comp,cond,arg
+    if comp == :lt
+      return cond < arg
+    else
+      return cond > arg
     end
   end
   

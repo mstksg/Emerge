@@ -22,6 +22,11 @@ def setup_log dir, name
   log.add Log4r::StdoutOutputter.new("console", :formatter => console_format,
                                       :level => $LOG_CONSOLE_LEVEL)
   
+  console_only_log = Logger.new "console_log"
+  console_only_format = PatternFormatter.new(:pattern => "\t %m")
+  console_only_log.add Log4r::StdoutOutputter.new("console", :formatter => console_only_format)
+  
+  
   if $LOG_ACT and not defined?(Ocra)
     file_format = PatternFormatter.new(:pattern => "[ %d ] %l\t %m")
     log.add FileOutputter.new("file", :filename => logfile, :trunc => false,
@@ -58,6 +63,7 @@ def setup_log dir, name
   end
   
   $LOGGER = log
+  $C_LOG = console_only_log
   
   $LOGGER.info "Logger loaded"
   $LOGGER.info "Logging activity in #{logfile}" if $LOG_ACT

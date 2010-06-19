@@ -49,9 +49,12 @@ settings:
   food_mass: 0.2
   drag: 0.04
   spike_decay: 0.997
+  pond_disaster: 25
+  energy_infusion: 75
   auto_track: true
  eo_constants:
   main:
+   eo_starting_energy: 10
    rep_variance: 2
    rep_rate: 72
    rep_rate_degree: 2
@@ -61,7 +64,9 @@ settings:
    healing_drain_min: 0.942
    healing_drain_max: 0.985
    spike_damage: 1.5
-   mass_drag: 1.5
+   mass_drag: 2
+   rest_energy_decay: 0.2
+   base_drag_reductor: 20
   body:
    body_mass_factor: 2.5
    recovery: 0.0125
@@ -70,9 +75,10 @@ settings:
    max_speed: 2.5
   feeler:
    poke_force_factor: 0.5
-   mass_factor: 1
+   feeler_mass_factor: 1
+   length_strength_mass_ratio: 0.6
   dna:
-   mutate_time_scale: 1.25
+   mutate_time_scale: 1.15
    mutation_factor: 0.13
    mutation_variance: 1.2
    brain_mutate_factor: 0.08

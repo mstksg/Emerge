@@ -6,17 +6,26 @@ include Rubygame
 class Eo
   include Sprites::Sprite
   
+  @@EO_REGEX = /Eo_(\w+) \[g(\d+)\]/
+  
   @@HEAL_DRAIN_OFFSET = ($HEAL_DRAIN_MAX-$HEAL_DRAIN_MIN)/10
   
   @@count = 0
   
-  attr_reader :body,:feeler,:energy,:age,:brain,:dna,:angle,
-              :velocity,:velo_magnitude,:mass,:id,:generation,
-              :death_cause,:angle_vect
-  attr_accessor :pos,:followed
+  attr_reader :body,:feeler,:energy,:brain,:dna,:angle,:velocity,:velo_magnitude,
+              :mass,:id,:generation,:death_cause,:angle_vect,:kill_count,:energy_record,
+              :collected_energy
+  attr_accessor :pos,:followed,:damage_dealt,:spike_hits
   
-  def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1)
-    
+  def self.fmt_str id,gen
+    return "Eo_#{id} [g#{gen}]"
+  end
+  def self.eo_regex
+    return @@EO_REGEX
+  end
+  
+  def initialize (pond,dna,energy=0,pos_x=0,pos_y=0,angle=0,generation=1,starting_hp_percent=1)
+
     @id = @@count.to_s(36)
     @@count += 1
     @generation = generation
@@ -25,14 +34,18 @@ class Eo
     
     @dna = dna
     
-    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency)
+    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency,starting_hp_percent)
     @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
     @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
     
     @mass = @feeler.mass + @body.mass
     @energy = energy
     set_velocity [0,0]
-    @age = 0
+    @kill_count = 0
+    @energy_record = energy
+    @collected_energy = 0
+    @damage_dealt = 0
+    @spike_hits = 0
     
     @food_triggered = []
     @eo_triggered = []
@@ -40,7 +53,7 @@ class Eo
     @total_heal_drain = $HEAL_DRAIN_MIN+@body.efficiency*@@HEAL_DRAIN_OFFSET
     @total_rep_rate = ($REP_RATE*((1-$REP_VARIANCE/2)+$REP_VARIANCE*@dna.efficiency/10))**$REP_RATE_DEGREE
     @total_rep_threshold = ($REP_MAXIMUM-$REP_MINIMUM)*@dna.efficiency/10 + $REP_MINIMUM
-    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*20+0.1)
+    @total_mass_drag = @mass * $MASS_DRAG/(5*$B_MASS_FACTOR+5*$F_MASS) / (@body.efficiency*$BASE_DRAG_REDUCTOR+0.1)
     
     
     @pond = pond
@@ -54,6 +67,7 @@ class Eo
     set_rects
     
     log_message "Eo_#{@id}\tBorn (g#{@generation});\t#{@dna}"
+    @birth_time = @pond.environment.clock.ticks
     
     @brain.run_birth_program
   end
@@ -76,13 +90,21 @@ class Eo
     return @eo_graphic
   end
   
+  def update_graphic
+    @eo_graphic = nil
+    @body.update_graphic
+    @feeler.update_graphic
+    
+    @image = graphic.rotozoom(@angle,1)
+    @image.colorkey = [10,10,10]
+  end
+  
   def set_rects
     @rect.center = Array.new(@pos)
     @col_rect.center = @rect.center
   end
   
   def update
-    @age += 1
     unless replicate
       @body.recover_hp
       energy_decay
@@ -248,9 +270,9 @@ class Eo
     if @body.hp < @body.shell
       @energy *= (@total_heal_drain) if @body.hp < @body.shell
     end
-    @energy -= (@velo_magnitude+0.2)*@total_mass_drag
+    @energy -= (@velo_magnitude+$REST_ENERGY_DECAY)*@total_mass_drag
     if @energy < 0
-      log_message "Eo_#{@id}\tStarved;\ta#{@age}"
+      log_message "Eo_#{@id}\tStarved;\ta#{age}"
       die :starvation
     end
   end
@@ -267,6 +289,8 @@ class Eo
   
   def collect_energy amount
     @energy += amount
+    @collected_energy += amount
+    @energy_record = @energy if @energy > @energy_record
   end
   
   def mutate new_energy=0
@@ -274,16 +298,28 @@ class Eo
     return Eo.new(new_dna, new_energy)
   end
   
+  def mutate! iterations=1
+    (iterations/$MUTATION_FACTOR).to_i.times { @dna.mutate! }
+    
+    @body = Eo_Body.new(self,@dna.shell,@dna.max_speed,@dna.efficiency,@body.hp/@dna.shell)
+    @feeler = Feeler.new(self,@dna.f_length,@dna.f_strength)
+    @brain = Brain.new(self,@dna.b_containers,@dna.b_programs,@dna.birth_program,@dna.c_program)
+    
+    @mass = @feeler.mass + @body.mass
+    
+    update_graphic
+  end
+  
   def replicate force=false
     
     if @energy >= $ENERGY_CAP
       reproduce_now = true
-      $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{@age}/e#{@energy.to_i}"
+      $LOGGER.warn "Eo_#{@id} has been forced to reproduce by breaking energy cap of #{$ENERGY_CAP}, with a#{age}/e#{@energy.to_i}"
     end
     
     if reproduce_now or force or ((@energy > @total_rep_threshold) and (rand*@total_rep_rate < @energy))
       
-      log_message "Eo_#{@id}\tReplicates;\ta#{@age}, e#{@energy.to_i}"
+      log_message "Eo_#{@id}\tReplicates;\ta#{age}, e#{@energy.to_i}"
       
       die :reproduction
       
@@ -321,9 +357,9 @@ class Eo
       ## Consider making this a bit simpler
       
       descendant1 = @pond.add_eo(@dna.mutate,@energy/2,left_disp[0],left_disp[1],
-                                 @angle+90,@generation+1,angle_disp,speed_frac)
+                                 @angle+90,@generation+1,angle_disp,speed_frac,@body.hp_percent)
       descendant2 = @pond.add_eo(@dna.mutate,@energy/2,right_disp[0],right_disp[1],
-                                 @angle-90,@generation+1,angle_disp,speed_frac)
+                                 @angle-90,@generation+1,angle_disp,speed_frac,@body.hp_percent)
       
       @pond.archive.store_eo(id,descendant1.id,descendant2.id)
       
@@ -376,7 +412,7 @@ class Eo
     new_x = @pos[0] + packet_angle_vect[0]*(6+@velo_magnitude)
     new_y = @pos[1] + packet_angle_vect[1]*(6+@velo_magnitude)
     
-    @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, packet_final_vect.angle 
+    @pond.add_packet amount, new_x, new_y, packet_final_vect.magnitude, (270-packet_final_vect.angle)
     
     @energy -= amount
   end
@@ -388,9 +424,9 @@ class Eo
     new_x = @pos[0] + spike_angle_vect[0]*(6+@velo_magnitude)
     new_y = @pos[1] + spike_angle_vect[1]*(6+@velo_magnitude)
     
-    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, spike_final_vect.angle 
+    @pond.add_spike mass, self, new_x, new_y, spike_final_vect.magnitude, (270-spike_final_vect.angle)
     
-    @energy -= (mass*speed)/(@body.efficiency+3)
+    @energy -= (mass*(speed+1))/(7.0+@body.efficiency/10.0)
   end
   
   def eaten
@@ -422,13 +458,15 @@ class Eo
     if log
       case reason
       when :divine
-        log_message "Eo_#{@id}\tDies by divine hand\ta#{@age}, e#{@energy.to_i}"
+        log_message "Eo_#{@id}\tDies by divine hand\ta#{age}, e#{@energy.to_i}"
       else
-        log_message "Eo_#{@id}\tDies;\t\ta#{@age}, e#{@energy.to_i}\t(Cause: #{reason})"
+        log_message "Eo_#{@id}\tDies;\t\ta#{age}, e#{@energy.to_i}\t(Cause: #{reason})"
       end
     end
     @pond.remove_eo(self)
+    @pond.hall.submit(self)
     kill
+    
     if reason != :reproduction and reason != :eaten and @energy > 0
       turn_into_food
     end
@@ -437,11 +475,18 @@ class Eo
     @col_rect = @rect
   end
   
+  def strike force,source=:unknown
+    @body.strike force,source
+  end
+  
   def inspect
     to_s
   end
   def to_s
     "Eo_#{@id} [g#{@generation}]"
+  end
+  def age
+    return @pond.environment.clock.ticks - @birth_time
   end
   
   def log_message message,post_anyway=true
@@ -458,8 +503,75 @@ class Eo
     return @groups.size > 0
   end
   
+  def get_kill
+    @kill_count += 1
+  end
+  
   def report
-    $LOGGER.info "Age: #{@age}"
+    $C_LOG.info "REPORT:\t~~ #{inspect} (Age: #{age}) ~~"
+    
+    if @generation <= 1
+      $C_LOG.info "\t- No ancestors; top of family line."
+    else
+      recent_parents = Array.new(5) { |n| @pond.archive.nth_ancestor_of(@id,n+1) }.compact
+      $C_LOG.info "\t- Recent ancestors: #{recent_parents.map { |n| "Eo_#{n} [g#{@generation-recent_parents.index(n)-1}]" }.join(", ") }"
+    end
+    
+    ult_anc = @pond.archive.ultimate_ancestor_of @id
+    
+    $C_LOG.info "\t- Kill count: #{@kill_count} (#{@damage_dealt.to_s[0,6]} damage dealt"
+    $C_LOG.info "\t- Energy collected: #{@collected_energy.to_s[0,5]} (maximum #{@energy_record.to_s[0,6]})"
+    $C_LOG.info "\t- Ultimate Ancestor: Eo_#{ult_anc} [g1]"
+    
+    # closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
+    # if closest_rel_dist == nil
+      # $C_LOG.info "\t- No living relatives."
+    # else
+      # closest_rel = @pond.archive.closest_relative_of @id
+      # common_ancestor = @pond.archive.lowest_common_ancestor_of @id,closest_rel
+      # common_ancestor_gen = @generation - @pond.archive.generation_gap(id,common_ancestor)
+      # closest_rel_gen = common_ancestor_gen + @pond.archive.generation_gap(closest_rel,common_ancestor)
+      # $C_LOG.info "\t- Closest living relative is Eo_#{closest_rel} [g#{closest_rel_gen}], by Eo_#{common_ancestor} [g#{common_ancestor_gen}]"
+    # end
+    
+    if @generation != 1
+      $C_LOG.info "\t- Nearby family"
+      
+      graph_top = @id
+      graph_top_gen = @generation
+      while @pond.archive.count_living_descendants_of(graph_top) < 6 and graph_top != ult_anc
+        graph_top = @pond.archive.parent_of graph_top
+        graph_top_gen -= 1
+      end
+      
+      ga = @pond.archive.group_descendants(graph_top,6)
+      
+      g_builder = Graph_Builder.new "Eo_#{graph_top} [g#{graph_top_gen}]"
+      to_expand = [[graph_top,0]]
+      
+      while to_expand.size > 0
+        curr_parent,curr_gen = to_expand.shift
+        expanded = @pond.archive.descendants_with_living_descendants_of curr_parent
+        expanded.each do |eo|
+          g_builder.add_node("Eo_#{curr_parent} [g#{graph_top_gen+curr_gen}]",curr_gen+1,"Eo_#{eo} [g#{graph_top_gen+curr_gen+1}]")
+          to_expand.push [eo,curr_gen+1] unless ga.include? eo
+        end
+      end
+      
+      g_builder.render_horizontal(graph_top_gen != 1) do |n|
+        last_eo = n.scan(@@EO_REGEX)[-1][0]
+        
+        if last_eo == @id
+          appender = "*"
+        else
+          survivors = @pond.archive.count_living_descendants_of last_eo
+          appender = survivors == 1 ? "" : "->(#{survivors})"
+        end
+        
+        $C_LOG.info "\t#{n.rstrip}#{appender}"
+      end
+    end
+    
   end
   
 end
@@ -469,7 +581,7 @@ class Eo_Body
   
   attr_reader :owner,:hp,:shell,:max_speed,:efficiency,:mass
   
-  def initialize owner, shell, max_speed, efficiency
+  def initialize owner, shell, max_speed, efficiency, starting_hp_percent=1
     @owner = owner
     
     @shell = shell
@@ -477,7 +589,7 @@ class Eo_Body
     @efficiency = efficiency
     @mass = (@shell+0.5)*$B_MASS_FACTOR
     
-    @hp = @shell
+    @hp = @shell*starting_hp_percent
     
     @image = graphic
     @rect = @image.make_rect
@@ -501,6 +613,11 @@ class Eo_Body
     return @body_graphic
   end
   
+  def update_graphic
+    @body_graphic = nil
+    @image = graphic
+  end
+  
   def recover_hp
     if @hp < @shell
       @hp += @shell*$B_RECOVERY
@@ -510,10 +627,17 @@ class Eo_Body
     end
   end
   
+  def hp_percent
+    @hp/@shell.to_f
+  end
+  
   def poked poke_force, poker
-    @hp -= poke_force*$B_DAMAGE
+    damage = poke_force*$B_DAMAGE
+    @hp -= damage
+    poker.damage_dealt += damage
     if @hp < 0
       poker.eat @owner
+      poker.get_kill
       message = "Eo_#{@owner.id}\tEaten by Eo_#{poker.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
       unless @owner.log_message message,false
         poker.log_message message
@@ -522,16 +646,34 @@ class Eo_Body
     end
   end
   
+  def lose_hp amount
+    @hp -= amount
+  end
+  
+  def strike force,source=:unknown
+    @hp -= force*(1-0.05*@shell)
+    @owner.log_message "Eo_#{@owner.id}\tstruck with a force of #{(force*10).to_i} for #{(force*(1-0.05*@shell)*10).to_i} damage by #{source.to_s}.",false
+    if @hp < 0
+      @owner.log_message "Eo_#{@owner.id}\tdied from being struck by #{source.to_s};\ta#{@owner.age}, e#{@owner.energy.to_i}"
+      @owner.die source
+    end
+  end
+  
   def spiked spiker, direct=true
+    spiker.owner.spike_hits += 1 if spiker.owner
+    
     diff = Vector_Array.new(@owner.velocity).sub(spiker.velocity).magnitude
     damage = (spiker.mass+spiker.energy_content)*(diff+0.5)*$SPIKE_DAMAGE*$B_DAMAGE/2
     if direct
       @hp -= damage
+      spiker.owner.damage_dealt += damage if spiker.owner
     else
       @hp -= damage/2
+      spiker.owner.damage_dealt += damage if spiker.owner
     end
     if @hp < 0
       if spiker.owner
+        spiker.owner.get_kill
         message = "Eo_#{@owner.id}\tKilled by spike from Eo_#{spiker.owner.id};\ta#{@owner.age}, e#{@owner.energy.to_i}"
         unless @owner.log_message message,false
           spiker.owner.log_message message
@@ -569,7 +711,7 @@ class Feeler
     
     @length = length
     @strength = strength
-    @mass = (length+strength)/2 * $F_MASS
+    @mass = ((length*$F_L_S_RATIO+strength)/($F_L_S_RATIO+1)) * $F_MASS
     
     @image = graphic
     @rect = @image.make_rect
@@ -601,6 +743,11 @@ class Feeler
     @f_graphic = @f_graphic.to_display
     
     return @f_graphic
+  end
+  
+  def update_graphic
+    @f_graphic = nil
+    @image = graphic
   end
   
   def max_dist

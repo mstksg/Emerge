@@ -1,6 +1,5 @@
 ## TODO
 
-- Track kills? heh
 - Try to catch some programs mutating within same organism, after trigger?
 - watch out for possible Eo moving over food and not eating?
 - perhaps exponential decay is not the best choice for healing?  or maybe it is,
@@ -8,16 +7,19 @@
 	up to heal.  actually that makes no sense. shut up.
     Actually, it's probably a good idea because it gives low-energy creatures
     a second chance, as well as normalizing abnormally high energy creatures
+    Possible side effect: injection of 75-100 energy is reduced to almost nothing
+    to heal a damaged Eo. desired?  But injection should not be typical.
 - move all physics/collision handling into Chipmunk
-- watch out for possible bug with shooting spikes/packets in the wrong direction?
 - generalize shooting spikes/packets into a generic "load buffer" "shoot buffer", to
     make it more like emergent behavior
     - actually, should go on a spree to generalize more of the program functions;
       it's a bit too arbitrary right now.  hm...actually most of them aren't.
-- create environment to actually test out everything is working properly, especially
-    movement_angle
+- create environment to actually test out everything is working properly
 - possible conservation of energy mechanism?
-- make more parameters attempt to find the "medium" instead of the maximum...give maximums
-    drawbacks as well as advantages (ie, mass = less efficient)
-- kamikaze spikes? eliminate?
 - allow "sticking"/hooking?
+- experiment with solid walls
+- "random drifting" gets too much food compared to detectors =(  Or well, not moreso, but
+    rather, one needs only to randomly drift before one can get enough to reproduce.  oh well.
+    solution would be to raise energy drag
+- ** save states **
+- eo highlighting (cross-hairs?)
