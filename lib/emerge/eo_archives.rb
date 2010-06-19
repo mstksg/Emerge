@@ -427,7 +427,7 @@ end
 
 class Eo_HoF
   
-  @@CATEGORIES = [:kill_count,:age,:reproduct,:energy,:energy_col,:damage_dlt,:spikes,:fastest,:strongest,:thickest,:heaviest]
+  @@CATEGORIES = [:kill_count,:age,:reproduct,:energy,:energy_col,:damage_dlt,:spikes,:fastest,:strongest,:longest,:thickest,:heaviest]
   @@CATEGORIES_DEFAULTS = Hash.new do |h,k|
                                      h[k] = case k
                                             when :reproduct then 1.0/0
@@ -435,7 +435,7 @@ class Eo_HoF
                                             end
                                    end
   @@REVERSE_RECORDS = [:reproduct]
-  @@CATEGORIES_NAMES =    { :kill_count => "Highest kill count  ",
+  @@CATEGORIES_NAMES =    { :kill_count => "Highest kill count  ",    ## perhaps use ljust instead?
                             :age        => "Longest living      ",
                             :reproduct  => "Fastest reproduction",
                             :energy     => "Highest energy      ",
@@ -444,6 +444,7 @@ class Eo_HoF
                             :spikes     => "Most spikes landed  ",
                             :fastest    => "Fastest max. speed  ",
                             :strongest  => "Strongest feeler    ",
+                            :longest    => "Longest feeler      ",
                             :thickest   => "Thickest shell      ",
                             :heaviest   => "Most massive        " }
   
@@ -478,6 +479,7 @@ class Eo_HoF
               when :spikes     then eo.spike_hits
               when :fastest    then eo.body.max_speed
               when :strongest  then eo.feeler.strength
+              when :longest    then eo.feeler.length
               when :thickest   then eo.body.shell
               when :heaviest   then eo.mass
               else raise "Improper record #{record.to_s}"

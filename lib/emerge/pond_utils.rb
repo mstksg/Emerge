@@ -146,7 +146,7 @@ class Follower
         
         $C_LOG.info "\t- Graphing major surviving sub-families..."
         
-        ga = @archive.group_descendants(lca,10)
+        ga = @archive.group_descendants(lca,8)
         
         g_builder = Graph_Builder.new "Eo_#{lca} [g#{lca_gen}]"
         to_expand = [[lca,0]]
@@ -360,15 +360,17 @@ class Pond_Key_Handler
     
     ## Ancestor Groups
     if @eos.size > 1
-      ga = lca ? @archive.group_descendants(lca,10) : @archive.group_ancestors(ids,4)
-      ga_gens = Hash.new do |h,k|
-        curr_desc_id = @archive.first_living_descendant_of k
-        curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
-        h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
-      end
+      ga = lca ? @archive.group_descendants(lca,8) : @archive.group_ancestors(ids,4)
       
       if not lca
         $C_LOG.info "\t- Largest families alive include:"
+        
+        ga_gens = Hash.new do |h,k|
+          curr_desc_id = @archive.first_living_descendant_of k
+          curr_desc_gen = @pond.eos.find { |eo| eo.id == curr_desc_id }.generation
+          h[k] = curr_desc_gen - @archive.generation_gap(curr_desc_id,k)
+        end
+        
         ga.each do |anc|
           if lca
             ascend = ga_gens[anc] - lca_gen - 1

@@ -523,18 +523,54 @@ class Eo
     $C_LOG.info "\t- Energy collected: #{@collected_energy.to_s[0,5]} (maximum #{@energy_record.to_s[0,6]})"
     $C_LOG.info "\t- Ultimate Ancestor: Eo_#{ult_anc} [g1]"
     
-    closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
-    if closest_rel_dist == nil
-      $C_LOG.info "\t- No living relatives."
-    else
-      closest_rel = @pond.archive.closest_relative_of @id
-      common_ancestor = @pond.archive.lowest_common_ancestor_of @id,closest_rel
-      common_ancestor_gen = @generation - @pond.archive.generation_gap(id,common_ancestor)
-      closest_rel_gen = common_ancestor_gen + @pond.archive.generation_gap(closest_rel,common_ancestor)
-      $C_LOG.info "\t- Closest living relative is Eo_#{closest_rel} [g#{closest_rel_gen}], by Eo_#{common_ancestor} [g#{common_ancestor_gen}]"
-    end
+    # closest_rel_dist = @pond.archive.distance_to_closest_relative_of @id
+    # if closest_rel_dist == nil
+      # $C_LOG.info "\t- No living relatives."
+    # else
+      # closest_rel = @pond.archive.closest_relative_of @id
+      # common_ancestor = @pond.archive.lowest_common_ancestor_of @id,closest_rel
+      # common_ancestor_gen = @generation - @pond.archive.generation_gap(id,common_ancestor)
+      # closest_rel_gen = common_ancestor_gen + @pond.archive.generation_gap(closest_rel,common_ancestor)
+      # $C_LOG.info "\t- Closest living relative is Eo_#{closest_rel} [g#{closest_rel_gen}], by Eo_#{common_ancestor} [g#{common_ancestor_gen}]"
+    # end
     
-    # Build a graph here, too!  Of maybe closest relatives.
+    if @generation != 1
+      $C_LOG.info "\t- Nearby family"
+      
+      graph_top = @id
+      graph_top_gen = @generation
+      while @pond.archive.count_living_descendants_of(graph_top) < 6 and graph_top != ult_anc
+        graph_top = @pond.archive.parent_of graph_top
+        graph_top_gen -= 1
+      end
+      
+      ga = @pond.archive.group_descendants(graph_top,6)
+      
+      g_builder = Graph_Builder.new "Eo_#{graph_top} [g#{graph_top_gen}]"
+      to_expand = [[graph_top,0]]
+      
+      while to_expand.size > 0
+        curr_parent,curr_gen = to_expand.shift
+        expanded = @pond.archive.descendants_with_living_descendants_of curr_parent
+        expanded.each do |eo|
+          g_builder.add_node("Eo_#{curr_parent} [g#{graph_top_gen+curr_gen}]",curr_gen+1,"Eo_#{eo} [g#{graph_top_gen+curr_gen+1}]")
+          to_expand.push [eo,curr_gen+1] unless ga.include? eo
+        end
+      end
+      
+      g_builder.render_horizontal(graph_top_gen != 1) do |n|
+        last_eo = n.scan(@@EO_REGEX)[-1][0]
+        
+        if last_eo == @id
+          appender = "*"
+        else
+          survivors = @pond.archive.count_living_descendants_of last_eo
+          appender = survivors == 1 ? "" : "->(#{survivors})"
+        end
+        
+        $C_LOG.info "\t#{n.rstrip}#{appender}"
+      end
+    end
     
   end
   
