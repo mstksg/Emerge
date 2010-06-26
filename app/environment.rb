@@ -78,15 +78,24 @@ class Environment
     end
     @pond.update
     
-    if $LOG_FR
-      if @clock.ticks % $LOG_FR_FREQ == 0
-        $FR_LOG.info "#{@clock.ticks},#{@fr}"
+    begin
+      if $LOG_FR
+        if @clock.ticks % $LOG_FR_FREQ == 0
+          $FR_LOG.info "#{@clock.ticks},#{@fr}"
+        end
       end
+    rescue
+      $LOGGER.error "Error writing to Framerate log."
     end
-    if $LOG_POP
-      if @clock.ticks % $LOG_POP_FREQ == 0
-        $POP_LOG.info "#{@clock.ticks},#{@pond.eos.size},#{@pond.foods.size}"
+    
+    begin
+      if $LOG_POP
+        if @clock.ticks % $LOG_POP_FREQ == 0
+          $POP_LOG.info "#{@clock.ticks},#{@pond.eos.size},#{@pond.foods.size}"
+        end
       end
+    rescue
+      $LOGGER.error "Error writing to population log."
     end
     
     #    @dialog.upate

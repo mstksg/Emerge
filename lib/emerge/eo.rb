@@ -539,12 +539,12 @@ class Eo
       
       graph_top = @id
       graph_top_gen = @generation
-      while @pond.archive.count_living_descendants_of(graph_top) < 6 and graph_top != ult_anc
+      while @pond.archive.count_living_descendants_of(graph_top) < 4 and graph_top != ult_anc
         graph_top = @pond.archive.parent_of graph_top
         graph_top_gen -= 1
       end
       
-      ga = @pond.archive.group_descendants(graph_top,6)
+      ga = @pond.archive.group_descendants(graph_top,4)
       
       g_builder = Graph_Builder.new "Eo_#{graph_top} [g#{graph_top_gen}]"
       to_expand = [[graph_top,0]]
@@ -566,6 +566,7 @@ class Eo
         else
           survivors = @pond.archive.count_living_descendants_of last_eo
           appender = survivors == 1 ? "" : "->(#{survivors})"
+          appender += "*" if @pond.archive.is_living_descendant_of(last_eo,@id)
         end
         
         $C_LOG.info "\t#{n.rstrip}#{appender}"
